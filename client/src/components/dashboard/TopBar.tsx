@@ -100,21 +100,21 @@ function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
 
       {/* Secondary Values Grid */}
       <div className="grid grid-cols-2 gap-x-5 gap-y-0.5">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">Honorários:</span>
-          <span className="text-sm font-medium text-success">{formatCurrency(kpis.honorarios)}</span>
+          <span className="text-sm font-medium text-success text-right tabular-nums">{formatCurrency(kpis.honorarios)}</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">GHonorários:</span>
-          <span className="text-sm font-medium text-destructive">{formatCurrency(kpis.gHonorarios)}</span>
+          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.gHonorarios)}</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">Despesas:</span>
-          <span className="text-sm font-medium text-success">{formatCurrency(kpis.despesas)}</span>
+          <span className="text-sm font-medium text-success text-right tabular-nums">{formatCurrency(kpis.despesas)}</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">GDespesas:</span>
-          <span className="text-sm font-medium text-destructive">{formatCurrency(kpis.gDespesas)}</span>
+          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.gDespesas)}</span>
         </div>
       </div>
     </div>
