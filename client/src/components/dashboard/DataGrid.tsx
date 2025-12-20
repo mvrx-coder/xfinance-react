@@ -83,55 +83,61 @@ function getStatusGradient(status: string | null | undefined): string {
 function SkeletonRow({ filters }: { filters: FilterState }) {
   return (
     <TableRow className="border-b border-white/5">
+      {/* Grupo 1: Ação */}
       <TableCell className="py-3">
-        <div className="h-5 w-10 shimmer rounded-md" />
+        <div className="h-5 w-8 shimmer rounded-md" />
       </TableCell>
-      <TableCell className="py-3">
-        <div className="h-4 w-20 shimmer rounded-md" />
-      </TableCell>
-      <TableCell className="py-3">
-        <div className="h-4 w-32 shimmer rounded-md" />
-      </TableCell>
-      <TableCell className="py-3">
-        <div className="h-4 w-8 shimmer rounded-md" />
-      </TableCell>
-      <TableCell className="py-3">
-        <div className="h-4 w-14 shimmer rounded-md" />
-      </TableCell>
-      <TableCell className="py-3">
-        <div className="h-4 w-14 shimmer rounded-md" />
-      </TableCell>
+      {/* Separador */}
+      <TableCell className="w-[1px] p-0" />
+      {/* Grupo 2: Identificação */}
+      <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-4 w-32 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-4 w-8 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-4 w-14 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-4 w-14 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-5 w-12 shimmer rounded-md" /></TableCell>
+      {/* Separador */}
+      <TableCell className="w-[1px] p-0" />
+      {/* Grupo 3: Workflow */}
       {filters.columnGroups.workflow && (
         <>
-          <TableCell className="py-3"><div className="h-5 w-12 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-8 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          {/* Separador */}
+          <TableCell className="w-[1px] p-0" />
         </>
       )}
+      {/* Grupo 4 e 5: Recebíveis */}
       {filters.columnGroups.recebiveis && (
         <>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          {/* Separador */}
+          <TableCell className="w-[1px] p-0" />
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          {/* Separador */}
+          <TableCell className="w-[1px] p-0" />
         </>
       )}
+      {/* Grupo 6: Pagamentos */}
       {filters.columnGroups.pagamentos && (
         <>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
           <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          {/* Separador */}
+          <TableCell className="w-[1px] p-0" />
         </>
       )}
-      <TableCell className="py-3">
-        <div className="h-4 w-24 shimmer rounded-md" />
-      </TableCell>
+      {/* Grupo 7: Contexto */}
+      <TableCell className="py-3"><div className="h-4 w-24 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
     </TableRow>
   );
 }
@@ -257,86 +263,136 @@ export function DataGrid({
             <Table>
               <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
                 <TableRow className="border-b border-white/10">
-                  <TableHead className="w-[70px] text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    #
+                  {/* Grupo 1: Ação */}
+                  <TableHead className="w-[50px] bg-card relative">
+                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">#</span>
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    Player
+                  
+                  {/* Separador */}
+                  <TableHead className="w-[1px] p-0 bg-card">
+                    <div className="w-[1px] h-full bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    Segurado
+                  
+                  {/* Grupo 2: Identificação */}
+                  <TableHead className="bg-card relative">
+                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Player</span>
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider w-[60px] bg-card">
-                    Loc
+                  <TableHead className="bg-card">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Segurado</span>
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    Guilty
+                  <TableHead className="w-[60px] bg-card">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Loc</span>
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    Guy
+                  <TableHead className="bg-card">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Guilty</span>
                   </TableHead>
+                  <TableHead className="bg-card">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Guy</span>
+                  </TableHead>
+                  <TableHead className="bg-card">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Meta</span>
+                  </TableHead>
+                  
+                  {/* Separador */}
+                  <TableHead className="w-[1px] p-0 bg-card">
+                    <div className="w-[1px] h-full bg-gradient-to-b from-muted-foreground/40 via-muted-foreground/20 to-transparent" />
+                  </TableHead>
+                  
+                  {/* Grupo 3: Workflow Principal */}
                   {filters.columnGroups.workflow && (
                     <>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
-                        META
+                      <TableHead className="bg-card relative">
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
+                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Inspeção</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
-                        Inspeção
+                      <TableHead className="bg-card">
+                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Entregue</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
-                        Entregue
+                      <TableHead className="w-[60px] bg-card">
+                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Prazo</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[60px] bg-card">
-                        Prazo
-                      </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
-                        Acerto
+                      
+                      {/* Separador */}
+                      <TableHead className="w-[1px] p-0 bg-card">
+                        <div className="w-[1px] h-full bg-gradient-to-b from-accent/40 via-accent/20 to-transparent" />
                       </TableHead>
                     </>
                   )}
+                  
+                  {/* Grupo 4: Recebíveis - Honorários */}
                   {filters.columnGroups.recebiveis && (
                     <>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
-                        Envio
+                      <TableHead className="bg-card relative">
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
+                        <span className="text-xs font-bold text-success uppercase tracking-wider">Acerto</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
-                        Pago
+                      <TableHead className="bg-card">
+                        <span className="text-xs font-bold text-success uppercase tracking-wider">Envio</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right bg-card">
-                        Honorários
+                      <TableHead className="bg-card">
+                        <span className="text-xs font-bold text-success uppercase tracking-wider">Pago</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
-                        DÉnvio
+                      <TableHead className="bg-card text-right">
+                        <span className="text-xs font-bold text-success uppercase tracking-wider">Honorários</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
-                        DPago
+                      
+                      {/* Separador */}
+                      <TableHead className="w-[1px] p-0 bg-card">
+                        <div className="w-[1px] h-full bg-gradient-to-b from-success/40 via-success/20 to-transparent" />
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right bg-card">
-                        Despesas
+                      
+                      {/* Grupo 5: Recebíveis - Despesas */}
+                      <TableHead className="bg-card relative">
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
+                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">DEnvio</span>
+                      </TableHead>
+                      <TableHead className="bg-card">
+                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">DPago</span>
+                      </TableHead>
+                      <TableHead className="bg-card text-right">
+                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Despesas</span>
+                      </TableHead>
+                      
+                      {/* Separador */}
+                      <TableHead className="w-[1px] p-0 bg-card">
+                        <div className="w-[1px] h-full bg-gradient-to-b from-emerald-400/40 via-emerald-400/20 to-transparent" />
                       </TableHead>
                     </>
                   )}
+                  
+                  {/* Grupo 6: Pagamentos Colaborador */}
                   {filters.columnGroups.pagamentos && (
                     <>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider bg-card">
-                        GPago
+                      <TableHead className="bg-card relative">
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GPago</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right bg-card">
-                        GHonorários
+                      <TableHead className="bg-card text-right">
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GHonorários</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider bg-card">
-                        GDPago
+                      <TableHead className="bg-card">
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDPago</span>
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right bg-card">
-                        GDespesas
+                      <TableHead className="bg-card text-right">
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDespesas</span>
+                      </TableHead>
+                      
+                      {/* Separador */}
+                      <TableHead className="w-[1px] p-0 bg-card">
+                        <div className="w-[1px] h-full bg-gradient-to-b from-warning/40 via-warning/20 to-transparent" />
                       </TableHead>
                     </>
                   )}
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
-                    Atividade
+                  
+                  {/* Grupo 7: Contexto */}
+                  <TableHead className="bg-card relative">
+                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Atividade</span>
                   </TableHead>
-                  <TableHead className="w-[80px] text-xs font-bold text-muted-foreground uppercase tracking-wider text-center bg-card">
-                    Ações
+                  <TableHead className="w-[80px] bg-card text-center">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -348,7 +404,7 @@ export function DataGrid({
                   ) : currentData.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={20}
+                        colSpan={30}
                         className="h-48 text-center"
                       >
                         <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -372,6 +428,7 @@ export function DataGrid({
                         onMouseLeave={() => setHoveredRow(null)}
                         data-testid={`row-inspection-${row.id || index}`}
                       >
+                          {/* Grupo 1: Ação */}
                           <TableCell className="py-2.5">
                             <button
                               className={`p-1.5 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
@@ -385,6 +442,13 @@ export function DataGrid({
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
                           </TableCell>
+                          
+                          {/* Separador */}
+                          <TableCell className="w-[1px] p-0">
+                            <div className="w-[1px] h-full bg-gradient-to-b from-primary/20 to-transparent" />
+                          </TableCell>
+                          
+                          {/* Grupo 2: Identificação */}
                           <TableCell className="py-2.5 text-xs font-semibold text-foreground">
                             {row.player || "-"}
                           </TableCell>
@@ -400,16 +464,23 @@ export function DataGrid({
                           <TableCell className="py-2.5 text-xs">
                             {row.guy || "-"}
                           </TableCell>
+                          <TableCell className="py-2.5">
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
+                            >
+                              {row.meta || "-"}
+                            </Badge>
+                          </TableCell>
+                          
+                          {/* Separador */}
+                          <TableCell className="w-[1px] p-0">
+                            <div className="w-[1px] h-full bg-gradient-to-b from-muted-foreground/20 to-transparent" />
+                          </TableCell>
+                          
+                          {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className="py-2.5">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
-                                >
-                                  {row.meta || "-"}
-                                </Badge>
-                              </TableCell>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.inspecao)}
                               </TableCell>
@@ -419,13 +490,20 @@ export function DataGrid({
                               <TableCell className="py-2.5 text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
-                                {formatDate(row.acerto)}
+                              
+                              {/* Separador */}
+                              <TableCell className="w-[1px] p-0">
+                                <div className="w-[1px] h-full bg-gradient-to-b from-accent/20 to-transparent" />
                               </TableCell>
                             </>
                           )}
+                          
+                          {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.acerto)}
+                              </TableCell>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.envio)}
                               </TableCell>
@@ -435,33 +513,54 @@ export function DataGrid({
                               <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-success">
                                 {formatCurrency(row.honorarios)}
                               </TableCell>
+                              
+                              {/* Separador */}
+                              <TableCell className="w-[1px] p-0">
+                                <div className="w-[1px] h-full bg-gradient-to-b from-success/20 to-transparent" />
+                              </TableCell>
+                              
+                              {/* Grupo 5: Recebíveis - Despesas */}
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.dEnvio)}
                               </TableCell>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.dPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-emerald-400">
                                 {formatCurrency(row.despesas)}
+                              </TableCell>
+                              
+                              {/* Separador */}
+                              <TableCell className="w-[1px] p-0">
+                                <div className="w-[1px] h-full bg-gradient-to-b from-emerald-400/20 to-transparent" />
                               </TableCell>
                             </>
                           )}
+                          
+                          {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.gPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-destructive">
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.gHonorarios)}
                               </TableCell>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.gdPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-destructive">
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.gDespesas)}
+                              </TableCell>
+                              
+                              {/* Separador */}
+                              <TableCell className="w-[1px] p-0">
+                                <div className="w-[1px] h-full bg-gradient-to-b from-warning/20 to-transparent" />
                               </TableCell>
                             </>
                           )}
+                          
+                          {/* Grupo 7: Contexto */}
                           <TableCell className="py-2.5 text-xs text-muted-foreground max-w-[100px] truncate">
                             {row.atividade || "-"}
                           </TableCell>
