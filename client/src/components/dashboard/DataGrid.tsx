@@ -147,93 +147,93 @@ export function DataGrid({
     >
       <Card className="h-full glass-card border-white/10 shadow-2xl overflow-hidden">
         {/* Grid Content - Headers stick on scroll */}
-        <CardContent className="p-0 flex-1">
-          <ScrollArea className="h-[calc(100vh-180px)] custom-scrollbar">
+        <CardContent className="p-0 flex-1 overflow-hidden">
+          <ScrollArea className="h-[calc(100vh-180px)]">
             <Table>
-              <TableHeader className="sticky top-0 z-50 bg-card/98 backdrop-blur-xl shadow-sm">
-                <TableRow className="border-b border-white/10 bg-card/95 backdrop-blur-xl">
-                  <TableHead className="w-[70px] text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
+                <TableRow className="border-b border-white/10">
+                  <TableHead className="w-[70px] text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     #
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     Player
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     Segurado
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider w-[60px]">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider w-[60px] bg-card">
                     Loc
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     Guilty
                   </TableHead>
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     Guy
                   </TableHead>
                   {filters.columnGroups.workflow && (
                     <>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
                         META
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
                         Inspeção
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
                         Entregue
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[60px]">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[60px] bg-card">
                         Prazo
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[50px]">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[50px] bg-card">
                         SW
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
                         Acerto
                       </TableHead>
                     </>
                   )}
                   {filters.columnGroups.recebiveis && (
                     <>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
                         Envio
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
                         Pago
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right bg-card">
                         Honorários
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
                         DÉnvio
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider bg-card">
                         DPago
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right">
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right bg-card">
                         Despesas
                       </TableHead>
                     </>
                   )}
                   {filters.columnGroups.pagamentos && (
                     <>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider bg-card">
                         GPago
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right">
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right bg-card">
                         GHonorários
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider">
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider bg-card">
                         GDPago
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right">
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right bg-card">
                         GDespesas
                       </TableHead>
                     </>
                   )}
-                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-card">
                     Atividade
                   </TableHead>
-                  <TableHead className="w-[80px] text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">
+                  <TableHead className="w-[80px] text-xs font-bold text-muted-foreground uppercase tracking-wider text-center bg-card">
                     Ações
                   </TableHead>
                 </TableRow>
