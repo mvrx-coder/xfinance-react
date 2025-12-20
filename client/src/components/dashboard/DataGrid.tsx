@@ -289,9 +289,6 @@ export function DataGrid({
                       <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[60px] bg-card">
                         Prazo
                       </TableHead>
-                      <TableHead className="text-xs font-bold text-accent uppercase tracking-wider w-[50px] bg-card">
-                        SW
-                      </TableHead>
                       <TableHead className="text-xs font-bold text-accent uppercase tracking-wider bg-card">
                         Acerto
                       </TableHead>
@@ -421,9 +418,6 @@ export function DataGrid({
                               </TableCell>
                               <TableCell className="py-2.5 text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
-                              </TableCell>
-                              <TableCell className="py-2.5 text-xs text-center font-mono">
-                                {row.sw ?? "-"}
                               </TableCell>
                               <TableCell className="py-2.5 text-xs text-muted-foreground">
                                 {formatDate(row.acerto)}
