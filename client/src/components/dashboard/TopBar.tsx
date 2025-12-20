@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import logoMvrx from "@assets/logo_1766218677246.png";
 import {
   Search,
   Plus,
@@ -180,11 +181,16 @@ export function TopBar({
     >
       {/* Logo + Welcome Section */}
       <motion.div variants={itemVariants} className="flex items-center gap-4">
-        {/* Logo with Glow */}
+        {/* Logo MVRX */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-lg opacity-50" />
-          <div className="relative flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 border border-white/20 backdrop-blur-xl">
-            <span className="text-xl font-black gradient-text">xFin</span>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-lg opacity-30" />
+          <div className="relative flex items-center justify-center h-12 px-2 rounded-xl bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/20 backdrop-blur-xl">
+            <img 
+              src={logoMvrx} 
+              alt="MVRX Logo" 
+              className="h-8 w-auto object-contain"
+              data-testid="img-logo"
+            />
           </div>
         </div>
 
