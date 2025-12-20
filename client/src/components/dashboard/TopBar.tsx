@@ -89,11 +89,11 @@ function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
       className="flex flex-col justify-center h-[88px] px-4 py-2 rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-white/10 backdrop-blur-sm"
       data-testid="panel-express-kpis"
     >
-      {/* EXPRESS - Main Value */}
+      {/* EXPRESS - Main Value (primary/lilás color like Buscar button) */}
       <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-white/10">
-        <Coins className="w-4 h-4 text-amber-400" />
+        <Coins className="w-4 h-4 text-primary" />
         <span className="text-sm font-semibold text-white/90 uppercase tracking-wide">EXPRESS</span>
-        <span className="text-base font-bold text-amber-400 ml-1">
+        <span className="text-base font-bold text-primary ml-1">
           {formatCurrency(kpis.express)}
         </span>
       </div>
@@ -102,19 +102,19 @@ function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
       <div className="grid grid-cols-2 gap-x-5 gap-y-0.5">
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-white/60">Honorários:</span>
-          <span className="text-sm font-medium text-violet-400">{formatCurrency(kpis.honorarios)}</span>
+          <span className="text-sm font-medium text-success">{formatCurrency(kpis.honorarios)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-white/60">GHonorários:</span>
-          <span className="text-sm font-medium text-cyan-400">{formatCurrency(kpis.gHonorarios)}</span>
+          <span className="text-sm font-medium text-destructive">{formatCurrency(kpis.gHonorarios)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-white/60">Despesas:</span>
-          <span className="text-sm font-medium text-rose-400">{formatCurrency(kpis.despesas)}</span>
+          <span className="text-sm font-medium text-success">{formatCurrency(kpis.despesas)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-white/60">GDespesas:</span>
-          <span className="text-sm font-medium text-rose-400">{formatCurrency(kpis.gDespesas)}</span>
+          <span className="text-sm font-medium text-destructive">{formatCurrency(kpis.gDespesas)}</span>
         </div>
       </div>
     </div>
