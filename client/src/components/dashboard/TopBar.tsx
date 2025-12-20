@@ -24,6 +24,7 @@ import {
   Receipt,
   CreditCard,
   Coins,
+  CloudSun,
 } from "lucide-react";
 import type { FilterState, KPIs } from "@shared/schema";
 
@@ -199,7 +200,7 @@ export function TopBar({
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-              Bem-vindo, {userName}
+              Bora, {userName}!!! Vascoooo!
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -211,6 +212,11 @@ export function TopBar({
               <Clock className="w-3.5 h-3.5 text-primary" />
               {currentTime}
             </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <CloudSun className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-cyan-400 font-medium">22°C</span>
+            <span>Nublado</span>
           </div>
         </div>
       </motion.div>
