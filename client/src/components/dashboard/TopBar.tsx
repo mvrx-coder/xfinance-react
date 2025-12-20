@@ -85,54 +85,39 @@ const itemVariants = {
 
 function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      className="flex flex-col px-5 py-3 rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-white/10 backdrop-blur-sm shadow-lg"
+    <div
+      className="flex flex-col justify-center h-[88px] px-4 py-2 rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-white/10 backdrop-blur-sm"
       data-testid="panel-express-kpis"
     >
       {/* EXPRESS - Main Value */}
-      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
-        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/30 to-amber-600/20">
-          <Coins className="w-4 h-4 text-amber-400" />
-        </div>
-        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">EXPRESS</span>
-        <span className="text-lg font-bold text-amber-400 ml-1">
+      <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-white/10">
+        <Coins className="w-4 h-4 text-amber-400" />
+        <span className="text-xs font-semibold text-white/90 uppercase tracking-wide">EXPRESS</span>
+        <span className="text-sm font-bold text-amber-400 ml-1">
           {formatCurrency(kpis.express)}
         </span>
       </div>
 
       {/* Secondary Values Grid */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-        {/* Honorários */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-white/70">Honorários:</span>
-          <span className="text-[11px] font-semibold text-violet-400">
-            {formatCurrency(kpis.honorarios)}
-          </span>
+      <div className="grid grid-cols-2 gap-x-5 gap-y-0.5">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-white/60">Honorários:</span>
+          <span className="text-xs font-medium text-violet-400">{formatCurrency(kpis.honorarios)}</span>
         </div>
-        {/* GHonorários */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-white/70">GHonorários:</span>
-          <span className="text-[11px] font-semibold text-cyan-400">
-            {formatCurrency(kpis.gHonorarios)}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-white/60">GHonorários:</span>
+          <span className="text-xs font-medium text-cyan-400">{formatCurrency(kpis.gHonorarios)}</span>
         </div>
-        {/* Despesas */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-white/70">Despesas:</span>
-          <span className="text-[11px] font-semibold text-rose-400">
-            {formatCurrency(kpis.despesas)}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-white/60">Despesas:</span>
+          <span className="text-xs font-medium text-rose-400">{formatCurrency(kpis.despesas)}</span>
         </div>
-        {/* GDespesas */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-white/70">GDespesas:</span>
-          <span className="text-[11px] font-semibold text-rose-400">
-            {formatCurrency(kpis.gDespesas)}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-white/60">GDespesas:</span>
+          <span className="text-xs font-medium text-rose-400">{formatCurrency(kpis.gDespesas)}</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -181,27 +166,22 @@ export function TopBar({
       data-testid="topbar"
     >
       {/* Logo + Welcome Section */}
-      <motion.div variants={itemVariants} className="flex items-center gap-4">
+      <motion.div variants={itemVariants} className="flex items-center gap-3">
         {/* Logo MVRX */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-lg opacity-30" />
-          <div className="relative flex items-center justify-center h-12 px-2 rounded-xl bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/20 backdrop-blur-xl">
-            <img 
-              src={logoMvrx} 
-              alt="MVRX Logo" 
-              className="h-8 w-auto object-contain"
-              data-testid="img-logo"
-            />
-          </div>
+        <div className="flex items-center justify-center h-[88px] px-3 rounded-xl bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/10 backdrop-blur-xl">
+          <img 
+            src={logoMvrx} 
+            alt="MVRX Logo" 
+            className="h-10 w-auto object-contain"
+            data-testid="img-logo"
+          />
         </div>
 
         {/* Welcome Panel */}
-        <div className="flex flex-col gap-1 px-5 py-3 rounded-xl glass border border-white/10">
+        <div className="flex flex-col justify-center gap-1 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-              Bora, {userName}!!! Vascoooo!
-            </span>
+            <span className="text-sm font-semibold">Bora, {userName}!!! Vascoooo!</span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
@@ -221,13 +201,13 @@ export function TopBar({
         </div>
       </motion.div>
 
-      <Separator orientation="vertical" className="h-14 bg-white/10" />
+      <Separator orientation="vertical" className="h-[88px] bg-white/10" />
 
       {/* Filters Section */}
       <motion.div variants={itemVariants} className="flex items-center gap-3">
         {/* Toggle Filters */}
-        <div className="flex flex-col gap-2 px-4 py-3 rounded-xl glass border border-white/10">
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+        <div className="flex flex-col justify-center gap-1.5 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="player-toggle"
               checked={filters.player}
@@ -237,10 +217,10 @@ export function TopBar({
               className="border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               data-testid="checkbox-player"
             />
-            <Gamepad2 className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+            <Gamepad2 className="w-3.5 h-3.5 text-primary" />
             <span className="font-medium group-hover:text-primary transition-colors">Player</span>
           </label>
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="myjob-toggle"
               checked={filters.myJob}
@@ -250,10 +230,10 @@ export function TopBar({
               className="border-warning/50 data-[state=checked]:bg-warning data-[state=checked]:border-warning"
               data-testid="checkbox-myjob"
             />
-            <Target className="w-4 h-4 text-warning group-hover:scale-110 transition-transform" />
+            <Target className="w-3.5 h-3.5 text-warning" />
             <span className="font-medium group-hover:text-warning transition-colors">My Job</span>
           </label>
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="db-limit-toggle"
               checked={filters.dbLimit}
@@ -263,14 +243,14 @@ export function TopBar({
               className="border-muted-foreground/50"
               data-testid="checkbox-dblimit"
             />
-            <Database className="w-4 h-4 text-muted-foreground group-hover:scale-110 transition-transform" />
+            <Database className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="font-medium group-hover:text-foreground transition-colors">DB Limit</span>
           </label>
         </div>
 
         {/* Column Groups */}
-        <div className="flex flex-col gap-2 px-4 py-3 rounded-xl glass border border-white/10">
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+        <div className="flex flex-col justify-center gap-1.5 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="workflow-toggle"
               checked={filters.columnGroups.workflow}
@@ -280,10 +260,10 @@ export function TopBar({
               className="border-accent/50 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
               data-testid="checkbox-workflow"
             />
-            <Workflow className="w-4 h-4 text-accent group-hover:scale-110 transition-transform" />
+            <Workflow className="w-3.5 h-3.5 text-accent" />
             <span className="font-medium group-hover:text-accent transition-colors">Work Flow</span>
           </label>
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="recebiveis-toggle"
               checked={filters.columnGroups.recebiveis}
@@ -293,10 +273,10 @@ export function TopBar({
               className="border-success/50 data-[state=checked]:bg-success data-[state=checked]:border-success"
               data-testid="checkbox-recebiveis"
             />
-            <Receipt className="w-4 h-4 text-success group-hover:scale-110 transition-transform" />
+            <Receipt className="w-3.5 h-3.5 text-success" />
             <span className="font-medium group-hover:text-success transition-colors">Recebíveis</span>
           </label>
-          <label className="flex items-center gap-2.5 text-sm cursor-pointer group">
+          <label className="flex items-center gap-2 text-xs cursor-pointer group">
             <Checkbox
               id="pagamentos-toggle"
               checked={filters.columnGroups.pagamentos}
@@ -306,48 +286,47 @@ export function TopBar({
               className="border-warning/50 data-[state=checked]:bg-warning data-[state=checked]:border-warning"
               data-testid="checkbox-pagamentos"
             />
-            <CreditCard className="w-4 h-4 text-warning group-hover:scale-110 transition-transform" />
+            <CreditCard className="w-3.5 h-3.5 text-warning" />
             <span className="font-medium group-hover:text-warning transition-colors">Pagamentos</span>
           </label>
         </div>
       </motion.div>
 
-      <Separator orientation="vertical" className="h-14 bg-white/10" />
+      <Separator orientation="vertical" className="h-[88px] bg-white/10" />
 
       {/* Actions Section */}
       <motion.div variants={itemVariants} className="flex items-center gap-3">
-        {/* Primary Actions */}
-        <div className="flex flex-col gap-2">
-          <Button
-            id="btn-search-inspections"
-            onClick={onSearch}
-            className="gap-2 bg-gradient-to-r from-primary to-secondary border-0 shadow-lg shadow-primary/25"
-            data-testid="button-search"
-          >
-            <Search className="w-4 h-4" />
-            Buscar
-          </Button>
-          <Button
-            id="btn-open-new-record"
-            onClick={onNewRecord}
-            variant="outline"
-            className="gap-2 border-accent/50 text-accent"
-            data-testid="button-new"
-          >
-            <Plus className="w-4 h-4" />
-            Novo
-          </Button>
-        </div>
-
-        {/* Admin Actions */}
-        <div className="flex flex-col gap-2">
+        {/* All Actions in unified grid */}
+        <div className="flex flex-col justify-center gap-1.5 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
           <div className="flex gap-2">
+            <Button
+              id="btn-search-inspections"
+              onClick={onSearch}
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs"
+              data-testid="button-search"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Buscar
+            </Button>
+            <Button
+              id="btn-open-new-record"
+              onClick={onNewRecord}
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-accent"
+              data-testid="button-new"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Novo
+            </Button>
             <Button
               id="btn-open-users"
               onClick={onOpenUsers}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs glass border border-white/10"
+              className="gap-1.5 text-xs"
               data-testid="button-users"
             >
               <Users className="w-3.5 h-3.5" />
@@ -358,31 +337,31 @@ export function TopBar({
               onClick={onOpenInvestments}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs glass border border-white/10"
+              className="gap-1.5 text-xs"
               data-testid="button-investments"
             >
               <TrendingUp className="w-3.5 h-3.5" />
               Aportes
             </Button>
+          </div>
+          <div className="flex gap-2">
             <Button
               id="btn-finance-control"
               onClick={onOpenFinancial}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs glass border border-white/10"
+              className="gap-1.5 text-xs"
               data-testid="button-financial"
             >
               <PieChart className="w-3.5 h-3.5" />
               Financial
             </Button>
-          </div>
-          <div className="flex gap-2">
             <Button
               id="btn-open-guy-pay"
               onClick={onOpenGuyPay}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs glass border border-white/10"
+              className="gap-1.5 text-xs"
               data-testid="button-guypay"
             >
               <Wallet className="w-3.5 h-3.5" />
@@ -414,10 +393,10 @@ export function TopBar({
         </div>
       </motion.div>
 
-      <Separator orientation="vertical" className="h-14 bg-white/10" />
+      <Separator orientation="vertical" className="h-[88px] bg-white/10" />
 
       {/* KPIs Express Panel - Consolidated */}
-      <motion.div variants={itemVariants} className="ml-auto" data-testid="panel-kpis">
+      <motion.div variants={itemVariants} data-testid="panel-kpis">
         <ExpressKPIPanel kpis={kpis} />
       </motion.div>
     </motion.div>
