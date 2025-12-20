@@ -294,83 +294,85 @@ export function TopBar({
 
       <Separator orientation="vertical" className="h-[88px] bg-white/10" />
 
-      {/* Actions Section - Clean, frameless design */}
+      {/* Actions Section - Styled buttons matching reference */}
       <motion.div variants={itemVariants} className="flex items-center">
         <div className="flex flex-col justify-center gap-2 h-[88px] px-2">
-          <div className="flex items-center gap-1.5">
+          {/* Row 1: Buscar, Usuários, Aportes, Financial */}
+          <div className="flex items-center gap-2">
             <Button
               id="btn-search-inspections"
               onClick={onSearch}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
+              className="gap-1.5 text-sm rounded-full border-primary/50 bg-slate-900/80 text-primary backdrop-blur-sm px-4"
               data-testid="button-search"
             >
               <Search className="w-4 h-4" />
               Buscar
             </Button>
             <Button
+              id="btn-open-users"
+              onClick={onOpenUsers}
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              data-testid="button-users"
+            >
+              <Users className="w-4 h-4 text-primary" />
+              Usuários
+            </Button>
+            <Button
+              id="btn-investimentos"
+              onClick={onOpenInvestments}
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              data-testid="button-investments"
+            >
+              <TrendingUp className="w-4 h-4 text-success" />
+              Aportes
+            </Button>
+            <Button
+              id="btn-finance-control"
+              onClick={onOpenFinancial}
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              data-testid="button-financial"
+            >
+              <PieChart className="w-4 h-4 text-violet-400" />
+              Financial
+            </Button>
+          </div>
+          {/* Row 2: Novo, Guy Pay, Em breve, Logout */}
+          <div className="flex items-center gap-2">
+            <Button
               id="btn-open-new-record"
               onClick={onNewRecord}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm border-accent/40 text-accent bg-accent/5 backdrop-blur-sm"
+              className="gap-1.5 text-sm rounded-full border-accent bg-slate-900/80 text-accent backdrop-blur-sm px-4"
               data-testid="button-new"
             >
               <Plus className="w-4 h-4" />
               Novo
             </Button>
             <Button
-              id="btn-open-users"
-              onClick={onOpenUsers}
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
-              data-testid="button-users"
-            >
-              <Users className="w-4 h-4" />
-              Usuários
-            </Button>
-            <Button
-              id="btn-investimentos"
-              onClick={onOpenInvestments}
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
-              data-testid="button-investments"
-            >
-              <TrendingUp className="w-4 h-4" />
-              Aportes
-            </Button>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Button
-              id="btn-finance-control"
-              onClick={onOpenFinancial}
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
-              data-testid="button-financial"
-            >
-              <PieChart className="w-4 h-4" />
-              Financial
-            </Button>
-            <Button
               id="btn-open-guy-pay"
               onClick={onOpenGuyPay}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
               data-testid="button-guypay"
             >
-              <Wallet className="w-4 h-4" />
+              <Wallet className="w-4 h-4 text-warning" />
               Guy Pay
             </Button>
             <Button
               id="btn-coming-soon"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-1.5 text-sm text-muted-foreground/50"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-muted-foreground backdrop-blur-sm px-4"
               disabled
               data-testid="button-coming-soon"
             >
@@ -382,11 +384,11 @@ export function TopBar({
               onClick={onLogout}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm border-destructive/40 text-destructive bg-destructive/5 backdrop-blur-sm"
+              className="gap-1.5 text-sm rounded-full border-orange-500/70 bg-slate-900/80 text-orange-400 backdrop-blur-sm px-4"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
-              Sair
+              Logout
             </Button>
           </div>
         </div>
