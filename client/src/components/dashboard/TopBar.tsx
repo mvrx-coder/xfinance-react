@@ -304,7 +304,7 @@ export function TopBar({
               onClick={onSearch}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-primary/50 bg-slate-900/80 text-primary backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-primary/50 bg-slate-900/80 text-primary backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-search"
             >
               <Search className="w-4 h-4" />
@@ -315,7 +315,7 @@ export function TopBar({
               onClick={onOpenUsers}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-users"
             >
               <Users className="w-4 h-4 text-primary" />
@@ -326,7 +326,7 @@ export function TopBar({
               onClick={onOpenInvestments}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-investments"
             >
               <TrendingUp className="w-4 h-4 text-success" />
@@ -337,7 +337,7 @@ export function TopBar({
               onClick={onOpenFinancial}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-financial"
             >
               <PieChart className="w-4 h-4 text-violet-400" />
@@ -351,7 +351,7 @@ export function TopBar({
               onClick={onNewRecord}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-accent bg-slate-900/80 text-accent backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-accent bg-slate-900/80 text-accent backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-new"
             >
               <Plus className="w-4 h-4" />
@@ -362,7 +362,7 @@ export function TopBar({
               onClick={onOpenGuyPay}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-guypay"
             >
               <Wallet className="w-4 h-4 text-warning" />
@@ -372,7 +372,7 @@ export function TopBar({
               id="btn-coming-soon"
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-muted-foreground backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-muted-foreground backdrop-blur-sm w-[100px] justify-center"
               disabled
               data-testid="button-coming-soon"
             >
@@ -384,7 +384,7 @@ export function TopBar({
               onClick={onLogout}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-orange-500/70 bg-slate-900/80 text-orange-400 backdrop-blur-sm px-4"
+              className="gap-1.5 text-sm rounded-full border-orange-500/70 bg-slate-900/80 text-orange-400 backdrop-blur-sm w-[100px] justify-center"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
