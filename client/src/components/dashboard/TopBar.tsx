@@ -167,12 +167,12 @@ export function TopBar({
     >
       {/* Logo + Welcome Section */}
       <motion.div variants={itemVariants} className="flex items-center gap-3">
-        {/* Logo MVRX */}
-        <div className="flex items-center justify-center h-[88px] px-3 rounded-xl bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/10 backdrop-blur-xl">
+        {/* Logo MVRX - Clean, no frame */}
+        <div className="flex items-center justify-center h-[88px] px-2">
           <img 
             src={logoMvrx} 
             alt="MVRX Logo" 
-            className="h-10 w-auto object-contain"
+            className="h-12 w-auto object-contain"
             data-testid="img-logo"
           />
         </div>
@@ -294,17 +294,16 @@ export function TopBar({
 
       <Separator orientation="vertical" className="h-[88px] bg-white/10" />
 
-      {/* Actions Section */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        {/* All Actions in unified grid */}
-        <div className="flex flex-col justify-center gap-1.5 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
-          <div className="flex gap-2">
+      {/* Actions Section - Clean, frameless design */}
+      <motion.div variants={itemVariants} className="flex items-center">
+        <div className="flex flex-col justify-center gap-2 h-[88px] px-2">
+          <div className="flex items-center gap-1.5">
             <Button
               id="btn-search-inspections"
               onClick={onSearch}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm"
+              className="gap-1.5 text-sm text-muted-foreground"
               data-testid="button-search"
             >
               <Search className="w-4 h-4" />
@@ -313,9 +312,9 @@ export function TopBar({
             <Button
               id="btn-open-new-record"
               onClick={onNewRecord}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-1.5 text-sm text-accent"
+              className="gap-1.5 text-sm border-accent/40 text-accent bg-accent/5 backdrop-blur-sm"
               data-testid="button-new"
             >
               <Plus className="w-4 h-4" />
@@ -326,7 +325,7 @@ export function TopBar({
               onClick={onOpenUsers}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm"
+              className="gap-1.5 text-sm text-muted-foreground"
               data-testid="button-users"
             >
               <Users className="w-4 h-4" />
@@ -337,20 +336,20 @@ export function TopBar({
               onClick={onOpenInvestments}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm"
+              className="gap-1.5 text-sm text-muted-foreground"
               data-testid="button-investments"
             >
               <TrendingUp className="w-4 h-4" />
               Aportes
             </Button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               id="btn-finance-control"
               onClick={onOpenFinancial}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm"
+              className="gap-1.5 text-sm text-muted-foreground"
               data-testid="button-financial"
             >
               <PieChart className="w-4 h-4" />
@@ -361,7 +360,7 @@ export function TopBar({
               onClick={onOpenGuyPay}
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm"
+              className="gap-1.5 text-sm text-muted-foreground"
               data-testid="button-guypay"
             >
               <Wallet className="w-4 h-4" />
@@ -371,7 +370,7 @@ export function TopBar({
               id="btn-coming-soon"
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-sm text-muted-foreground"
+              className="gap-1.5 text-sm text-muted-foreground/50"
               disabled
               data-testid="button-coming-soon"
             >
@@ -381,9 +380,9 @@ export function TopBar({
             <Button
               id="btn-logout"
               onClick={onLogout}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-1.5 text-sm text-destructive/80"
+              className="gap-1.5 text-sm border-destructive/40 text-destructive bg-destructive/5 backdrop-blur-sm"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
