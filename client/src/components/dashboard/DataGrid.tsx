@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -13,16 +13,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  LayoutGrid,
-  RefreshCw,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   FileSpreadsheet,
-  Filter,
-  Sparkles,
-  TrendingUp,
   Eye,
   Edit3,
 } from "lucide-react";
@@ -143,12 +138,6 @@ export function DataGrid({
   const endIndex = startIndex + rowsPerPage;
   const currentData = data.slice(startIndex, endIndex);
 
-  const lastUpdated = new Intl.DateTimeFormat("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(new Date());
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -157,60 +146,11 @@ export function DataGrid({
       className="flex-1 mx-3 mb-3"
     >
       <Card className="h-full glass-card border-white/10 shadow-2xl overflow-hidden">
-        {/* Grid Header */}
-        <CardHeader className="flex flex-row items-center justify-between gap-4 py-4 px-5 border-b border-white/10 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-                <LayoutGrid className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold" data-testid="text-grid-title">
-                  Operações / Inspeções
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Gerenciamento de inspeções e pagamentos
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="gap-1.5 px-3 py-1 bg-accent/10 border-accent/30 text-accent">
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                {data.length} registros
-              </Badge>
-              <Badge variant="outline" className="gap-1.5 px-3 py-1 bg-success/10 border-success/30 text-success">
-                <TrendingUp className="w-3.5 h-3.5" />
-                Ativo
-              </Badge>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-primary" />
-              {lastUpdated}
-            </span>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRefresh}
-                className={`glass border border-white/10 ${isLoading ? "animate-spin" : ""}`}
-                data-testid="button-refresh"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="glass border border-white/10" data-testid="button-filter">
-                <Filter className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-
-        {/* Grid Content */}
+        {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1">
-          <ScrollArea className="h-[calc(100vh-300px)] custom-scrollbar">
+          <ScrollArea className="h-[calc(100vh-180px)] custom-scrollbar">
             <Table>
-              <TableHeader className="sticky top-0 z-10">
+              <TableHeader className="sticky top-0 z-50 bg-card/98 backdrop-blur-xl shadow-sm">
                 <TableRow className="border-b border-white/10 bg-card/95 backdrop-blur-xl">
                   <TableHead className="w-[70px] text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     #
