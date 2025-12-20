@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -20,6 +27,13 @@ import {
   FileSpreadsheet,
   Eye,
   Edit3,
+  Send,
+  AlertTriangle,
+  MapPin,
+  Sparkles,
+  Trash2,
+  Filter,
+  X,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 
@@ -122,6 +136,103 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
   );
 }
 
+function ActionCenter({ 
+  inspection, 
+  isOpen, 
+  onClose 
+}: { 
+  inspection: Inspection | null; 
+  isOpen: boolean; 
+  onClose: () => void;
+}) {
+  if (!inspection) return null;
+
+  return (
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent 
+        side="right" 
+        className="w-[340px] sm:w-[380px] bg-card/95 backdrop-blur-xl border-l border-white/10 p-0"
+      >
+        <SheetHeader className="p-5 border-b border-white/10">
+          <SheetTitle className="text-base font-bold">Central de ações</SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3" />
+            Escolha a ação para Valid Soluções da {inspection.player} de {inspection.loc?.toString().padStart(2, '0')}/{new Date().getMonth() + 1 < 10 ? '0' : ''}{new Date().getMonth() + 1}.
+          </SheetDescription>
+        </SheetHeader>
+        
+        <div className="p-5 flex flex-col gap-3">
+          <Button
+            className="w-full justify-center gap-2 rounded-full border-2 border-orange-500 bg-transparent text-orange-400 hover:bg-orange-500/10"
+            variant="outline"
+            data-testid="action-forward-inspection"
+          >
+            <Send className="w-4 h-4" />
+            Encaminhar inspeção
+          </Button>
+          
+          <Button
+            className="w-full justify-center gap-2 rounded-full border-2 border-green-500 bg-transparent text-green-400 hover:bg-green-500/10"
+            variant="outline"
+            data-testid="action-alert-marker"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Marcador de alerta
+          </Button>
+          
+          <Button
+            className="w-full justify-center gap-2 rounded-full border-2 border-violet-500 bg-transparent text-violet-400 hover:bg-violet-500/10"
+            variant="outline"
+            data-testid="action-view-locations"
+          >
+            <MapPin className="w-4 h-4" />
+            Visualizar demais locais
+          </Button>
+          
+          <Button
+            className="w-full justify-center gap-2 rounded-full border-2 border-yellow-500 bg-transparent text-yellow-400 hover:bg-yellow-500/10"
+            variant="outline"
+            data-testid="action-coming-soon"
+          >
+            <Sparkles className="w-4 h-4" />
+            Em breve
+          </Button>
+          
+          <Button
+            className="w-full justify-center gap-2 rounded-full border-2 border-red-500 bg-transparent text-red-400 hover:bg-red-500/10"
+            variant="outline"
+            data-testid="action-delete-inspection"
+          >
+            <Trash2 className="w-4 h-4" />
+            Excluir inspeção
+          </Button>
+          
+          <div className="border-t border-white/10 pt-3 mt-2">
+            <Button
+              className="w-full justify-center gap-2 rounded-full border border-white/20 bg-transparent text-muted-foreground hover:bg-white/5"
+              variant="outline"
+              data-testid="action-clear-filters"
+            >
+              <Filter className="w-4 h-4" />
+              Limpar Filtros (Global)
+            </Button>
+          </div>
+          
+          <Button
+            className="w-full justify-center gap-2 rounded-full border border-white/20 bg-transparent text-muted-foreground hover:bg-white/5"
+            variant="outline"
+            onClick={onClose}
+            data-testid="action-cancel"
+          >
+            <X className="w-4 h-4" />
+            Cancelar
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 export function DataGrid({
   data,
   filters,
@@ -131,6 +242,8 @@ export function DataGrid({
 }: DataGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+  const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
   const rowsPerPage = 50;
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -273,7 +386,13 @@ export function DataGrid({
                           <TableCell className="py-2.5">
                             <Badge
                               variant="outline"
-                              className={`text-[10px] font-bold px-2 py-0.5 ${getStatusColor(row.meta)}`}
+                              className={`text-[10px] font-bold px-2 py-0.5 cursor-pointer transition-transform hover:scale-105 ${getStatusColor(row.meta)}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedInspection(row);
+                                setIsActionCenterOpen(true);
+                              }}
+                              data-testid={`badge-action-${row.id || index}`}
                             >
                               {String(index + 1 + startIndex).padStart(2, '0')}
                             </Badge>
@@ -474,6 +593,12 @@ export function DataGrid({
           </div>
         </div>
       </Card>
+      
+      <ActionCenter
+        inspection={selectedInspection}
+        isOpen={isActionCenterOpen}
+        onClose={() => setIsActionCenterOpen(false)}
+      />
     </motion.div>
   );
 }
