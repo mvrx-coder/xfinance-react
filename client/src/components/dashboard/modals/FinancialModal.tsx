@@ -1,14 +1,16 @@
+import { motion } from "framer-motion";
 import { Modal } from "../Modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  PieChart,
   TrendingUp,
-  DollarSign,
   ArrowUpRight,
   ArrowDownRight,
   BarChart3,
+  Wallet,
+  Receipt,
+  CreditCard,
 } from "lucide-react";
 
 interface FinancialModalProps {
@@ -20,8 +22,20 @@ function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value);
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export function FinancialModal({ isOpen, onClose }: FinancialModalProps) {
   return (
@@ -30,127 +44,160 @@ export function FinancialModal({ isOpen, onClose }: FinancialModalProps) {
       isOpen={isOpen}
       onClose={onClose}
       title="Controle Financeiro"
+      subtitle="Visualize receitas, despesas e tendências financeiras"
       maxWidth="xl"
       footer={
-        <Button variant="outline" onClick={onClose} data-testid="button-close-financial">
+        <Button variant="outline" onClick={onClose} className="gap-2" data-testid="button-close-financial">
           Fechar
         </Button>
       }
     >
-      <div className="space-y-4">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-5"
+      >
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <Card className="glass border-success/30 bg-gradient-to-br from-success/15 to-success/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <ArrowUpRight className="w-3 h-3 text-success" />
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ArrowUpRight className="w-3.5 h-3.5 text-success" />
                 Receita Total
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-xl font-bold text-success">
-                {formatCurrency(1308894.01)}
+              <span className="text-2xl font-bold text-success">
+                {formatCurrency(1308894)}
               </span>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-success/80 mt-1 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
                 +12.5% vs mês anterior
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
+          <Card className="glass border-destructive/30 bg-gradient-to-br from-destructive/15 to-destructive/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <ArrowDownRight className="w-3 h-3 text-destructive" />
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
                 Despesas Totais
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-xl font-bold text-destructive">
-                {formatCurrency(109497.01)}
+              <span className="text-2xl font-bold text-destructive">
+                {formatCurrency(109497)}
               </span>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-success/80 mt-1 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
                 -3.2% vs mês anterior
               </p>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-primary" />
-              Breakdown por Categoria
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Honorários</span>
-                <span className="font-medium">{formatCurrency(1259027.96)}</span>
+        <motion.div variants={itemVariants}>
+          <Card className="glass border-white/10">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                </div>
+                Breakdown por Categoria
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Receipt className="w-4 h-4 text-success" />
+                    Honorários
+                  </span>
+                  <span className="font-semibold text-success">{formatCurrency(1259028)}</span>
+                </div>
+                <div className="relative h-2 rounded-full bg-muted/50 overflow-hidden">
+                  <motion.div 
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-success to-success/70 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: "85%" }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  />
+                </div>
               </div>
-              <Progress value={85} className="h-2" />
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">GHonorários</span>
-                <span className="font-medium text-warning">
-                  {formatCurrency(44700.00)}
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Wallet className="w-4 h-4 text-warning" />
+                    GHonorários
+                  </span>
+                  <span className="font-semibold text-warning">{formatCurrency(44700)}</span>
+                </div>
+                <div className="relative h-2 rounded-full bg-muted/50 overflow-hidden">
+                  <motion.div 
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-warning to-warning/70 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: "35%" }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                  />
+                </div>
               </div>
-              <Progress value={35} className="h-2 [&>div]:bg-warning" />
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Despesas</span>
-                <span className="font-medium text-accent">
-                  {formatCurrency(14930.41)}
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <CreditCard className="w-4 h-4 text-accent" />
+                    Despesas
+                  </span>
+                  <span className="font-semibold text-accent">{formatCurrency(14930)}</span>
+                </div>
+                <div className="relative h-2 rounded-full bg-muted/50 overflow-hidden">
+                  <motion.div 
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent to-accent/70 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: "12%" }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                  />
+                </div>
               </div>
-              <Progress value={12} className="h-2 [&>div]:bg-accent" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Monthly Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              Tendência Mensal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 flex items-end justify-between gap-2">
-              {[65, 45, 78, 52, 90, 75, 85, 60, 95, 70, 80, 88].map(
-                (height, i) => (
-                  <div
+        <motion.div variants={itemVariants}>
+          <Card className="glass border-white/10">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                </div>
+                Tendência Mensal
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-36 flex items-end justify-between gap-2">
+                {[65, 45, 78, 52, 90, 75, 85, 60, 95, 70, 80, 88].map((height, i) => (
+                  <motion.div
                     key={i}
-                    className="flex-1 bg-gradient-to-t from-primary to-primary/50 rounded-t"
-                    style={{ height: `${height}%` }}
+                    className="flex-1 bg-gradient-to-t from-primary to-primary/40 rounded-t-md"
+                    initial={{ height: 0 }}
+                    animate={{ height: `${height}%` }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
                   />
-                )
-              )}
-            </div>
-            <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>Jan</span>
-              <span>Fev</span>
-              <span>Mar</span>
-              <span>Abr</span>
-              <span>Mai</span>
-              <span>Jun</span>
-              <span>Jul</span>
-              <span>Ago</span>
-              <span>Set</span>
-              <span>Out</span>
-              <span>Nov</span>
-              <span>Dez</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-3 text-[10px] text-muted-foreground font-medium">
+                {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"].map((m) => (
+                  <span key={m}>{m}</span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </Modal>
   );
 }

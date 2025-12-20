@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
-import { CheckCircle, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-
-type ToastType = "success" | "error" | "warning" | "info";
+import {
+  X,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Sparkles,
+} from "lucide-react";
 
 export interface Toast {
   id: string;
-  type: ToastType;
+  type: "success" | "error" | "warning" | "info" | "default";
   title: string;
   message?: string;
   duration?: number;
@@ -17,84 +23,122 @@ interface ToastContainerProps {
   onDismiss: (id: string) => void;
 }
 
-const toastConfig: Record<
-  ToastType,
-  { icon: typeof CheckCircle; className: string; progressColor: string }
-> = {
+const toastConfig = {
   success: {
-    icon: CheckCircle,
-    className:
-      "bg-card border border-success/30 shadow-lg shadow-success/10",
-    progressColor: "bg-success",
+    icon: CheckCircle2,
+    gradient: "from-success/20 to-success/5",
+    border: "border-success/30",
+    iconColor: "text-success",
+    glow: "shadow-[0_0_20px_rgba(16,185,129,0.2)]",
   },
   error: {
     icon: AlertCircle,
-    className:
-      "bg-card border border-destructive/30 shadow-lg shadow-destructive/10",
-    progressColor: "bg-destructive",
+    gradient: "from-destructive/20 to-destructive/5",
+    border: "border-destructive/30",
+    iconColor: "text-destructive",
+    glow: "shadow-[0_0_20px_rgba(239,68,68,0.2)]",
   },
   warning: {
     icon: AlertTriangle,
-    className:
-      "bg-card border border-warning/30 shadow-lg shadow-warning/10",
-    progressColor: "bg-warning",
+    gradient: "from-warning/20 to-warning/5",
+    border: "border-warning/30",
+    iconColor: "text-warning",
+    glow: "shadow-[0_0_20px_rgba(245,158,11,0.2)]",
   },
   info: {
     icon: Info,
-    className: "bg-card border border-accent/30 shadow-lg shadow-accent/10",
-    progressColor: "bg-accent",
+    gradient: "from-accent/20 to-accent/5",
+    border: "border-accent/30",
+    iconColor: "text-accent",
+    glow: "shadow-[0_0_20px_rgba(0,188,212,0.2)]",
+  },
+  default: {
+    icon: Sparkles,
+    gradient: "from-primary/20 to-primary/5",
+    border: "border-primary/30",
+    iconColor: "text-primary",
+    glow: "shadow-[0_0_20px_rgba(206,98,217,0.2)]",
   },
 };
 
-function ToastItem({
-  toast,
-  onDismiss,
-}: {
-  toast: Toast;
-  onDismiss: (id: string) => void;
-}) {
+const toastVariants = {
+  hidden: { 
+    opacity: 0, 
+    x: 100,
+    scale: 0.95,
+  },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 20,
+      stiffness: 300,
+    },
+  },
+  exit: { 
+    opacity: 0, 
+    x: 100,
+    scale: 0.95,
+    transition: {
+      duration: 0.2,
+    },
+  },
+};
+
+function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
   const [progress, setProgress] = useState(100);
-  const duration = toast.duration || 5000;
   const config = toastConfig[toast.type];
   const Icon = config.icon;
+  const duration = toast.duration || 5000;
 
   useEffect(() => {
     const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
-      setProgress(remaining);
+    const endTime = startTime + duration;
 
-      if (remaining === 0) {
-        clearInterval(interval);
-        onDismiss(toast.id);
+    const updateProgress = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, endTime - now);
+      const percentage = (remaining / duration) * 100;
+      setProgress(percentage);
+
+      if (percentage > 0) {
+        requestAnimationFrame(updateProgress);
       }
-    }, 50);
+    };
 
-    return () => clearInterval(interval);
+    const animation = requestAnimationFrame(updateProgress);
+    const timeout = setTimeout(() => onDismiss(toast.id), duration);
+
+    return () => {
+      cancelAnimationFrame(animation);
+      clearTimeout(timeout);
+    };
   }, [toast.id, duration, onDismiss]);
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-lg p-4 min-w-[300px] max-w-[400px] animate-in slide-in-from-right-full duration-300 ${config.className}`}
+    <motion.div
+      layout
+      variants={toastVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className={`relative overflow-hidden w-[380px] rounded-xl glass-strong border ${config.border} ${config.glow}`}
       data-testid={`toast-${toast.id}`}
     >
-      <div className="flex items-start gap-3">
-        <Icon
-          className={`w-5 h-5 flex-shrink-0 ${
-            toast.type === "success"
-              ? "text-success"
-              : toast.type === "error"
-                ? "text-destructive"
-                : toast.type === "warning"
-                  ? "text-warning"
-                  : "text-accent"
-          }`}
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">{toast.title}</p>
+      {/* Gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient} opacity-50`} />
+      
+      {/* Content */}
+      <div className="relative flex items-start gap-4 p-4">
+        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${config.gradient} border border-white/10 flex-shrink-0`}>
+          <Icon className={`w-5 h-5 ${config.iconColor}`} />
+        </div>
+        <div className="flex-1 min-w-0 pt-0.5">
+          <h4 className="text-sm font-bold text-foreground">{toast.title}</h4>
           {toast.message && (
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
               {toast.message}
             </p>
           )}
@@ -102,34 +146,34 @@ function ToastItem({
         <Button
           variant="ghost"
           size="icon"
-          className="flex-shrink-0"
+          className="flex-shrink-0 glass border border-white/10 -mt-1"
           onClick={() => onDismiss(toast.id)}
           data-testid={`button-close-toast-${toast.id}`}
         >
           <X className="w-4 h-4" />
         </Button>
       </div>
+
       {/* Progress bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/50">
-        <div
-          className={`h-full transition-all duration-100 ${config.progressColor}`}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+        <motion.div
+          className={`h-full bg-gradient-to-r ${config.gradient.replace('/20', '/60').replace('/5', '/30')}`}
           style={{ width: `${progress}%` }}
+          transition={{ duration: 0.1 }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   return (
-    <div
-      id="toast-container"
-      className="fixed top-4 right-4 z-[9999] flex flex-col gap-3"
-      data-testid="toast-container"
-    >
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
-      ))}
+    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-3" data-testid="toast-container">
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

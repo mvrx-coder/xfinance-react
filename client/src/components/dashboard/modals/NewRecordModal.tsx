@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save, X } from "lucide-react";
 
 const newRecordSchema = z.object({
   player: z.string().min(1, "Player é obrigatório"),
@@ -63,6 +64,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/kpis"] });
       form.reset();
       onSuccess();
     },
@@ -78,237 +80,246 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
       isOpen={isOpen}
       onClose={onClose}
       title="Novo Registro"
-      maxWidth="lg"
+      subtitle="Adicione uma nova inspeção ao sistema"
+      maxWidth="xl"
       footer={
         <>
           <Button
             variant="outline"
             onClick={onClose}
             disabled={createMutation.isPending}
+            className="gap-2"
             data-testid="button-cancel-new-record"
           >
+            <X className="w-4 h-4" />
             Cancelar
           </Button>
           <Button
             onClick={form.handleSubmit(onSubmit)}
             disabled={createMutation.isPending}
+            className="gap-2 bg-gradient-to-r from-primary to-secondary border-0"
             data-testid="button-confirm-new-record"
           >
-            {createMutation.isPending && (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            {createMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
             )}
-            Criar Registro
+            {createMutation.isPending ? "Salvando..." : "Criar Registro"}
           </Button>
         </>
       }
     >
-      <Form {...form}>
-        <form className="space-y-4">
-          <ModalFormGrid>
-            <FormField
-              control={form.control}
-              name="player"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Player" required htmlFor="player">
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger
-                          id="player"
-                          data-testid="select-player"
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Form {...form}>
+          <form className="space-y-4">
+            <ModalFormGrid>
+              <FormField
+                control={form.control}
+                name="player"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Player" required>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
                         >
-                          <SelectValue placeholder="Selecione o player" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Aon">Aon</SelectItem>
-                          <SelectItem value="Swiss Re">Swiss Re</SelectItem>
-                          <SelectItem value="Howden">Howden</SelectItem>
-                          <SelectItem value="Inter">Inter</SelectItem>
-                          <SelectItem value="Free Job">Free Job</SelectItem>
-                          <SelectItem value="Marsh">Marsh</SelectItem>
-                          <SelectItem value="Lockton">Lockton</SelectItem>
-                          <SelectItem value="IRB">IRB</SelectItem>
-                          <SelectItem value="Gallagher">Gallagher</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                          <SelectTrigger className="glass border-white/10" data-testid="select-player">
+                            <SelectValue placeholder="Selecione o player" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Aon">Aon</SelectItem>
+                            <SelectItem value="Swiss Re">Swiss Re</SelectItem>
+                            <SelectItem value="Howden">Howden</SelectItem>
+                            <SelectItem value="Inter">Inter</SelectItem>
+                            <SelectItem value="Free Job">Free Job</SelectItem>
+                            <SelectItem value="Marsh">Marsh</SelectItem>
+                            <SelectItem value="Lockton">Lockton</SelectItem>
+                            <SelectItem value="IRB">IRB</SelectItem>
+                            <SelectItem value="Gallagher">Gallagher</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="segurado"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Segurado" required htmlFor="segurado">
-                    <FormControl>
-                      <Input
-                        id="segurado"
-                        placeholder="Nome do segurado"
-                        {...field}
-                        data-testid="input-segurado"
-                      />
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="segurado"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Segurado" required>
+                      <FormControl>
+                        <Input
+                          placeholder="Nome do segurado"
+                          className="glass border-white/10"
+                          {...field}
+                          data-testid="input-segurado"
+                        />
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="loc"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Loc" required htmlFor="loc">
-                    <FormControl>
-                      <Input
-                        id="loc"
-                        type="number"
-                        min={1}
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        data-testid="input-loc"
-                      />
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="loc"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Loc" required>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          className="glass border-white/10"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                          data-testid="input-loc"
+                        />
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="guilty"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Guilty" htmlFor="guilty">
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger id="guilty" data-testid="select-guilty">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="AAS">AAS</SelectItem>
-                          <SelectItem value="HEA">HEA</SelectItem>
-                          <SelectItem value="MVR">MVR</SelectItem>
-                          <SelectItem value="ARR">ARR</SelectItem>
-                          <SelectItem value="ALS">ALS</SelectItem>
-                          <SelectItem value="RES">RES</SelectItem>
-                          <SelectItem value="LVS">LVS</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="guilty"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Guilty">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="glass border-white/10" data-testid="select-guilty">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AAS">AAS</SelectItem>
+                            <SelectItem value="HEA">HEA</SelectItem>
+                            <SelectItem value="MVR">MVR</SelectItem>
+                            <SelectItem value="ARR">ARR</SelectItem>
+                            <SelectItem value="ALS">ALS</SelectItem>
+                            <SelectItem value="RES">RES</SelectItem>
+                            <SelectItem value="LVS">LVS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="guy"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Guy" htmlFor="guy">
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger id="guy" data-testid="select-guy">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="MVR">MVR</SelectItem>
-                          <SelectItem value="AAS">AAS</SelectItem>
-                          <SelectItem value="HEA">HEA</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="guy"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Guy">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="glass border-white/10" data-testid="select-guy">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MVR">MVR</SelectItem>
+                            <SelectItem value="AAS">AAS</SelectItem>
+                            <SelectItem value="HEA">HEA</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="meta"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="META" htmlFor="meta">
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger id="meta" data-testid="select-meta">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Sim">Sim</SelectItem>
-                          <SelectItem value="Não">Não</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="meta"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="META">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="glass border-white/10" data-testid="select-meta">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sim">Sim</SelectItem>
+                            <SelectItem value="Não">Não</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="inspecao"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Data Inspeção" htmlFor="inspecao">
-                    <FormControl>
-                      <Input
-                        id="inspecao"
-                        type="date"
-                        {...field}
-                        data-testid="input-inspecao"
-                      />
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="inspecao"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Data Inspeção">
+                      <FormControl>
+                        <Input
+                          type="date"
+                          className="glass border-white/10"
+                          {...field}
+                          data-testid="input-inspecao"
+                        />
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="atividade"
-              render={({ field }) => (
-                <FormItem>
-                  <ModalFormField label="Atividade" htmlFor="atividade">
-                    <FormControl>
-                      <Input
-                        id="atividade"
-                        placeholder="Ex: Mineradora, Biodiesel..."
-                        {...field}
-                        data-testid="input-atividade"
-                      />
-                    </FormControl>
-                  </ModalFormField>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </ModalFormGrid>
-        </form>
-      </Form>
+              <FormField
+                control={form.control}
+                name="atividade"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Atividade">
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Mineradora, Biodiesel..."
+                          className="glass border-white/10"
+                          {...field}
+                          data-testid="input-atividade"
+                        />
+                      </FormControl>
+                    </ModalFormField>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </ModalFormGrid>
+          </form>
+        </Form>
+      </motion.div>
     </Modal>
   );
 }
