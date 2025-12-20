@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 /* xFinance Premium Dark Theme - Modern Glassmorphism Design */
+/* Based on tokens.py color scheme */
 :root {
   --button-outline: rgba(255,255,255, .12);
   --badge-outline: rgba(255,255,255, .08);
@@ -10,65 +11,74 @@
   --elevate-1: rgba(255,255,255, .06);
   --elevate-2: rgba(255,255,255, .12);
   
-  /* Premium Dark Palette */
-  --background: 240 50% 3%;
-  --foreground: 220 20% 95%;
-  --border: 240 20% 12%;
+  /* xFinance Palette - Deep Blue/Indigo Base */
+  /* #0A0A1F - Deep Blue Background */
+  --background: 240 51% 8%;
+  /* #E0E0FF - Ice White/Blue text */
+  --foreground: 240 100% 94%;
+  --border: 240 38% 20%;
   
-  /* Card with Glassmorphism */
-  --card: 240 30% 8%;
-  --card-foreground: 220 20% 95%;
-  --card-border: 240 20% 15%;
+  /* Card with Glassmorphism - #232347 */
+  --card: 240 34% 21%;
+  --card-foreground: 240 100% 94%;
+  --card-border: 240 30% 28%;
   
-  /* Sidebar */
-  --sidebar: 240 35% 6%;
-  --sidebar-foreground: 220 20% 90%;
-  --sidebar-border: 240 20% 12%;
-  --sidebar-primary: 280 85% 65%;
+  /* Sidebar - #1A1A3A */
+  --sidebar: 240 38% 16%;
+  --sidebar-foreground: 240 100% 94%;
+  --sidebar-border: 240 30% 22%;
+  --sidebar-primary: 295 60% 62%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 25% 15%;
-  --sidebar-accent-foreground: 220 20% 90%;
-  --sidebar-ring: 280 85% 65%;
+  --sidebar-accent: 240 34% 25%;
+  --sidebar-accent-foreground: 240 100% 94%;
+  --sidebar-ring: 295 60% 62%;
   
   /* Popover */
-  --popover: 240 30% 8%;
-  --popover-foreground: 220 20% 95%;
-  --popover-border: 240 20% 15%;
+  --popover: 240 34% 21%;
+  --popover-foreground: 240 100% 94%;
+  --popover-border: 240 30% 28%;
   
-  /* Primary - Vibrant Magenta/Purple */
-  --primary: 280 85% 65%;
+  /* Primary - #CE62D9 Lilás Vibrante (Orchid) */
+  --primary: 295 60% 62%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary - Deep Purple */
-  --secondary: 265 90% 55%;
+  /* Secondary - #5B21B6 Roxo Profundo */
+  --secondary: 263 69% 42%;
   --secondary-foreground: 0 0% 100%;
   
-  /* Muted */
-  --muted: 240 20% 13%;
-  --muted-foreground: 220 15% 55%;
+  /* Brand Deep - #7C3AED Violeta Intenso */
+  --brand-deep: 263 84% 58%;
   
-  /* Accent - Electric Cyan */
-  --accent: 185 100% 50%;
-  --accent-foreground: 240 50% 5%;
+  /* Muted - using indigo tones */
+  --muted: 240 34% 18%;
+  /* #A0A0C0 - Cinza azulado */
+  --muted-foreground: 240 25% 69%;
   
-  /* Status Colors */
-  --destructive: 0 85% 60%;
+  /* Accent - #00BCD4 Ciano */
+  --accent: 187 100% 42%;
+  --accent-foreground: 240 51% 8%;
+  
+  /* Status Colors from xFinance */
+  /* #EF4444 - Vermelho Vivo */
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --success: 155 80% 45%;
+  /* #34D399 - Verde Esmeralda */
+  --success: 160 67% 52%;
   --success-foreground: 0 0% 5%;
-  --warning: 40 95% 55%;
+  /* #F59E0B - Âmbar/Laranja */
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 5%;
   
   /* Input */
-  --input: 240 15% 18%;
-  --ring: 280 85% 65%;
+  --input: 240 34% 24%;
+  --ring: 295 60% 62%;
   
   /* Chart Colors */
-  --chart-1: 280 85% 65%;
-  --chart-2: 185 100% 50%;
-  --chart-3: 155 80% 45%;
-  --chart-4: 40 95% 55%;
-  --chart-5: 265 90% 55%;
+  --chart-1: 295 60% 62%;
+  --chart-2: 187 100% 42%;
+  --chart-3: 160 67% 52%;
+  --chart-4: 38 92% 50%;
+  --chart-5: 263 84% 58%;
   
   /* Typography */
   --font-sans: 'Inter', 'SF Pro Display', system-ui, sans-serif;
@@ -88,10 +98,10 @@
   --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.7), 0 10px 24px rgba(0, 0, 0, 0.5);
   --shadow-2xl: 0 32px 80px rgba(0, 0, 0, 0.8);
   
-  /* Glow Effects */
+  /* Glow Effects - updated for xFinance palette */
   --glow-primary: 0 0 20px rgba(206, 98, 217, 0.3);
   --glow-accent: 0 0 20px rgba(0, 188, 212, 0.3);
-  --glow-success: 0 0 20px rgba(16, 185, 129, 0.3);
+  --glow-success: 0 0 20px rgba(52, 211, 153, 0.3);
   
   --tracking-normal: 0em;
   --spacing: 0.25rem;
@@ -119,44 +129,47 @@
   --opaque-button-border-intensity: 12;
   --elevate-1: rgba(255,255,255, .06);
   --elevate-2: rgba(255,255,255, .12);
-  --background: 240 50% 3%;
-  --foreground: 220 20% 95%;
-  --border: 240 20% 12%;
-  --card: 240 30% 8%;
-  --card-foreground: 220 20% 95%;
-  --card-border: 240 20% 15%;
-  --sidebar: 240 35% 6%;
-  --sidebar-foreground: 220 20% 90%;
-  --sidebar-border: 240 20% 12%;
-  --sidebar-primary: 280 85% 65%;
+  
+  /* xFinance Dark Mode - Same as root since it's dark-first */
+  --background: 240 51% 8%;
+  --foreground: 240 100% 94%;
+  --border: 240 38% 20%;
+  --card: 240 34% 21%;
+  --card-foreground: 240 100% 94%;
+  --card-border: 240 30% 28%;
+  --sidebar: 240 38% 16%;
+  --sidebar-foreground: 240 100% 94%;
+  --sidebar-border: 240 30% 22%;
+  --sidebar-primary: 295 60% 62%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 25% 15%;
-  --sidebar-accent-foreground: 220 20% 90%;
-  --sidebar-ring: 280 85% 65%;
-  --popover: 240 30% 8%;
-  --popover-foreground: 220 20% 95%;
-  --popover-border: 240 20% 15%;
-  --primary: 280 85% 65%;
+  --sidebar-accent: 240 34% 25%;
+  --sidebar-accent-foreground: 240 100% 94%;
+  --sidebar-ring: 295 60% 62%;
+  --popover: 240 34% 21%;
+  --popover-foreground: 240 100% 94%;
+  --popover-border: 240 30% 28%;
+  --primary: 295 60% 62%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 265 90% 55%;
+  --secondary: 263 69% 42%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 240 20% 13%;
-  --muted-foreground: 220 15% 55%;
-  --accent: 185 100% 50%;
-  --accent-foreground: 240 50% 5%;
-  --destructive: 0 85% 60%;
+  --brand-deep: 263 84% 58%;
+  --muted: 240 34% 18%;
+  --muted-foreground: 240 25% 69%;
+  --accent: 187 100% 42%;
+  --accent-foreground: 240 51% 8%;
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --success: 155 80% 45%;
+  --success: 160 67% 52%;
   --success-foreground: 0 0% 5%;
-  --warning: 40 95% 55%;
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 5%;
-  --input: 240 15% 18%;
-  --ring: 280 85% 65%;
-  --chart-1: 280 85% 65%;
-  --chart-2: 185 100% 50%;
-  --chart-3: 155 80% 45%;
-  --chart-4: 40 95% 55%;
-  --chart-5: 265 90% 55%;
+  --input: 240 34% 24%;
+  --ring: 295 60% 62%;
+  --chart-1: 295 60% 62%;
+  --chart-2: 187 100% 42%;
+  --chart-3: 160 67% 52%;
+  --chart-4: 38 92% 50%;
+  --chart-5: 263 84% 58%;
   --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.5);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -189,9 +202,10 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    /* xFinance gradient background with lilás and ciano accents */
     background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 40, 200, 0.15), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0, 180, 200, 0.08), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(206, 98, 217, 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0, 188, 212, 0.06), transparent);
     background-attachment: fixed;
   }
 
@@ -275,17 +289,20 @@
     inset: -1px;
   }
 
-  /* Glassmorphism utilities */
+  /* Glassmorphism utilities - xFinance style */
   .glass {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10;
+    @apply backdrop-blur-xl border border-white/10;
+    background: rgba(26, 26, 58, 0.85);
   }
 
   .glass-card {
-    @apply backdrop-blur-xl bg-card/80 border border-white/10;
+    @apply backdrop-blur-xl border border-white/10;
+    background: rgba(26, 26, 58, 0.85);
   }
 
   .glass-strong {
-    @apply backdrop-blur-2xl bg-white/10 border border-white/15;
+    @apply backdrop-blur-2xl border border-white/15;
+    background: rgba(35, 35, 71, 0.9);
   }
 
   /* Gradient utilities */
