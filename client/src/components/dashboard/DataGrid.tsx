@@ -27,7 +27,6 @@ import {
   Edit3,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
-import { FinancialSummaryCell } from "./FinancialSummaryCell";
 
 interface DataGridProps {
   data: Inspection[];
@@ -103,10 +102,23 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
           <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
         </>
       )}
-      {(filters.columnGroups.recebiveis || filters.columnGroups.pagamentos) && (
-        <TableCell className="py-3">
-          <div className="h-8 w-36 shimmer rounded-md" />
-        </TableCell>
+      {filters.columnGroups.recebiveis && (
+        <>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+        </>
+      )}
+      {filters.columnGroups.pagamentos && (
+        <>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+        </>
       )}
       <TableCell className="py-3">
         <div className="h-4 w-24 shimmer rounded-md" />
@@ -240,13 +252,43 @@ export function DataGrid({
                       </TableHead>
                     </>
                   )}
-                  {(filters.columnGroups.recebiveis || filters.columnGroups.pagamentos) && (
-                    <TableHead className="text-xs font-bold text-primary uppercase tracking-wider">
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3" />
-                        Express
-                      </div>
-                    </TableHead>
+                  {filters.columnGroups.recebiveis && (
+                    <>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                        Envio
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                        Pago
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right">
+                        Honorários
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                        DÉnvio
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider">
+                        DPago
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-success uppercase tracking-wider text-right">
+                        Despesas
+                      </TableHead>
+                    </>
+                  )}
+                  {filters.columnGroups.pagamentos && (
+                    <>
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider">
+                        GPago
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right">
+                        GHonorários
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider">
+                        GDPago
+                      </TableHead>
+                      <TableHead className="text-xs font-bold text-warning uppercase tracking-wider text-right">
+                        GDespesas
+                      </TableHead>
+                    </>
                   )}
                   <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Atividade
@@ -338,15 +380,43 @@ export function DataGrid({
                               </TableCell>
                             </>
                           )}
-                          {(filters.columnGroups.recebiveis || filters.columnGroups.pagamentos) && (
-                            <TableCell className="py-2">
-                              <FinancialSummaryCell
-                                honorarios={row.honorarios}
-                                despesas={row.despesas}
-                                gHonorarios={row.gHonorarios}
-                                gDespesas={row.gDespesas}
-                              />
-                            </TableCell>
+                          {filters.columnGroups.recebiveis && (
+                            <>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.envio)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.pago)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-success">
+                                {formatCurrency(row.honorarios)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.dEnvio)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.dPago)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
+                                {formatCurrency(row.despesas)}
+                              </TableCell>
+                            </>
+                          )}
+                          {filters.columnGroups.pagamentos && (
+                            <>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.gPago)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-destructive">
+                                {formatCurrency(row.gHonorarios)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                                {formatDate(row.gdPago)}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-destructive">
+                                {formatCurrency(row.gDespesas)}
+                              </TableCell>
+                            </>
                           )}
                           <TableCell className="py-2.5 text-xs text-muted-foreground max-w-[100px] truncate">
                             {row.atividade || "-"}
