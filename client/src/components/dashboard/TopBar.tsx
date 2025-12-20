@@ -22,9 +22,7 @@ import {
   Workflow,
   Receipt,
   CreditCard,
-  Zap,
-  ArrowUpRight,
-  ArrowDownRight,
+  Coins,
 } from "lucide-react";
 import type { FilterState, KPIs } from "@shared/schema";
 
@@ -83,50 +81,53 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-function KPICard({
-  label,
-  value,
-  icon: Icon,
-  trend,
-  color,
-}: {
-  label: string;
-  value: string;
-  icon: typeof Zap;
-  trend?: "up" | "down";
-  color: "primary" | "accent" | "success" | "warning" | "destructive";
-}) {
-  const colorClasses = {
-    primary: "from-primary/20 to-primary/5 border-primary/30 text-primary",
-    accent: "from-accent/20 to-accent/5 border-accent/30 text-accent",
-    success: "from-success/20 to-success/5 border-success/30 text-success",
-    warning: "from-warning/20 to-warning/5 border-warning/30 text-warning",
-    destructive: "from-destructive/20 to-destructive/5 border-destructive/30 text-destructive",
-  };
-
+function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-sm transition-all duration-300`}
+      whileHover={{ scale: 1.01 }}
+      className="flex flex-col px-5 py-3 rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-white/10 backdrop-blur-sm shadow-lg"
+      data-testid="panel-express-kpis"
     >
-      <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClasses[color]}`}>
-        <Icon className="w-4 h-4" />
-      </div>
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-          {label}
+      {/* EXPRESS - Main Value */}
+      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
+        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/30 to-amber-600/20">
+          <Coins className="w-4 h-4 text-amber-400" />
+        </div>
+        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">EXPRESS</span>
+        <span className="text-lg font-bold text-amber-400 ml-1">
+          {formatCurrency(kpis.express)}
         </span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-bold">{value}</span>
-          {trend && (
-            <span className={trend === "up" ? "text-success" : "text-destructive"}>
-              {trend === "up" ? (
-                <ArrowUpRight className="w-3 h-3" />
-              ) : (
-                <ArrowDownRight className="w-3 h-3" />
-              )}
-            </span>
-          )}
+      </div>
+
+      {/* Secondary Values Grid */}
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+        {/* Honorários */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-white/70">Honorários:</span>
+          <span className="text-[11px] font-semibold text-violet-400">
+            {formatCurrency(kpis.honorarios)}
+          </span>
+        </div>
+        {/* GHonorários */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-white/70">GHonorários:</span>
+          <span className="text-[11px] font-semibold text-cyan-400">
+            {formatCurrency(kpis.gHonorarios)}
+          </span>
+        </div>
+        {/* Despesas */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-white/70">Despesas:</span>
+          <span className="text-[11px] font-semibold text-rose-400">
+            {formatCurrency(kpis.despesas)}
+          </span>
+        </div>
+        {/* GDespesas */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-white/70">GDespesas:</span>
+          <span className="text-[11px] font-semibold text-rose-400">
+            {formatCurrency(kpis.gDespesas)}
+          </span>
         </div>
       </div>
     </motion.div>
@@ -403,51 +404,9 @@ export function TopBar({
 
       <Separator orientation="vertical" className="h-14 bg-white/10" />
 
-      {/* KPIs Express Panel */}
-      <motion.div
-        variants={itemVariants}
-        className="flex items-center gap-3"
-        data-testid="panel-kpis"
-      >
-        <KPICard
-          label="Express"
-          value={formatCurrency(kpis.express)}
-          icon={Zap}
-          trend="up"
-          color="success"
-        />
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <KPICard
-              label="Honorários"
-              value={formatCurrency(kpis.honorarios)}
-              icon={Receipt}
-              color="accent"
-            />
-            <KPICard
-              label="GHonorários"
-              value={formatCurrency(kpis.gHonorarios)}
-              icon={TrendingUp}
-              trend="down"
-              color="destructive"
-            />
-          </div>
-          <div className="flex gap-2">
-            <KPICard
-              label="Despesas"
-              value={formatCurrency(kpis.despesas)}
-              icon={CreditCard}
-              color="warning"
-            />
-            <KPICard
-              label="GDespesas"
-              value={formatCurrency(kpis.gDespesas)}
-              icon={Wallet}
-              trend="down"
-              color="destructive"
-            />
-          </div>
-        </div>
+      {/* KPIs Express Panel - Consolidated */}
+      <motion.div variants={itemVariants} className="ml-auto" data-testid="panel-kpis">
+        <ExpressKPIPanel kpis={kpis} />
       </motion.div>
     </motion.div>
   );
