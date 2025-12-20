@@ -147,86 +147,78 @@ function ActionCenter({
 }) {
   if (!inspection) return null;
 
+  const actionButtons = [
+    { icon: Trash2, label: "Excluir inspeção", color: "red", testId: "action-delete-inspection" },
+    { icon: Send, label: "Encaminhar inspeção", color: "orange", testId: "action-forward-inspection" },
+    { icon: AlertTriangle, label: "Marcador de alerta", color: "yellow", testId: "action-alert-marker" },
+    { icon: MapPin, label: "Visualizar demais locais", color: "green", testId: "action-view-locations" },
+    { icon: Filter, label: "Limpar Filtros (Global)", color: "blue", testId: "action-clear-filters" },
+    { icon: Sparkles, label: "Em breve", color: "purple", testId: "action-coming-soon" },
+  ];
+
+  const colorClasses: Record<string, string> = {
+    red: "border-red-500 text-red-400 shadow-red-500/20 hover:shadow-red-500/40 hover:bg-red-500/10",
+    orange: "border-orange-500 text-orange-400 shadow-orange-500/20 hover:shadow-orange-500/40 hover:bg-orange-500/10",
+    yellow: "border-yellow-500 text-yellow-400 shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:bg-yellow-500/10",
+    green: "border-green-500 text-green-400 shadow-green-500/20 hover:shadow-green-500/40 hover:bg-green-500/10",
+    blue: "border-blue-500 text-blue-400 shadow-blue-500/20 hover:shadow-blue-500/40 hover:bg-blue-500/10",
+    purple: "border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10",
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent 
         side="right" 
-        className="w-[340px] sm:w-[380px] bg-card/95 backdrop-blur-xl border-l border-white/10 p-0"
+        className="w-[360px] sm:w-[400px] bg-[rgba(10,10,31,0.95)] backdrop-blur-2xl border-l border-primary/20 p-0 overflow-hidden"
       >
-        <SheetHeader className="p-5 border-b border-white/10">
-          <SheetTitle className="text-base font-bold">Central de ações</SheetTitle>
-          <SheetDescription className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <AlertTriangle className="w-3 h-3" />
-            Escolha a ação para Valid Soluções da {inspection.player} de {inspection.loc?.toString().padStart(2, '0')}/{new Date().getMonth() + 1 < 10 ? '0' : ''}{new Date().getMonth() + 1}.
-          </SheetDescription>
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        
+        <SheetHeader className="relative p-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <SheetTitle className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Central de Ações
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground mt-0.5">
+                {inspection.player} - Loc {inspection.loc?.toString().padStart(2, '0')}
+              </SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
         
-        <div className="p-5 flex flex-col gap-3">
-          <Button
-            className="w-full justify-center gap-2 rounded-full border-2 border-orange-500 bg-transparent text-orange-400 hover:bg-orange-500/10"
-            variant="outline"
-            data-testid="action-forward-inspection"
-          >
-            <Send className="w-4 h-4" />
-            Encaminhar inspeção
-          </Button>
-          
-          <Button
-            className="w-full justify-center gap-2 rounded-full border-2 border-green-500 bg-transparent text-green-400 hover:bg-green-500/10"
-            variant="outline"
-            data-testid="action-alert-marker"
-          >
-            <AlertTriangle className="w-4 h-4" />
-            Marcador de alerta
-          </Button>
-          
-          <Button
-            className="w-full justify-center gap-2 rounded-full border-2 border-violet-500 bg-transparent text-violet-400 hover:bg-violet-500/10"
-            variant="outline"
-            data-testid="action-view-locations"
-          >
-            <MapPin className="w-4 h-4" />
-            Visualizar demais locais
-          </Button>
-          
-          <Button
-            className="w-full justify-center gap-2 rounded-full border-2 border-yellow-500 bg-transparent text-yellow-400 hover:bg-yellow-500/10"
-            variant="outline"
-            data-testid="action-coming-soon"
-          >
-            <Sparkles className="w-4 h-4" />
-            Em breve
-          </Button>
-          
-          <Button
-            className="w-full justify-center gap-2 rounded-full border-2 border-red-500 bg-transparent text-red-400 hover:bg-red-500/10"
-            variant="outline"
-            data-testid="action-delete-inspection"
-          >
-            <Trash2 className="w-4 h-4" />
-            Excluir inspeção
-          </Button>
-          
-          <div className="border-t border-white/10 pt-3 mt-2">
-            <Button
-              className="w-full justify-center gap-2 rounded-full border border-white/20 bg-transparent text-muted-foreground hover:bg-white/5"
-              variant="outline"
-              data-testid="action-clear-filters"
+        <div className="relative p-6 flex flex-col gap-3">
+          {actionButtons.map((action, index) => (
+            <motion.div
+              key={action.testId}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <Filter className="w-4 h-4" />
-              Limpar Filtros (Global)
+              <Button
+                className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses[action.color]}`}
+                variant="outline"
+                data-testid={action.testId}
+              >
+                <action.icon className="w-4 h-4" />
+                <span className="font-medium">{action.label}</span>
+              </Button>
+            </motion.div>
+          ))}
+          
+          <div className="border-t border-white/10 pt-4 mt-3">
+            <Button
+              className="w-full justify-center gap-2 rounded-xl border border-white/20 bg-white/5 text-muted-foreground hover:bg-white/10 transition-all duration-300"
+              variant="outline"
+              onClick={onClose}
+              data-testid="action-cancel"
+            >
+              <X className="w-4 h-4" />
+              Cancelar
             </Button>
           </div>
-          
-          <Button
-            className="w-full justify-center gap-2 rounded-full border border-white/20 bg-transparent text-muted-foreground hover:bg-white/5"
-            variant="outline"
-            onClick={onClose}
-            data-testid="action-cancel"
-          >
-            <X className="w-4 h-4" />
-            Cancelar
-          </Button>
         </div>
       </SheetContent>
     </Sheet>
@@ -384,9 +376,8 @@ export function DataGrid({
                         data-testid={`row-inspection-${row.id || index}`}
                       >
                           <TableCell className="py-2.5">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] font-bold px-2 py-0.5 cursor-pointer transition-transform hover:scale-105 ${getStatusColor(row.meta)}`}
+                            <button
+                              className={`p-1.5 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedInspection(row);
@@ -394,8 +385,8 @@ export function DataGrid({
                               }}
                               data-testid={`badge-action-${row.id || index}`}
                             >
-                              {String(index + 1 + startIndex).padStart(2, '0')}
-                            </Badge>
+                              <Sparkles className="w-3.5 h-3.5" />
+                            </button>
                           </TableCell>
                           <TableCell className="py-2.5 text-xs font-semibold text-foreground">
                             {row.player || "-"}
