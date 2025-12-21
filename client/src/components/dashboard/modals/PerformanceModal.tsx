@@ -315,27 +315,26 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
   const xScale = (index: number) => padding.left + (index / (data.months.length - 1)) * chartWidth;
   const yScale = (value: number) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
 
-  const gridLines = [0, 50000, 100000, 150000, 200000, 250000, 300000, 350000];
+  const gridLines = [0, 100000, 200000, 300000];
 
   return (
     <div className="relative">
       <div className="flex items-center justify-end gap-4 mb-4">
         {data.series.map((series) => (
-          <motion.div
+          <div
             key={series.year}
-            className={`flex items-center gap-2 cursor-pointer transition-opacity ${
+            className={`flex items-center gap-2 cursor-pointer transition-opacity duration-200 ${
               hoveredYear && hoveredYear !== series.year ? "opacity-40" : "opacity-100"
             }`}
             onMouseEnter={() => setHoveredYear(series.year)}
             onMouseLeave={() => setHoveredYear(null)}
-            whileHover={{ scale: 1.05 }}
           >
             <div 
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: series.color }}
             />
             <span className="text-xs text-muted-foreground">{series.year}</span>
-          </motion.div>
+          </div>
         ))}
       </div>
       
@@ -343,20 +342,13 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
         <defs>
           {data.series.map((series) => (
             <linearGradient key={`gradient-${series.year}`} id={`line-gradient-${series.year}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={series.color} stopOpacity="0.3" />
+              <stop offset="0%" stopColor={series.color} stopOpacity="0.2" />
               <stop offset="100%" stopColor={series.color} stopOpacity="0" />
             </linearGradient>
           ))}
-          <filter id="glow-line">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
-        {gridLines.map((value, i) => (
+        {gridLines.map((value) => (
           <g key={value}>
             <line
               x1={padding.left}
@@ -398,9 +390,8 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
           </g>
         ))}
 
-        {data.series.map((series, seriesIndex) => {
+        {data.series.map((series) => {
           const isActive = !hoveredYear || hoveredYear === series.year;
-          const points = series.data.map((value, i) => `${xScale(i)},${yScale(value * 1000)}`).join(" ");
           const pathD = `M ${series.data.map((value, i) => `${xScale(i)},${yScale(value * 1000)}`).join(" L ")}`;
           
           const areaPath = `
@@ -412,45 +403,40 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
           `;
 
           return (
-            <motion.g
+            <g
               key={series.year}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isActive ? 1 : 0.2 }}
-              transition={{ duration: 0.3 }}
+              style={{ 
+                opacity: isActive ? 1 : 0.2,
+                transition: 'opacity 0.2s ease'
+              }}
             >
-              <motion.path
+              <path
                 d={areaPath}
                 fill={`url(#line-gradient-${series.year})`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                style={{ opacity: 0.5 }}
               />
-              <motion.path
+              <path
                 d={pathD}
                 fill="none"
                 stroke={series.color}
-                strokeWidth={isActive && hoveredYear === series.year ? 3 : 2}
+                strokeWidth={hoveredYear === series.year ? 3 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                filter={isActive && hoveredYear === series.year ? "url(#glow-line)" : undefined}
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.5, delay: seriesIndex * 0.2 }}
+                style={{ transition: 'stroke-width 0.2s ease' }}
               />
               {series.data.map((value, i) => (
-                <motion.circle
+                <circle
                   key={i}
                   cx={xScale(i)}
                   cy={yScale(value * 1000)}
-                  r={isActive && hoveredYear === series.year ? 5 : 3}
+                  r={hoveredYear === series.year ? 4 : 3}
                   fill={series.color}
                   stroke="rgba(10,10,31,0.8)"
                   strokeWidth={2}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5 + i * 0.05 }}
+                  style={{ transition: 'r 0.2s ease' }}
                 />
               ))}
-            </motion.g>
+            </g>
           );
         })}
       </svg>
