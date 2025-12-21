@@ -370,13 +370,13 @@ export function DataGrid({
                         <span className="text-xs font-bold text-warning uppercase tracking-wider">GPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GHonorários</span>
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GHonorarios</span>
                       </TableHead>
                       <TableHead className="bg-card">
                         <span className="text-xs font-bold text-warning uppercase tracking-wider">GDPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDespesas</span>
+                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDDespesas</span>
                       </TableHead>
                       
                       {/* Separador */}
@@ -392,7 +392,7 @@ export function DataGrid({
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Atividade</span>
                   </TableHead>
                   <TableHead className="w-[80px] bg-card text-center">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</span>
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Observação</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
