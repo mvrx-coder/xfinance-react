@@ -320,17 +320,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Inspeção <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger className="form-select" data-testid="select-inspecao">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="prev">Prévia</SelectItem>
-                              <SelectItem value="risk">Risk</SelectItem>
-                              <SelectItem value="loss">Loss</SelectItem>
-                              <SelectItem value="rec">Recuperação</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input
+                            type="date"
+                            className="form-input"
+                            {...field}
+                            data-testid="input-inspecao"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
