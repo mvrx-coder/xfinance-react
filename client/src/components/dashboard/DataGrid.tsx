@@ -303,11 +303,11 @@ export function DataGrid({
                   {/* Grupo 3: Workflow Principal */}
                   {filters.columnGroups.workflow && (
                     <>
-                      <TableHead className="bg-card relative">
+                      <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
                         <span className="text-xs font-bold text-accent tracking-wider">Inspeção</span>
                       </TableHead>
-                      <TableHead className="bg-card">
+                      <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
                       </TableHead>
                       <TableHead className="w-[60px] bg-card">
@@ -324,14 +324,14 @@ export function DataGrid({
                   {/* Grupo 4: Recebíveis - Honorários */}
                   {filters.columnGroups.recebiveis && (
                     <>
-                      <TableHead className="bg-card relative">
+                      <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
                         <span className="text-xs font-bold text-success tracking-wider">Acerto</span>
                       </TableHead>
-                      <TableHead className="bg-card">
+                      <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Envio</span>
                       </TableHead>
-                      <TableHead className="bg-card">
+                      <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Pago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
@@ -344,11 +344,11 @@ export function DataGrid({
                       </TableHead>
                       
                       {/* Grupo 5: Recebíveis - Despesas */}
-                      <TableHead className="bg-card relative">
+                      <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">DEnvio</span>
                       </TableHead>
-                      <TableHead className="bg-card">
+                      <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
@@ -365,14 +365,14 @@ export function DataGrid({
                   {/* Grupo 6: Pagamentos Colaborador */}
                   {filters.columnGroups.pagamentos && (
                     <>
-                      <TableHead className="bg-card relative">
+                      <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
                         <span className="text-xs font-bold text-warning tracking-wider">GPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
                       </TableHead>
-                      <TableHead className="bg-card">
+                      <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
@@ -481,10 +481,10 @@ export function DataGrid({
                           {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.inspecao)}
                               </TableCell>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.entregue)}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-center font-mono">
@@ -501,13 +501,13 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.acerto)}
                               </TableCell>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.envio)}
                               </TableCell>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.pago)}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-success">
@@ -520,10 +520,10 @@ export function DataGrid({
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.dEnvio)}
                               </TableCell>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.dPago)}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-emerald-400">
@@ -540,13 +540,13 @@ export function DataGrid({
                           {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.gPago)}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.gHonorarios)}
                               </TableCell>
-                              <TableCell className="py-1.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground text-center">
                                 {formatDate(row.gdPago)}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-warning">
