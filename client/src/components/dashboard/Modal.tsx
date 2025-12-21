@@ -11,7 +11,7 @@ interface ModalProps {
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
 }
 
 const maxWidthClasses = {
@@ -20,6 +20,9 @@ const maxWidthClasses = {
   lg: "max-w-lg",
   xl: "max-w-xl",
   "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+  "5xl": "max-w-5xl",
 };
 
 const backdropVariants = {
@@ -150,7 +153,7 @@ export function Modal({
             </div>
 
             {/* Body */}
-            <div className="px-6 py-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
               {children}
             </div>
 

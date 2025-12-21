@@ -1,0 +1,101 @@
+Tela “Novo Aporte” (Registro em finan )
+
+- Leia e aplique este contexto antes de qualquer implementação:
+  
+  - Projeto: xFinance 3.0 — migração do frontend para React/TypeScript + FastAPI.
+  - Banco: SQLite ( xFinanceDB.db ) do sistema original; manter nomenclaturas alinhadas com o schema para reaproveitar queries.
+  - Regras: não alterar estética/tema (glassmorphism, lilás/ciano, gradientes), não mudar estrutura de componentes, não mexer nas animações Framer Motion, não adicionar/remover dependências, usar Radix UI conforme já adotado.
+- Objetivo:
+  
+  - Criar a tela “Novo Aporte” (inserção na tabela finan ) com visual premium e compatível com o restante do sistema, preparada para futura integração com FastAPI/SQLite.
+  - Antes de codar, pesquise referências visuais de “premium glassmorphism finance forms”, “Radix UI form patterns”, “Framer Motion micro-interactions” e aplique os padrões que combinem com nosso tema.
+- Entregáveis:
+  
+  - Página NovoAportePage acessível por "/aportes/novo" sem alterar estrutura existente.
+  - Componente de formulário NovoAporteForm com validações e acessibilidade.
+  - Tipos TypeScript em src/types/aporte.ts .
+  - Serviço de API em src/services/api/aportes.ts com stubs para futura conexão FastAPI.
+  - Não criar novas dependências; usar fetch , Radix UI e Framer Motion já presentes.
+- Campos e nomenclaturas — usar exatamente estas chaves no estado e no payload (compatíveis com finan ):
+  
+  - Obrigatórios:
+    - investidor (TEXT) — nome do investidor
+    - tipo (TEXT) — usar 'aporte' por padrão
+    - v_aplicado (REAL) — valor aplicado (> 0)
+    - dt_aplicacao (TEXT) — data do aporte (ISO ou padrão app)
+  - Opcionais:
+    - instituicao (TEXT)
+    - detalhe (TEXT)
+    - v_bruto (REAL)
+    - v_liquido (REAL)
+    - ganho_perda (INTEGER) — representar como booleano no UI; converter para 1/0 no payload
+    - resgate_bruto (REAL)
+    - rentabilidade (TEXT)
+    - dt_vence (TEXT)
+    - ir_iof (REAL)
+  - Identificador retornado pelo backend:
+    - id_finan (INTEGER, PK AUTOINCREMENT)
+- Tipos TypeScript ( src/types/aporte.ts ):
+  
+  - interface Aporte { id_finan: number; investidor: string; instituicao?: string; tipo: string; detalhe?: string; v_aplicado: number; v_bruto?: number; v_liquido?: number; ganho_perda?: number; resgate_bruto?: number; rentabilidade?: string; dt_aplicacao: string; dt_vence?: string; ir_iof?: number }
+  - interface AporteInput { investidor: string; instituicao?: string; tipo: string; detalhe?: string; v_aplicado: number; v_bruto?: number; v_liquido?: number; ganho_perda?: number; resgate_bruto?: number; rentabilidade?: string; dt_aplicacao: string; dt_vence?: string; ir_iof?: number }
+- Serviço de API ( src/services/api/aportes.ts ):
+  
+  - Base URL: import.meta.env.VITE_API_URL com fallback "/api" .
+  - async function createAporte(data: AporteInput): Promise<Aporte> :
+    - POST para "/aportes" com Content-Type: application/json .
+    - Tratar 4xx/5xx com erro amigável; não logar dados sensíveis.
+  - Stub local sem libs extras:
+    - Quando o backend não estiver disponível, retornar Promise.resolve com um Aporte simulado e id_finan fake.
+  - Convenções:
+    - Converter o booleano do UI para ganho_perda: 1 | 0 no payload.
+    - Normalizar números para number e strings sem formatação (backend aplica formatação/calcula agregados).
+- Validações no frontend (sem libs extras):
+  
+  - investidor : mínimo 3 caracteres.
+  - tipo : obrigatório; setar 'aporte' por padrão, permitir outros se necessário.
+  - v_aplicado : número > 0.
+  - dt_aplicacao : formato válido (ISO YYYY-MM-DD ).
+  - Numéricos opcionais ( v_bruto , v_liquido , resgate_bruto , ir_iof ): ≥ 0.
+  - dt_vence : opcional; se preenchida, deve ser ≥ dt_aplicacao .
+  - rentabilidade : opcional; aceitar percentuais como string (ex.: "8,5% a.a." ).
+  - Desabilitar “Salvar” enquanto houver erros; exibir mensagens inline.
+- UI/UX premium:
+  
+  - Container glassmorphism com blur, sombras suaves e cabeçalho lilás/ciano com gradiente consistente.
+  - Layout em etapas (Step/Wizard) recomendado:
+    - Etapa 1: Básicos — investidor , instituicao , tipo , detalhe
+    - Etapa 2: Valores — v_aplicado , v_bruto , v_liquido , ganho_perda (toggle), resgate_bruto , ir_iof
+    - Etapa 3: Datas e Rentabilidade — dt_aplicacao , dt_vence , rentabilidade
+  - Radix UI: Input , Label , Select , Switch / Checkbox , Dialog / Toast .
+  - Framer Motion: micro-interações — entrada do card, foco suave, confirmação com leve escala/fade.
+  - Acessibilidade: labels associados, aria-* , foco visível, navegação por teclado.
+  - Botões: Salvar (primário), Cancelar / Voltar (secundário), estilos globais preservados.
+- Comportamento do formulário:
+  
+  - “Salvar” chama createAporte com AporteInput .
+  - Converter ganho_perda do UI para 1/0 antes do envio.
+  - Em sucesso: toast “Aporte registrado com sucesso”, limpar campos temporários e opcionalmente redirecionar para "/aportes" .
+  - Em erro: mostrar mensagens específicas (ex.: valor aplicado inválido).
+  - Não persistir estado sensível em store global; manter local ao componente.
+- Padrão visual e estrutura:
+  
+  - Reutilizar tokens de cores/gradientes já existentes.
+  - Não alterar CSS global, nem mover pastas, nem quebrar componentes.
+  - Responsivo: mobile-first; duas colunas em telas largas.
+- Aceitação:
+  
+  - Página compila sem novas dependências.
+  - Validações e acessibilidade funcionam.
+  - Tema glassmorphism e lilás/ciano preservado.
+  - Payload enviado usa exatamente as chaves definidas para finan .
+  - API stub funciona; futura troca para FastAPI será apenas de URL/rotas.
+- Mapeamento futuro FastAPI/SQLite (não codar migração agora):
+  
+  - POST /aportes → insere em finan com as colunas mapeadas; sugerir tipo='aporte' como padrão.
+  - GET /aportes → lista com filtros básicos (investidor, instituição, intervalo de datas).
+  - DELETE /aportes/:id → remove pelo id_finan .
+  - Possíveis cálculos agregados (futuros): totais por investidor, retorno acumulado, rentabilidade média.
+- Referência de esquema:
+  
+  - c:\00_xFinance\x_main\docs\system\schema\db_ddl.txt:41 até :55 — definição da tabela finan e colunas relacionadas.
