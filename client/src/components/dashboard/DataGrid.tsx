@@ -202,7 +202,6 @@ function ActionCenter({
     auditoria: false,
     followup: false,
   });
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearFiltersConfirm, setShowClearFiltersConfirm] = useState(false);
 
   useEffect(() => {
@@ -213,7 +212,7 @@ function ActionCenter({
 
   if (!inspection) return null;
 
-  const idPrinc = inspection.id_princ;
+  const idPrinc = inspection.idPrinc;
 
   const handleExcluir = async () => {
     if (!idPrinc) return;
@@ -236,7 +235,7 @@ function ActionCenter({
       }
     } finally {
       setIsLoading(false);
-      setShowDeleteConfirm(false);
+      setActivePanel(null);
     }
   };
 
@@ -350,14 +349,56 @@ function ActionCenter({
                 transition={{ delay: 0 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.red}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.red} ${activePanel === 'excluir' ? 'bg-red-500/20' : ''}`}
                   variant="outline"
-                  onClick={() => setShowDeleteConfirm(true)}
+                  onClick={() => setActivePanel(activePanel === 'excluir' ? null : 'excluir')}
                   data-testid="action-delete-inspection"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span className="font-medium">Excluir inspeção</span>
                 </Button>
+                <AnimatePresence>
+                  {activePanel === 'excluir' && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 p-4 rounded-xl bg-slate-900/80 border border-red-500/30 space-y-3"
+                    >
+                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <p className="text-sm text-muted-foreground">
+                          <strong className="text-foreground">{inspection.player}</strong> - {inspection.segurado}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Loc {inspection.loc?.toString().padStart(2, '0')} | {inspection.uf || 'N/A'}
+                        </p>
+                      </div>
+                      <p className="text-sm text-red-400">
+                        Tem certeza? Esta ação não pode ser desfeita.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setActivePanel(null)}
+                          className="flex-1 border-white/20"
+                          data-testid="button-cancel-delete"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={handleExcluir}
+                          disabled={isLoading}
+                          className="flex-1 border-red-500 text-red-400 bg-red-500/10"
+                          data-testid="button-confirm-delete"
+                        >
+                          {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                          Excluir
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
               <motion.div
@@ -473,7 +514,7 @@ function ActionCenter({
                   onClick={() => {
                     toast({
                       title: "Demais locais",
-                      description: inspection.variosLocais ? "Esta inspeção possui vários locais" : "Esta inspeção possui um único local",
+                      description: (inspection.loc && inspection.loc > 1) ? "Esta inspeção possui vários locais" : "Esta inspeção possui um único local",
                     });
                   }}
                   data-testid="action-view-locations"
@@ -530,48 +571,6 @@ function ActionCenter({
           </ScrollArea>
         </SheetContent>
       </Sheet>
-
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="bg-[rgba(10,10,31,0.98)] border-red-500/30 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle className="text-red-400 flex items-center gap-2">
-              <Trash2 className="w-5 h-5" />
-              Confirmar Exclusão
-            </DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir esta inspeção? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-sm text-muted-foreground">
-              <strong className="text-foreground">{inspection.player}</strong> - {inspection.segurado}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Loc {inspection.loc?.toString().padStart(2, '0')} | {inspection.uf}
-            </p>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(false)}
-              className="border-white/20"
-              data-testid="button-cancel-delete"
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleExcluir}
-              disabled={isLoading}
-              className="border-red-500 text-red-400 bg-red-500/10"
-              data-testid="button-confirm-delete"
-            >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={showClearFiltersConfirm} onOpenChange={setShowClearFiltersConfirm}>
         <DialogContent className="bg-[rgba(10,10,31,0.98)] border-blue-500/30 backdrop-blur-xl">
