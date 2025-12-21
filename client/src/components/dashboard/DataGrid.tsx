@@ -266,7 +266,7 @@ export function DataGrid({
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
-                    <span className="text-xs font-bold text-primary uppercase tracking-wider">#</span>
+                    <span className="text-xs font-bold text-primary tracking-wider">#</span>
                   </TableHead>
                   
                   {/* Separador */}
@@ -277,22 +277,22 @@ export function DataGrid({
                   {/* Grupo 2: Identificação */}
                   <TableHead className="bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Player</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Player</span>
                   </TableHead>
                   <TableHead className="bg-card">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Segurado</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
                   </TableHead>
                   <TableHead className="w-[60px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Loc</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
                   </TableHead>
                   <TableHead className="bg-card">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Guilty</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
                   </TableHead>
                   <TableHead className="bg-card">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Guy</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
                   </TableHead>
                   <TableHead className="bg-card">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Meta</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
                   </TableHead>
                   
                   {/* Separador */}
@@ -305,13 +305,13 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
-                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Inspeção</span>
+                        <span className="text-xs font-bold text-accent tracking-wider">Inspeção</span>
                       </TableHead>
                       <TableHead className="bg-card">
-                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Entregue</span>
+                        <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
                       </TableHead>
                       <TableHead className="w-[60px] bg-card">
-                        <span className="text-xs font-bold text-accent uppercase tracking-wider">Prazo</span>
+                        <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
                       </TableHead>
                       
                       {/* Separador */}
@@ -326,16 +326,16 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
-                        <span className="text-xs font-bold text-success uppercase tracking-wider">Acerto</span>
+                        <span className="text-xs font-bold text-success tracking-wider">Acerto</span>
                       </TableHead>
                       <TableHead className="bg-card">
-                        <span className="text-xs font-bold text-success uppercase tracking-wider">Envio</span>
+                        <span className="text-xs font-bold text-success tracking-wider">Envio</span>
                       </TableHead>
                       <TableHead className="bg-card">
-                        <span className="text-xs font-bold text-success uppercase tracking-wider">Pago</span>
+                        <span className="text-xs font-bold text-success tracking-wider">Pago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-success uppercase tracking-wider">Honorários</span>
+                        <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
                       </TableHead>
                       
                       {/* Separador */}
@@ -346,13 +346,13 @@ export function DataGrid({
                       {/* Grupo 5: Recebíveis - Despesas */}
                       <TableHead className="bg-card relative">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
-                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">DEnvio</span>
+                        <span className="text-xs font-bold text-emerald-400 tracking-wider">DEnvio</span>
                       </TableHead>
                       <TableHead className="bg-card">
-                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">DPago</span>
+                        <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Despesas</span>
+                        <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
                       </TableHead>
                       
                       {/* Separador */}
@@ -367,16 +367,16 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GPago</span>
+                        <span className="text-xs font-bold text-warning tracking-wider">GPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GHonorarios</span>
+                        <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
                       </TableHead>
                       <TableHead className="bg-card">
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDPago</span>
+                        <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
-                        <span className="text-xs font-bold text-warning uppercase tracking-wider">GDDespesas</span>
+                        <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
                       </TableHead>
                       
                       {/* Separador */}
@@ -389,10 +389,10 @@ export function DataGrid({
                   {/* Grupo 7: Contexto */}
                   <TableHead className="bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Atividade</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Atividade</span>
                   </TableHead>
                   <TableHead className="w-[80px] bg-card text-center">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Observação</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
