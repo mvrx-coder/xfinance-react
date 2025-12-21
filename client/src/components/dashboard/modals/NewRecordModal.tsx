@@ -3,10 +3,14 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Modal } from "../Modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -34,15 +38,17 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  Layers
+  Layers,
+  CalendarIcon
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const newRecordSchema = z.object({
   player: z.string().min(1, "Player obrigatório"),
   segurado: z.string().min(1, "Segurado obrigatório"),
   atividade: z.string().min(1, "Atividade obrigatória"),
   guy: z.string().min(1, "Inspetor obrigatório"),
-  inspecao: z.string().optional(),
+  inspecao: z.date().optional(),
   uf: z.string().min(1, "UF obrigatória"),
   cidade: z.string().optional(),
   honorario: z.number().min(0).optional(),
@@ -98,7 +104,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
       segurado: "",
       atividade: "",
       guy: "",
-      inspecao: "",
+      inspecao: undefined,
       uf: "",
       cidade: "",
       honorario: 0,
@@ -108,7 +114,11 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
 
   const createMutation = useMutation({
     mutationFn: async (data: NewRecordFormData) => {
-      return apiRequest("POST", "/api/inspections", data);
+      const payload = {
+        ...data,
+        inspecao: data.inspecao ? format(data.inspecao, "yyyy-MM-dd") : undefined,
+      };
+      return apiRequest("POST", "/api/inspections", payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
@@ -319,14 +329,37 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           <Calendar className="w-3.5 h-3.5 text-accent" />
                           Inspeção <span className="text-destructive">*</span>
                         </label>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            className="form-input"
-                            {...field}
-                            data-testid="input-inspecao"
-                          />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "form-input w-full justify-start text-left font-normal bg-[rgba(15,15,35,0.6)] border-white/12 hover:bg-[rgba(15,15,35,0.8)]",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                                data-testid="button-inspecao-date"
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
+                                {field.value ? (
+                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                ) : (
+                                  <span>Selecione...</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 bg-card border-white/15" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              locale={ptBR}
+                              initialFocus
+                              className="rounded-md"
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage className="form-error" />
                       </div>
                     </FormItem>
