@@ -1,0 +1,93 @@
+# TAREFA: Converter schema de PostgreSQL para SQLite
+
+## ⚠️ REGRAS IMPORTANTES
+- NÃO alterar estética/visual (cores, espaçamentos, fontes, animações)
+- Manter o app funcionando após as alterações
+- Se algo visual mudar, DESFAZER imediatamente
+
+---
+
+## Arquivo: `shared/schema.ts`
+
+O schema atual usa `drizzle-orm/pg-core` (PostgreSQL). Precisa ser convertido para SQLite para compatibilidade com o banco de dados original do xFinance.
+
+### 1. Trocar imports (linha 2):
+
+// REMOVER esta linha:
+import { pgTable, text, varchar, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+
+// ADICIONAR no lugar:
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";### 2. Trocar `pgTable` por `sqliteTable` em TODAS as definições de tabelas
+
+### 3. Ajustar tabela `users` (linhas 7-13):
+
+export const users = sqliteTable("user", {
+  id: integer("id_user").primaryKey({ autoIncrement: true }),
+  username: text("email").notNull(),
+  password: text("hash_senha").notNull(),
+  displayName: text("nome"),
+  role: text("papel").default("user"),
+  nick: text("nick"),
+  ativo: integer("ativo"),
+});### 4. Ajustar tabela `inspections` (linhas 25-56):
+
+export const inspections = sqliteTable("princ", {
+  idPrinc: integer("id_princ").primaryKey(),
+  player: text("player"),
+  segurado: text("segurado"),
+  loc: integer("loc"),
+  nickGuilty: text("nick_guilty"),
+  nickGuy: text("nick_guy"),
+  meta: text("meta"),
+  dtInspecao: text("dt_inspecao"),
+  dtEntregue: text("dt_entregue"),
+  prazo: integer("prazo"),
+  sw: integer("sw"),
+  dtAcerto: text("dt_acerto"),
+  dtEnvio: text("dt_envio"),
+  dtPago: text("dt_pago"),
+  honorario: real("honorario"),
+  dtDenvio: text("dt_denvio"),
+  dtDpago: text("dt_dpago"),
+  despesa: real("despesa"),
+  dtGuyPago: text("dt_guy_pago"),
+  guyHonorario: real("guy_honorario"),
+  dtGuyDpago: text("dt_guy_dpago"),
+  guyDespesa: real("guy_despesa"),
+  atividade: text("atividade"),
+  ms: integer("ms"),
+  obs: text("obs"),
+  uf: text("uf"),
+  cidade: text("cidade"),
+});**Nota:** Removi `isWorkflow`, `isRecebiveis`, `isPagamentos` porque não existem no banco original - são calculados na UI.
+
+### 5. Ajustar insertUserSchema (se der erro):
+
+Se `insertUserSchema` der erro por causa do campo `username`, ajustar para:
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  displayName: true,
+});### 6. Manter as interfaces TypeScript iguais:
+
+As interfaces `KPIs`, `FilterState` e `WeatherInfo` NÃO precisam de alteração.
+
+---
+
+## Verificação após alterações:
+
+1. O app deve compilar sem erros
+2. O TypeScript não deve reclamar de tipos
+3. O visual deve estar IDÊNTICO ao anterior
+4. Fazer commit com mensagem: "refactor: convert schema from PostgreSQL to SQLite"
+
+---
+
+## Resumo das alterações:
+
+- Import: `pg-core` → `sqlite-core`
+- Função: `pgTable` → `sqliteTable`
+- Tipos: `varchar` → `text`, `boolean` → `integer`
+- IDs: Remover `gen_random_uuid()`, usar `autoIncrement`
+- Nomes de tabelas: Ajustar para nomes originais do SQLite (`user`, `princ`)

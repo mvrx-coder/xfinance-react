@@ -1,15 +1,16 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Users table
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  displayName: text("display_name"),
-  role: text("role").default("user"),
+export const users = sqliteTable("user", {
+  id: integer("id_user").primaryKey({ autoIncrement: true }),
+  username: text("email").notNull(),
+  password: text("hash_senha").notNull(),
+  displayName: text("nome"),
+  role: text("papel").default("user"),
+  nick: text("nick"),
+  ativo: integer("ativo"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -22,8 +23,8 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 // Inspections table - main grid data (aligned with SQLite xFinance original)
-export const inspections = pgTable("inspections", {
-  idPrinc: varchar("id_princ").primaryKey().default(sql`gen_random_uuid()`),
+export const inspections = sqliteTable("princ", {
+  idPrinc: integer("id_princ").primaryKey(),
   player: text("player"),
   segurado: text("segurado"),
   loc: integer("loc"),
@@ -50,9 +51,6 @@ export const inspections = pgTable("inspections", {
   obs: text("obs"),
   uf: text("uf"),
   cidade: text("cidade"),
-  isWorkflow: boolean("is_workflow").default(true),
-  isRecebiveis: boolean("is_recebiveis").default(true),
-  isPagamentos: boolean("is_pagamentos").default(true),
 });
 
 export const insertInspectionSchema = createInsertSchema(inspections).omit({

@@ -1,15 +1,14 @@
 import { type User, type InsertUser, type Inspection, type InsertInspection, type KPIs } from "@shared/schema";
-import { randomUUID } from "crypto";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getInspections(): Promise<Inspection[]>;
-  getInspection(id: string): Promise<Inspection | undefined>;
+  getInspection(id: number): Promise<Inspection | undefined>;
   createInspection(inspection: InsertInspection): Promise<Inspection>;
-  updateInspection(id: string, inspection: Partial<InsertInspection>): Promise<Inspection | undefined>;
-  deleteInspection(id: string): Promise<boolean>;
+  updateInspection(id: number, inspection: Partial<InsertInspection>): Promise<Inspection | undefined>;
+  deleteInspection(id: number): Promise<boolean>;
   getKPIs(): Promise<KPIs>;
 }
 
@@ -33,7 +32,7 @@ function generateMockInspections(): Inspection[] {
     const guyDespesa = Math.random() * 1000;
 
     inspections.push({
-      idPrinc: randomUUID(),
+      idPrinc: i + 1,
       player: players[Math.floor(Math.random() * players.length)],
       segurado: segurados[Math.floor(Math.random() * segurados.length)],
       loc: Math.floor(Math.random() * 5) + 1,
@@ -60,9 +59,6 @@ function generateMockInspections(): Inspection[] {
       obs: null,
       uf: null,
       cidade: null,
-      isWorkflow: true,
-      isRecebiveis: true,
-      isPagamentos: true,
     });
   }
 
@@ -70,8 +66,10 @@ function generateMockInspections(): Inspection[] {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private inspections: Map<string, Inspection>;
+  private users: Map<number, User>;
+  private inspections: Map<number, Inspection>;
+  private nextUserId: number = 1;
+  private nextInspectionId: number = 26;
 
   constructor() {
     this.users = new Map();
@@ -83,7 +81,7 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
@@ -94,12 +92,14 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
+    const id = this.nextUserId++;
     const user: User = { 
       ...insertUser, 
       id,
       displayName: insertUser.displayName ?? null,
-      role: null,
+      role: "user",
+      nick: null,
+      ativo: 1,
     };
     this.users.set(id, user);
     return user;
@@ -109,12 +109,12 @@ export class MemStorage implements IStorage {
     return Array.from(this.inspections.values());
   }
 
-  async getInspection(id: string): Promise<Inspection | undefined> {
+  async getInspection(id: number): Promise<Inspection | undefined> {
     return this.inspections.get(id);
   }
 
   async createInspection(insertInspection: InsertInspection): Promise<Inspection> {
-    const idPrinc = randomUUID();
+    const idPrinc = this.nextInspectionId++;
     const inspection: Inspection = { 
       idPrinc,
       player: insertInspection.player ?? null,
@@ -143,15 +143,12 @@ export class MemStorage implements IStorage {
       obs: insertInspection.obs ?? null,
       uf: insertInspection.uf ?? null,
       cidade: insertInspection.cidade ?? null,
-      isWorkflow: insertInspection.isWorkflow ?? true,
-      isRecebiveis: insertInspection.isRecebiveis ?? true,
-      isPagamentos: insertInspection.isPagamentos ?? true,
     };
     this.inspections.set(idPrinc, inspection);
     return inspection;
   }
 
-  async updateInspection(id: string, updates: Partial<InsertInspection>): Promise<Inspection | undefined> {
+  async updateInspection(id: number, updates: Partial<InsertInspection>): Promise<Inspection | undefined> {
     const existing = this.inspections.get(id);
     if (!existing) return undefined;
     
@@ -160,7 +157,7 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteInspection(id: string): Promise<boolean> {
+  async deleteInspection(id: number): Promise<boolean> {
     return this.inspections.delete(id);
   }
 

@@ -20,7 +20,11 @@ export async function registerRoutes(
 
   app.get("/api/inspections/:id", async (req, res) => {
     try {
-      const inspection = await storage.getInspection(req.params.id);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const inspection = await storage.getInspection(id);
       if (!inspection) {
         return res.status(404).json({ error: "Inspection not found" });
       }
@@ -74,7 +78,11 @@ export async function registerRoutes(
 
   app.patch("/api/inspections/:id", async (req, res) => {
     try {
-      const inspection = await storage.updateInspection(req.params.id, req.body);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const inspection = await storage.updateInspection(id, req.body);
       if (!inspection) {
         return res.status(404).json({ error: "Inspection not found" });
       }
@@ -86,7 +94,11 @@ export async function registerRoutes(
 
   app.delete("/api/inspections/:id", async (req, res) => {
     try {
-      const success = await storage.deleteInspection(req.params.id);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const success = await storage.deleteInspection(id);
       if (!success) {
         return res.status(404).json({ error: "Inspection not found" });
       }
