@@ -34,6 +34,12 @@ import {
   Trash2,
   Filter,
   X,
+  Briefcase,
+  Clock,
+  Wallet,
+  Receipt,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 
@@ -277,7 +283,10 @@ export function DataGrid({
                   {/* Grupo 2: Identificação */}
                   <TableHead className="bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Player</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
+                      <Briefcase className="w-3 h-3" />
+                      Player
+                    </span>
                   </TableHead>
                   <TableHead className="bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
@@ -305,7 +314,10 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
-                        <span className="text-xs font-bold text-accent tracking-wider">Inspeção</span>
+                        <span className="text-xs font-bold text-accent tracking-wider flex items-center justify-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Inspeção
+                        </span>
                       </TableHead>
                       <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
@@ -326,7 +338,10 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
-                        <span className="text-xs font-bold text-success tracking-wider">Acerto</span>
+                        <span className="text-xs font-bold text-success tracking-wider flex items-center justify-center gap-1">
+                          <Wallet className="w-3 h-3" />
+                          Acerto
+                        </span>
                       </TableHead>
                       <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Envio</span>
@@ -346,7 +361,10 @@ export function DataGrid({
                       {/* Grupo 5: Recebíveis - Despesas */}
                       <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
-                        <span className="text-xs font-bold text-emerald-400 tracking-wider">DEnvio</span>
+                        <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center justify-center gap-1">
+                          <Receipt className="w-3 h-3" />
+                          DEnvio
+                        </span>
                       </TableHead>
                       <TableHead className="bg-card text-center">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
@@ -367,7 +385,10 @@ export function DataGrid({
                     <>
                       <TableHead className="bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
-                        <span className="text-xs font-bold text-warning tracking-wider">GPago</span>
+                        <span className="text-xs font-bold text-warning tracking-wider flex items-center justify-center gap-1">
+                          <CreditCard className="w-3 h-3" />
+                          GPago
+                        </span>
                       </TableHead>
                       <TableHead className="bg-card text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
@@ -389,7 +410,10 @@ export function DataGrid({
                   {/* Grupo 7: Contexto */}
                   <TableHead className="bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Atividade</span>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
+                      Atividade
+                    </span>
                   </TableHead>
                   <TableHead className="w-[80px] bg-card text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
