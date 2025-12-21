@@ -84,60 +84,60 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
   return (
     <TableRow className="border-b border-white/5">
       {/* Grupo 1: Ação */}
-      <TableCell className="py-3">
-        <div className="h-5 w-8 shimmer rounded-md" />
+      <TableCell className="py-1.5">
+        <div className="h-4 w-6 shimmer rounded-md" />
       </TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0" />
+      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-primary/15" /></TableCell>
       {/* Grupo 2: Identificação */}
-      <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-4 w-32 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-4 w-8 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-4 w-14 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-4 w-14 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-5 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-6 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0" />
+      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-muted-foreground/15" /></TableCell>
       {/* Grupo 3: Workflow */}
       {filters.columnGroups.workflow && (
         <>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-8 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0" />
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-accent/15" /></TableCell>
         </>
       )}
       {/* Grupo 4 e 5: Recebíveis */}
       {filters.columnGroups.recebiveis && (
         <>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0" />
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-success/15" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0" />
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-emerald-400/15" /></TableCell>
         </>
       )}
       {/* Grupo 6: Pagamentos */}
       {filters.columnGroups.pagamentos && (
         <>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="py-3"><div className="h-4 w-20 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0" />
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-warning/15" /></TableCell>
         </>
       )}
       {/* Grupo 7: Contexto */}
-      <TableCell className="py-3"><div className="h-4 w-24 shimmer rounded-md" /></TableCell>
-      <TableCell className="py-3"><div className="h-4 w-16 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-20 shimmer rounded-md" /></TableCell>
+      <TableCell className="py-1.5"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
     </TableRow>
   );
 }
@@ -429,9 +429,9 @@ export function DataGrid({
                         data-testid={`row-inspection-${row.id || index}`}
                       >
                           {/* Grupo 1: Ação */}
-                          <TableCell className="py-2.5">
+                          <TableCell className="py-1.5">
                             <button
-                              className={`p-1.5 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
+                              className={`p-1 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedInspection(row);
@@ -445,26 +445,26 @@ export function DataGrid({
                           
                           {/* Separador */}
                           <TableCell className="w-[1px] p-0">
-                            <div className="w-[1px] h-full bg-gradient-to-b from-primary/20 to-transparent" />
+                            <div className="w-[1px] h-full bg-primary/15" />
                           </TableCell>
                           
                           {/* Grupo 2: Identificação */}
-                          <TableCell className="py-2.5 text-xs font-semibold text-foreground">
+                          <TableCell className="py-1.5 text-xs font-semibold text-foreground">
                             {row.player || "-"}
                           </TableCell>
-                          <TableCell className="py-2.5 text-xs max-w-[140px] truncate">
+                          <TableCell className="py-1.5 text-xs max-w-[140px] truncate">
                             {row.segurado || "-"}
                           </TableCell>
-                          <TableCell className="py-2.5 text-xs text-center font-mono">
+                          <TableCell className="py-1.5 text-xs text-center font-mono">
                             {row.loc ?? "-"}
                           </TableCell>
-                          <TableCell className="py-2.5 text-xs">
+                          <TableCell className="py-1.5 text-xs">
                             {row.guilty || "-"}
                           </TableCell>
-                          <TableCell className="py-2.5 text-xs">
+                          <TableCell className="py-1.5 text-xs">
                             {row.guy || "-"}
                           </TableCell>
-                          <TableCell className="py-2.5">
+                          <TableCell className="py-1.5">
                             <Badge
                               variant="outline"
                               className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
@@ -475,25 +475,25 @@ export function DataGrid({
                           
                           {/* Separador */}
                           <TableCell className="w-[1px] p-0">
-                            <div className="w-[1px] h-full bg-gradient-to-b from-muted-foreground/20 to-transparent" />
+                            <div className="w-[1px] h-full bg-muted-foreground/15" />
                           </TableCell>
                           
                           {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.inspecao)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.entregue)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-center font-mono">
+                              <TableCell className="py-1.5 text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
                               </TableCell>
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-gradient-to-b from-accent/20 to-transparent" />
+                                <div className="w-[1px] h-full bg-accent/15" />
                               </TableCell>
                             </>
                           )}
@@ -501,38 +501,38 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.acerto)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.envio)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.pago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-success">
+                              <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-success">
                                 {formatCurrency(row.honorarios)}
                               </TableCell>
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-gradient-to-b from-success/20 to-transparent" />
+                                <div className="w-[1px] h-full bg-success/15" />
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.dEnvio)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.dPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-emerald-400">
+                              <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-emerald-400">
                                 {formatCurrency(row.despesas)}
                               </TableCell>
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-gradient-to-b from-emerald-400/20 to-transparent" />
+                                <div className="w-[1px] h-full bg-emerald-400/15" />
                               </TableCell>
                             </>
                           )}
@@ -540,31 +540,31 @@ export function DataGrid({
                           {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.gPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
+                              <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.gHonorarios)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-muted-foreground">
+                              <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {formatDate(row.gdPago)}
                               </TableCell>
-                              <TableCell className="py-2.5 text-xs text-right font-mono font-semibold text-warning">
+                              <TableCell className="py-1.5 text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.gDespesas)}
                               </TableCell>
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-gradient-to-b from-warning/20 to-transparent" />
+                                <div className="w-[1px] h-full bg-warning/15" />
                               </TableCell>
                             </>
                           )}
                           
                           {/* Grupo 7: Contexto */}
-                          <TableCell className="py-2.5 text-xs text-muted-foreground max-w-[100px] truncate">
+                          <TableCell className="py-1.5 text-xs text-muted-foreground max-w-[100px] truncate">
                             {row.atividade || "-"}
                           </TableCell>
-                          <TableCell className="py-2.5">
+                          <TableCell className="py-1.5">
                             <div className={`flex items-center justify-center gap-1 transition-opacity duration-200 ${hoveredRow === index ? "opacity-100" : "opacity-0"}`}>
                               <Button
                                 variant="ghost"
