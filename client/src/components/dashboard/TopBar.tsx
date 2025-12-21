@@ -333,15 +333,15 @@ export function TopBar({
               Aportes
             </Button>
             <Button
-              id="btn-finance-control"
+              id="btn-performance"
               onClick={onOpenFinancial}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
-              data-testid="button-financial"
+              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[110px] justify-center"
+              data-testid="button-performance"
             >
               <PieChart className="w-4 h-4 text-violet-400" />
-              Financial
+              Performance
             </Button>
           </div>
           {/* Row 2: Novo, Guy Pay, Em breve, Logout */}

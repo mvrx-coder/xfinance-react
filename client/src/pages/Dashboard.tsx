@@ -7,7 +7,7 @@ import { ToastContainer, type Toast } from "@/components/dashboard/ToastContaine
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
 import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
-import { FinancialModal } from "@/components/dashboard/modals/FinancialModal";
+import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Inspection, FilterState, KPIs } from "@shared/schema";
@@ -155,7 +155,7 @@ export default function Dashboard() {
         onClose={() => handleCloseModal("investments")}
       />
 
-      <FinancialModal
+      <PerformanceModal
         isOpen={modals.financial}
         onClose={() => handleCloseModal("financial")}
       />
