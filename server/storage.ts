@@ -27,35 +27,39 @@ function generateMockInspections(): Inspection[] {
   const inspections: Inspection[] = [];
 
   for (let i = 0; i < 25; i++) {
-    const honorarios = Math.random() * 5000 + 500;
-    const despesas = Math.random() * 1500 + 100;
-    const gHonorarios = Math.random() * 4000;
-    const gDespesas = Math.random() * 1000;
+    const honorario = Math.random() * 5000 + 500;
+    const despesa = Math.random() * 1500 + 100;
+    const guyHonorario = Math.random() * 4000;
+    const guyDespesa = Math.random() * 1000;
 
     inspections.push({
-      id: randomUUID(),
+      idPrinc: randomUUID(),
       player: players[Math.floor(Math.random() * players.length)],
       segurado: segurados[Math.floor(Math.random() * segurados.length)],
       loc: Math.floor(Math.random() * 5) + 1,
-      guilty: guilties[Math.floor(Math.random() * guilties.length)],
-      guy: guys[Math.floor(Math.random() * guys.length)],
+      nickGuilty: guilties[Math.floor(Math.random() * guilties.length)],
+      nickGuy: guys[Math.floor(Math.random() * guys.length)],
       meta: Math.random() > 0.5 ? "Sim" : "Não",
-      inspecao: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
-      entregue: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      dtInspecao: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      dtEntregue: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
       prazo: Math.floor(Math.random() * 50) + 1,
       sw: Math.floor(Math.random() * 60) + 1,
-      acerto: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
-      envio: `${Math.floor(Math.random() * 28) + 1}/11`,
-      pago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      honorarios: parseFloat(honorarios.toFixed(2)),
-      dEnvio: `${Math.floor(Math.random() * 28) + 1}/10`,
-      dPago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      despesas: parseFloat(despesas.toFixed(2)),
-      gPago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      gHonorarios: parseFloat(gHonorarios.toFixed(2)),
-      gdPago: `${Math.floor(Math.random() * 28) + 1}/09`,
-      gDespesas: parseFloat(gDespesas.toFixed(2)),
+      dtAcerto: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      dtEnvio: `${Math.floor(Math.random() * 28) + 1}/11`,
+      dtPago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      honorario: parseFloat(honorario.toFixed(2)),
+      dtDenvio: `${Math.floor(Math.random() * 28) + 1}/10`,
+      dtDpago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      despesa: parseFloat(despesa.toFixed(2)),
+      dtGuyPago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      guyHonorario: parseFloat(guyHonorario.toFixed(2)),
+      dtGuyDpago: `${Math.floor(Math.random() * 28) + 1}/09`,
+      guyDespesa: parseFloat(guyDespesa.toFixed(2)),
       atividade: atividades[Math.floor(Math.random() * atividades.length)],
+      ms: null,
+      obs: null,
+      uf: null,
+      cidade: null,
       isWorkflow: true,
       isRecebiveis: true,
       isPagamentos: true,
@@ -75,7 +79,7 @@ export class MemStorage implements IStorage {
     
     const mockData = generateMockInspections();
     mockData.forEach(inspection => {
-      this.inspections.set(inspection.id, inspection);
+      this.inspections.set(inspection.idPrinc, inspection);
     });
   }
 
@@ -91,7 +95,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      displayName: insertUser.displayName ?? null,
+      role: null,
+    };
     this.users.set(id, user);
     return user;
   }
@@ -105,15 +114,40 @@ export class MemStorage implements IStorage {
   }
 
   async createInspection(insertInspection: InsertInspection): Promise<Inspection> {
-    const id = randomUUID();
+    const idPrinc = randomUUID();
     const inspection: Inspection = { 
-      ...insertInspection, 
-      id,
+      idPrinc,
+      player: insertInspection.player ?? null,
+      segurado: insertInspection.segurado ?? null,
+      loc: insertInspection.loc ?? null,
+      nickGuilty: insertInspection.nickGuilty ?? null,
+      nickGuy: insertInspection.nickGuy ?? null,
+      meta: insertInspection.meta ?? null,
+      dtInspecao: insertInspection.dtInspecao ?? null,
+      dtEntregue: insertInspection.dtEntregue ?? null,
+      prazo: insertInspection.prazo ?? null,
+      sw: insertInspection.sw ?? null,
+      dtAcerto: insertInspection.dtAcerto ?? null,
+      dtEnvio: insertInspection.dtEnvio ?? null,
+      dtPago: insertInspection.dtPago ?? null,
+      honorario: insertInspection.honorario ?? null,
+      dtDenvio: insertInspection.dtDenvio ?? null,
+      dtDpago: insertInspection.dtDpago ?? null,
+      despesa: insertInspection.despesa ?? null,
+      dtGuyPago: insertInspection.dtGuyPago ?? null,
+      guyHonorario: insertInspection.guyHonorario ?? null,
+      dtGuyDpago: insertInspection.dtGuyDpago ?? null,
+      guyDespesa: insertInspection.guyDespesa ?? null,
+      atividade: insertInspection.atividade ?? null,
+      ms: insertInspection.ms ?? null,
+      obs: insertInspection.obs ?? null,
+      uf: insertInspection.uf ?? null,
+      cidade: insertInspection.cidade ?? null,
       isWorkflow: insertInspection.isWorkflow ?? true,
       isRecebiveis: insertInspection.isRecebiveis ?? true,
       isPagamentos: insertInspection.isPagamentos ?? true,
     };
-    this.inspections.set(id, inspection);
+    this.inspections.set(idPrinc, inspection);
     return inspection;
   }
 
@@ -133,17 +167,17 @@ export class MemStorage implements IStorage {
   async getKPIs(): Promise<KPIs> {
     const inspections = Array.from(this.inspections.values());
     
-    const honorarios = inspections.reduce((sum, i) => sum + (i.honorarios || 0), 0);
-    const despesas = inspections.reduce((sum, i) => sum + (i.despesas || 0), 0);
-    const gHonorarios = inspections.reduce((sum, i) => sum + (i.gHonorarios || 0), 0);
-    const gDespesas = inspections.reduce((sum, i) => sum + (i.gDespesas || 0), 0);
+    const honorarios = inspections.reduce((sum, i) => sum + (i.honorario || 0), 0);
+    const despesas = inspections.reduce((sum, i) => sum + (i.despesa || 0), 0);
+    const guyHonorario = inspections.reduce((sum, i) => sum + (i.guyHonorario || 0), 0);
+    const guyDespesa = inspections.reduce((sum, i) => sum + (i.guyDespesa || 0), 0);
     
     return {
-      express: honorarios + despesas - gHonorarios - gDespesas,
+      express: honorarios + despesas - guyHonorario - guyDespesa,
       honorarios,
-      gHonorarios,
+      guyHonorario,
       despesas,
-      gDespesas,
+      guyDespesa,
     };
   }
 }

@@ -21,50 +21,54 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// Inspections table - main grid data
+// Inspections table - main grid data (aligned with SQLite xFinance original)
 export const inspections = pgTable("inspections", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  idPrinc: varchar("id_princ").primaryKey().default(sql`gen_random_uuid()`),
   player: text("player"),
   segurado: text("segurado"),
   loc: integer("loc"),
-  guilty: text("guilty"),
-  guy: text("guy"),
+  nickGuilty: text("nick_guilty"),
+  nickGuy: text("nick_guy"),
   meta: text("meta"),
-  inspecao: text("inspecao"),
-  entregue: text("entregue"),
+  dtInspecao: text("dt_inspecao"),
+  dtEntregue: text("dt_entregue"),
   prazo: integer("prazo"),
   sw: integer("sw"),
-  acerto: text("acerto"),
-  envio: text("envio"),
-  pago: text("pago"),
-  honorarios: real("honorarios"),
-  dEnvio: text("d_envio"),
-  dPago: text("d_pago"),
-  despesas: real("despesas"),
-  gPago: text("g_pago"),
-  gHonorarios: real("g_honorarios"),
-  gdPago: text("gd_pago"),
-  gDespesas: real("g_despesas"),
+  dtAcerto: text("dt_acerto"),
+  dtEnvio: text("dt_envio"),
+  dtPago: text("dt_pago"),
+  honorario: real("honorario"),
+  dtDenvio: text("dt_denvio"),
+  dtDpago: text("dt_dpago"),
+  despesa: real("despesa"),
+  dtGuyPago: text("dt_guy_pago"),
+  guyHonorario: real("guy_honorario"),
+  dtGuyDpago: text("dt_guy_dpago"),
+  guyDespesa: real("guy_despesa"),
   atividade: text("atividade"),
+  ms: integer("ms"),
+  obs: text("obs"),
+  uf: text("uf"),
+  cidade: text("cidade"),
   isWorkflow: boolean("is_workflow").default(true),
   isRecebiveis: boolean("is_recebiveis").default(true),
   isPagamentos: boolean("is_pagamentos").default(true),
 });
 
 export const insertInspectionSchema = createInsertSchema(inspections).omit({
-  id: true,
+  idPrinc: true,
 });
 
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type Inspection = typeof inspections.$inferSelect;
 
-// KPIs type for Express totals
+// KPIs type for Express totals (aligned with SQLite xFinance original)
 export interface KPIs {
   express: number;
   honorarios: number;
-  gHonorarios: number;
+  guyHonorario: number;
   despesas: number;
-  gDespesas: number;
+  guyDespesa: number;
 }
 
 // Filter state type

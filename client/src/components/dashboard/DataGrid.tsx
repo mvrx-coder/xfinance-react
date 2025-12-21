@@ -443,14 +443,14 @@ export function DataGrid({
                   ) : (
                     currentData.map((row, index) => (
                       <TableRow
-                        key={row.id || index}
+                        key={row.idPrinc || index}
                         className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
                           ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
                         `}
                         onClick={() => onRowClick?.(row)}
                         onMouseEnter={() => setHoveredRow(index)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        data-testid={`row-inspection-${row.id || index}`}
+                        data-testid={`row-inspection-${row.idPrinc || index}`}
                       >
                           {/* Grupo 1: Ação */}
                           <TableCell className="leading-tight">
@@ -461,7 +461,7 @@ export function DataGrid({
                                 setSelectedInspection(row);
                                 setIsActionCenterOpen(true);
                               }}
-                              data-testid={`badge-action-${row.id || index}`}
+                              data-testid={`badge-action-${row.idPrinc || index}`}
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
@@ -483,10 +483,10 @@ export function DataGrid({
                             {row.loc ?? "-"}
                           </TableCell>
                           <TableCell className=" text-xs">
-                            {row.guilty || "-"}
+                            {row.nickGuilty || "-"}
                           </TableCell>
                           <TableCell className=" text-xs">
-                            {row.guy || "-"}
+                            {row.nickGuy || "-"}
                           </TableCell>
                           <TableCell className="leading-tight">
                             <Badge
@@ -506,10 +506,10 @@ export function DataGrid({
                           {filters.columnGroups.workflow && (
                             <>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.inspecao)}
+                                {formatDate(row.dtInspecao)}
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.entregue)}
+                                {formatDate(row.dtEntregue)}
                               </TableCell>
                               <TableCell className=" text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
@@ -526,16 +526,16 @@ export function DataGrid({
                           {filters.columnGroups.recebiveis && (
                             <>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.acerto)}
+                                {formatDate(row.dtAcerto)}
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.envio)}
+                                {formatDate(row.dtEnvio)}
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.pago)}
+                                {formatDate(row.dtPago)}
                               </TableCell>
                               <TableCell className=" text-xs text-right font-mono font-semibold text-success">
-                                {formatCurrency(row.honorarios)}
+                                {formatCurrency(row.honorario)}
                               </TableCell>
                               
                               {/* Separador */}
@@ -545,13 +545,13 @@ export function DataGrid({
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.dEnvio)}
+                                {formatDate(row.dtDenvio)}
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.dPago)}
+                                {formatDate(row.dtDpago)}
                               </TableCell>
                               <TableCell className=" text-xs text-right font-mono font-semibold text-emerald-400">
-                                {formatCurrency(row.despesas)}
+                                {formatCurrency(row.despesa)}
                               </TableCell>
                               
                               {/* Separador */}
@@ -565,16 +565,16 @@ export function DataGrid({
                           {filters.columnGroups.pagamentos && (
                             <>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.gPago)}
+                                {formatDate(row.dtGuyPago)}
                               </TableCell>
                               <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.gHonorarios)}
+                                {formatCurrency(row.guyHonorario)}
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.gdPago)}
+                                {formatDate(row.dtGuyDpago)}
                               </TableCell>
                               <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.gDespesas)}
+                                {formatCurrency(row.guyDespesa)}
                               </TableCell>
                               
                               {/* Separador */}
@@ -595,7 +595,7 @@ export function DataGrid({
                                 size="icon"
                                 className="glass border border-white/10"
                                 onClick={(e) => { e.stopPropagation(); }}
-                                data-testid={`button-view-${row.id || index}`}
+                                data-testid={`button-view-${row.idPrinc || index}`}
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </Button>
@@ -604,7 +604,7 @@ export function DataGrid({
                                 size="icon"
                                 className="glass border border-white/10"
                                 onClick={(e) => { e.stopPropagation(); }}
-                                data-testid={`button-edit-${row.id || index}`}
+                                data-testid={`button-edit-${row.idPrinc || index}`}
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </Button>

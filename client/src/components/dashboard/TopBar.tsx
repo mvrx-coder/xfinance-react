@@ -106,7 +106,7 @@ function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">GHonorários:</span>
-          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.gHonorarios)}</span>
+          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.guyHonorario)}</span>
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">Despesas:</span>
@@ -114,7 +114,7 @@ function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm text-white/60">GDespesas:</span>
-          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.gDespesas)}</span>
+          <span className="text-sm font-medium text-destructive text-right tabular-nums">{formatCurrency(kpis.guyDespesa)}</span>
         </div>
       </div>
     </div>

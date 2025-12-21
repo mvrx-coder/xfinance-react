@@ -42,7 +42,7 @@ export default function Dashboard() {
     queryKey: ["/api/inspections"],
   });
 
-  const { data: kpis = { express: 0, honorarios: 0, gHonorarios: 0, despesas: 0, gDespesas: 0 } } = useQuery<KPIs>({
+  const { data: kpis = { express: 0, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 } } = useQuery<KPIs>({
     queryKey: ["/api/kpis"],
   });
 
@@ -90,7 +90,7 @@ export default function Dashboard() {
     addToast({
       type: "info",
       title: "Registro selecionado",
-      message: `ID: ${inspection.id} - ${inspection.segurado || "Sem nome"}`,
+      message: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
       duration: 3000,
     });
   }, [addToast]);
