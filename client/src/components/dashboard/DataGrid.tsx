@@ -88,7 +88,7 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
         <div className="h-4 w-6 shimmer rounded-md" />
       </TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-primary/15" /></TableCell>
+      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-primary/30" /></TableCell>
       {/* Grupo 2: Identificação */}
       <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
       <TableCell className="py-1.5"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
@@ -97,7 +97,7 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
       <TableCell className="py-1.5"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
       <TableCell className="py-1.5"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-muted-foreground/15" /></TableCell>
+      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-muted-foreground/30" /></TableCell>
       {/* Grupo 3: Workflow */}
       {filters.columnGroups.workflow && (
         <>
@@ -105,7 +105,7 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
           <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-8 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-accent/15" /></TableCell>
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-accent/30" /></TableCell>
         </>
       )}
       {/* Grupo 4 e 5: Recebíveis */}
@@ -116,12 +116,12 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
           <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-success/15" /></TableCell>
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-success/30" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-emerald-400/15" /></TableCell>
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-emerald-400/30" /></TableCell>
         </>
       )}
       {/* Grupo 6: Pagamentos */}
@@ -132,7 +132,7 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
           <TableCell className="py-1.5"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="py-1.5"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-warning/15" /></TableCell>
+          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-warning/30" /></TableCell>
         </>
       )}
       {/* Grupo 7: Contexto */}
@@ -271,7 +271,7 @@ export function DataGrid({
                   
                   {/* Separador */}
                   <TableHead className="w-[1px] p-0 bg-card">
-                    <div className="w-[1px] h-full bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+                    <div className="w-[1px] h-full bg-primary/40" />
                   </TableHead>
                   
                   {/* Grupo 2: Identificação */}
@@ -297,7 +297,7 @@ export function DataGrid({
                   
                   {/* Separador */}
                   <TableHead className="w-[1px] p-0 bg-card">
-                    <div className="w-[1px] h-full bg-gradient-to-b from-muted-foreground/40 via-muted-foreground/20 to-transparent" />
+                    <div className="w-[1px] h-full bg-muted-foreground/40" />
                   </TableHead>
                   
                   {/* Grupo 3: Workflow Principal */}
@@ -316,7 +316,7 @@ export function DataGrid({
                       
                       {/* Separador */}
                       <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-gradient-to-b from-accent/40 via-accent/20 to-transparent" />
+                        <div className="w-[1px] h-full bg-accent/40" />
                       </TableHead>
                     </>
                   )}
@@ -340,7 +340,7 @@ export function DataGrid({
                       
                       {/* Separador */}
                       <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-gradient-to-b from-success/40 via-success/20 to-transparent" />
+                        <div className="w-[1px] h-full bg-success/40" />
                       </TableHead>
                       
                       {/* Grupo 5: Recebíveis - Despesas */}
@@ -357,7 +357,7 @@ export function DataGrid({
                       
                       {/* Separador */}
                       <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-gradient-to-b from-emerald-400/40 via-emerald-400/20 to-transparent" />
+                        <div className="w-[1px] h-full bg-emerald-400/40" />
                       </TableHead>
                     </>
                   )}
@@ -381,7 +381,7 @@ export function DataGrid({
                       
                       {/* Separador */}
                       <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-gradient-to-b from-warning/40 via-warning/20 to-transparent" />
+                        <div className="w-[1px] h-full bg-warning/40" />
                       </TableHead>
                     </>
                   )}
@@ -445,7 +445,7 @@ export function DataGrid({
                           
                           {/* Separador */}
                           <TableCell className="w-[1px] p-0">
-                            <div className="w-[1px] h-full bg-primary/15" />
+                            <div className="w-[1px] h-full bg-primary/30" />
                           </TableCell>
                           
                           {/* Grupo 2: Identificação */}
@@ -475,7 +475,7 @@ export function DataGrid({
                           
                           {/* Separador */}
                           <TableCell className="w-[1px] p-0">
-                            <div className="w-[1px] h-full bg-muted-foreground/15" />
+                            <div className="w-[1px] h-full bg-muted-foreground/30" />
                           </TableCell>
                           
                           {/* Grupo 3: Workflow Principal */}
@@ -493,7 +493,7 @@ export function DataGrid({
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-accent/15" />
+                                <div className="w-[1px] h-full bg-accent/30" />
                               </TableCell>
                             </>
                           )}
@@ -516,7 +516,7 @@ export function DataGrid({
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-success/15" />
+                                <div className="w-[1px] h-full bg-success/30" />
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
@@ -532,7 +532,7 @@ export function DataGrid({
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-emerald-400/15" />
+                                <div className="w-[1px] h-full bg-emerald-400/30" />
                               </TableCell>
                             </>
                           )}
@@ -555,7 +555,7 @@ export function DataGrid({
                               
                               {/* Separador */}
                               <TableCell className="w-[1px] p-0">
-                                <div className="w-[1px] h-full bg-warning/15" />
+                                <div className="w-[1px] h-full bg-warning/30" />
                               </TableCell>
                             </>
                           )}
