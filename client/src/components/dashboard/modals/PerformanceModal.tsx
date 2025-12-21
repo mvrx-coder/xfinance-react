@@ -315,7 +315,7 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
   const xScale = (index: number) => padding.left + (index / (data.months.length - 1)) * chartWidth;
   const yScale = (value: number) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
 
-  const gridLines = [0, 100000, 200000, 300000];
+  const gridLines = [0, 100, 200, 300];
 
   return (
     <div className="relative">
@@ -392,11 +392,11 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
 
         {data.series.map((series) => {
           const isActive = !hoveredYear || hoveredYear === series.year;
-          const pathD = `M ${series.data.map((value, i) => `${xScale(i)},${yScale(value * 1000)}`).join(" L ")}`;
+          const pathD = `M ${series.data.map((value, i) => `${xScale(i)},${yScale(value)}`).join(" L ")}`;
           
           const areaPath = `
-            M ${xScale(0)},${yScale(series.data[0] * 1000)}
-            ${series.data.map((value, i) => `L ${xScale(i)},${yScale(value * 1000)}`).join(" ")}
+            M ${xScale(0)},${yScale(series.data[0])}
+            ${series.data.map((value, i) => `L ${xScale(i)},${yScale(value)}`).join(" ")}
             L ${xScale(series.data.length - 1)},${height - padding.bottom}
             L ${xScale(0)},${height - padding.bottom}
             Z
@@ -428,7 +428,7 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
                 <circle
                   key={i}
                   cx={xScale(i)}
-                  cy={yScale(value * 1000)}
+                  cy={yScale(value)}
                   r={hoveredYear === series.year ? 4 : 3}
                   fill={series.color}
                   stroke="rgba(10,10,31,0.8)"
