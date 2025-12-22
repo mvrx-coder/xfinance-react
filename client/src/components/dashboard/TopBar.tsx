@@ -162,7 +162,7 @@ export function TopBar({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-wrap items-center gap-4 p-4 mx-3 mt-3 rounded-2xl glass-card shadow-xl"
+      className="flex flex-wrap items-center gap-4 p-4 mx-3 mt-3 rounded-2xl glass-card shadow-xl border-b-2 border-b-primary/20"
       data-testid="topbar"
     >
       {/* Logo + Welcome Section */}

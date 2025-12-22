@@ -199,7 +199,7 @@ export function DataGrid({
       transition={{ duration: 0.4, delay: 0.2 }}
       className="flex-1 mx-3 mb-3"
     >
-      <Card className="h-full glass-card border-white/10 shadow-2xl overflow-hidden">
+      <Card className="h-full container-elevated shadow-2xl overflow-hidden">
         {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-[calc(100vh-180px)]">
