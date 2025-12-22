@@ -107,7 +107,7 @@ export default function Dashboard() {
   }, [handleCloseModal, refetchInspections, addToast]);
 
   return (
-    <div className="flex flex-col h-screen bg-background" data-testid="dashboard">
+    <div className="flex flex-col h-screen bg-background bg-depth-gradient" data-testid="dashboard">
       {/* Toast Container */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
