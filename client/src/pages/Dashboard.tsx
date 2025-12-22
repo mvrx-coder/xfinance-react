@@ -129,14 +129,16 @@ export default function Dashboard() {
       {/* Status Bar */}
       <StatusBar messages={statusMessages} onDismiss={dismissStatus} />
 
-      {/* Main Grid */}
-      <DataGrid
-        data={inspections}
-        filters={filters}
-        isLoading={isLoadingInspections}
-        onRowClick={handleRowClick}
-        onRefresh={handleSearch}
-      />
+      {/* Main Grid - with spacing to show background gradient */}
+      <div className="flex-1 px-4 pb-4 pt-3 overflow-hidden">
+        <DataGrid
+          data={inspections}
+          filters={filters}
+          isLoading={isLoadingInspections}
+          onRowClick={handleRowClick}
+          onRefresh={handleSearch}
+        />
+      </div>
 
       {/* Modals */}
       <NewRecordModal
