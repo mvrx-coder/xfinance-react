@@ -320,7 +320,12 @@ export function DataGrid({
                       <TableHead className="w-[90px] bg-card text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
                       </TableHead>
-                      <TableHead className="w-[60px] bg-card text-center">
+                      
+                      {/* Separador vertical - GDPago é separador de grupo */}
+                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-warning" />
+                      
+                      <TableHead className="w-[60px] bg-card relative text-center">
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
                         <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
                       </TableHead>
                       <TableHead className="w-[85px] bg-card text-right">
