@@ -423,6 +423,7 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
         {data.series.map((series, seriesIdx) => {
           const isActive = !hoveredYear || hoveredYear === series.year;
           const isHighlighted = hoveredYear === series.year;
+          const isFaded = hoveredYear !== null && hoveredYear !== series.year;
           const pathD = `M ${series.data.map((value, i) => `${xScale(i)},${yScale(value)}`).join(" L ")}`;
           
           const areaPath = `
@@ -437,44 +438,51 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
             <motion.g
               key={series.year}
               initial={{ opacity: 0 }}
-              animate={{ opacity: isActive ? 1 : 0.15 }}
-              transition={{ duration: 0.3 }}
+              animate={{ 
+                opacity: isFaded ? 0.08 : 1,
+                scale: isHighlighted ? 1.02 : 1
+              }}
+              transition={{ duration: 0.25 }}
+              style={{ transformOrigin: 'center' }}
             >
               <motion.path
                 d={areaPath}
                 fill={`url(#line-gradient-${series.year})`}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isVisible ? 0.6 : 0 }}
+                animate={{ opacity: isVisible ? (isHighlighted ? 0.8 : isFaded ? 0.1 : 0.6) : 0 }}
                 transition={{ delay: seriesIdx * 0.15, duration: 0.5 }}
               />
               <motion.path
                 d={pathD}
                 fill="none"
                 stroke={series.color}
-                strokeWidth={isHighlighted ? 3.5 : 2}
+                strokeWidth={isHighlighted ? 4 : isFaded ? 1 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 filter={isHighlighted ? "url(#glow-business)" : undefined}
                 initial={{ strokeDasharray: 1000, strokeDashoffset: 1000 }}
                 animate={{ strokeDashoffset: isVisible ? 0 : 1000 }}
                 transition={{ delay: seriesIdx * 0.15, duration: 1.2, ease: "easeOut" }}
-                style={{ transition: 'stroke-width 0.2s ease' }}
+                style={{ transition: 'stroke-width 0.25s ease, filter 0.25s ease' }}
               />
               {series.data.map((value, i) => (
                 <motion.circle
                   key={i}
                   cx={xScale(i)}
                   cy={yScale(value)}
-                  r={isHighlighted ? 5 : 3}
+                  r={isHighlighted ? 6 : isFaded ? 2 : 3}
                   fill={series.color}
                   stroke="rgba(10,10,31,0.9)"
-                  strokeWidth={2}
+                  strokeWidth={isHighlighted ? 2.5 : 2}
                   initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: isVisible ? 1 : 0, opacity: isVisible ? 1 : 0 }}
+                  animate={{ 
+                    scale: isVisible ? 1 : 0, 
+                    opacity: isVisible ? (isFaded ? 0.3 : 1) : 0 
+                  }}
                   transition={{ delay: seriesIdx * 0.15 + i * 0.03, duration: 0.3 }}
                   style={{ 
-                    filter: isHighlighted ? `drop-shadow(0 0 4px ${series.color})` : 'none',
-                    transition: 'r 0.2s ease, filter 0.2s ease'
+                    filter: isHighlighted ? `drop-shadow(0 0 8px ${series.color})` : 'none',
+                    transition: 'r 0.25s ease, filter 0.25s ease'
                   }}
                 />
               ))}
