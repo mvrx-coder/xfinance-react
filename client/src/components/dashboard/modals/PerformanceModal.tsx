@@ -439,7 +439,7 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
               key={series.year}
               initial={{ opacity: 0 }}
               animate={{ 
-                opacity: isFaded ? 0.25 : 1,
+                opacity: isFaded ? 0.5 : 1,
                 scale: isHighlighted ? 1.02 : 1
               }}
               transition={{ duration: 0.25 }}
@@ -456,7 +456,7 @@ function BusinessLineChart({ data }: { data: typeof mockBusinessData }) {
                 d={pathD}
                 fill="none"
                 stroke={series.color}
-                strokeWidth={isHighlighted ? 3 : isFaded ? 1 : 2}
+                strokeWidth={isHighlighted ? 2 : isFaded ? 1 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 filter={isHighlighted ? "url(#glow-business)" : undefined}
