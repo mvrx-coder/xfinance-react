@@ -212,10 +212,8 @@ export function DataGrid({
                     <span className="text-xs font-bold text-primary tracking-wider">#</span>
                   </TableHead>
                   
-                  {/* Separador */}
-                  <TableHead className="w-[1px] p-0 bg-card">
-                    <div className="w-[1px] h-full bg-primary/40" />
-                  </TableHead>
+                  {/* Separador vertical com gradiente */}
+                  <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-primary" />
                   
                   {/* Grupo 2: Identificação */}
                   <TableHead className="w-[90px] bg-card relative">
@@ -241,10 +239,8 @@ export function DataGrid({
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
                   </TableHead>
                   
-                  {/* Separador */}
-                  <TableHead className="w-[1px] p-0 bg-card">
-                    <div className="w-[1px] h-full bg-muted-foreground/40" />
-                  </TableHead>
+                  {/* Separador vertical com gradiente */}
+                  <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-muted" />
                   
                   {/* Grupo 3: Workflow Principal */}
                   {filters.columnGroups.workflow && (
@@ -263,10 +259,8 @@ export function DataGrid({
                         <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
                       </TableHead>
                       
-                      {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-accent/40" />
-                      </TableHead>
+                      {/* Separador vertical com gradiente */}
+                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-accent" />
                     </>
                   )}
                   
@@ -290,10 +284,8 @@ export function DataGrid({
                         <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
                       </TableHead>
                       
-                      {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-success/40" />
-                      </TableHead>
+                      {/* Separador vertical com gradiente */}
+                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-success" />
                       
                       {/* Grupo 5: Recebíveis - Despesas */}
                       <TableHead className="w-[60px] bg-card relative text-center">
@@ -310,10 +302,8 @@ export function DataGrid({
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
                       </TableHead>
                       
-                      {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
-                        <div className="w-[1px] h-full bg-emerald-400/40" />
-                      </TableHead>
+                      {/* Separador vertical com gradiente */}
+                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-emerald" />
                     </>
                   )}
                   

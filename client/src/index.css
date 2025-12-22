@@ -331,27 +331,58 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.02);
   }
 
-  /* Header separator line with gradient fade and glow */
+  /* Header separator line - keeping simple horizontal line */
   .header-separator {
-    position: relative;
-    border-bottom: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
-  .header-separator::after {
+
+  /* Vertical column separator with gradient fade and glow */
+  .column-separator {
+    position: relative;
+    width: 1px;
+    min-width: 1px;
+  }
+  .column-separator::after {
     content: "";
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      rgba(206, 98, 217, 0.6) 0%,
-      rgba(206, 98, 217, 0.4) 30%,
-      rgba(0, 188, 212, 0.3) 60%,
+    bottom: 0;
+    background: linear-gradient(180deg, 
+      var(--separator-color, rgba(255, 255, 255, 0.4)) 0%,
+      var(--separator-color, rgba(255, 255, 255, 0.2)) 50%,
       transparent 100%
     );
     box-shadow: 
-      0 0 8px rgba(206, 98, 217, 0.3),
-      0 0 4px rgba(0, 188, 212, 0.2);
+      0 0 6px var(--separator-glow, rgba(255, 255, 255, 0.15)),
+      0 0 3px var(--separator-glow, rgba(255, 255, 255, 0.1));
+  }
+
+  /* Color variants for column separators */
+  .column-separator-primary {
+    --separator-color: rgba(206, 98, 217, 0.6);
+    --separator-glow: rgba(206, 98, 217, 0.3);
+  }
+  .column-separator-muted {
+    --separator-color: rgba(161, 161, 170, 0.5);
+    --separator-glow: rgba(161, 161, 170, 0.2);
+  }
+  .column-separator-accent {
+    --separator-color: rgba(0, 188, 212, 0.6);
+    --separator-glow: rgba(0, 188, 212, 0.3);
+  }
+  .column-separator-success {
+    --separator-color: rgba(34, 197, 94, 0.6);
+    --separator-glow: rgba(34, 197, 94, 0.3);
+  }
+  .column-separator-emerald {
+    --separator-color: rgba(52, 211, 153, 0.6);
+    --separator-glow: rgba(52, 211, 153, 0.3);
+  }
+  .column-separator-warning {
+    --separator-color: rgba(251, 191, 36, 0.6);
+    --separator-glow: rgba(251, 191, 36, 0.3);
   }
 
   /* Gradient utilities */
