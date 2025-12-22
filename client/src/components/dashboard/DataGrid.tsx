@@ -461,11 +461,11 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className={`text-xs text-muted-foreground text-center ${index < 4 ? 'border-b-2 border-warning/50' : ''}`}>
                                 <div className="flex items-center justify-center gap-1.5">
                                   {formatDate(row.dtAcerto)}
                                   
-                                  {/* DEMO: Opção 1 - Mini Badge com Clock (linha 0) */}
+                                  {/* DEMO: Opção 1 - Mini Badge com Clock + Sublinhado (linha 0) */}
                                   {index === 0 && (
                                     <Badge variant="outline" className="px-1.5 py-0 h-5 text-[9px] bg-warning/10 border-warning/40 text-warning gap-0.5">
                                       <Clock className="w-2.5 h-2.5" />
@@ -473,7 +473,7 @@ export function DataGrid({
                                     </Badge>
                                   )}
                                   
-                                  {/* DEMO: Opção 2 - Dot Pulsante (linha 1) */}
+                                  {/* DEMO: Opção 2 - Dot Pulsante + Sublinhado (linha 1) */}
                                   {index === 1 && (
                                     <span className="relative flex h-2.5 w-2.5">
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
@@ -481,14 +481,14 @@ export function DataGrid({
                                     </span>
                                   )}
                                   
-                                  {/* DEMO: Opção 3 - Badge Moeda (linha 2) */}
+                                  {/* DEMO: Opção 3 - Badge Moeda + Sublinhado (linha 2) */}
                                   {index === 2 && (
                                     <Badge variant="outline" className="px-1 py-0 h-5 text-[9px] bg-amber-500/10 border-amber-500/40 text-amber-400">
                                       <DollarSign className="w-3 h-3" />
                                     </Badge>
                                   )}
                                   
-                                  {/* DEMO: Opção 4 - Badge Outline Glow (linha 3) */}
+                                  {/* DEMO: Opção 4 - Badge Outline Glow + Sublinhado (linha 3) */}
                                   {index === 3 && (
                                     <Badge variant="outline" className="px-1.5 py-0 h-5 text-[9px] border-warning/60 text-warning shadow-[0_0_8px_rgba(234,179,8,0.3)]">
                                       <AlertCircle className="w-3 h-3" />
