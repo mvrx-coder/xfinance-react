@@ -381,7 +381,7 @@ export function DataGrid({
                     currentData.map((row, index) => (
                       <TableRow
                         key={row.idPrinc || index}
-                        className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
+                        className={`h-[24px] border-b border-white/5 cursor-pointer transition-all duration-200 group
                           ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
                         `}
                         onClick={() => onRowClick?.(row)}
