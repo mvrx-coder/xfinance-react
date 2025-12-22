@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,15 +42,25 @@ import {
   CalendarIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  fetchContrOptions,
+  fetchSegurOptions,
+  fetchAtiviOptions,
+  fetchUfOptions,
+  fetchCidadeOptions,
+  fetchUsersOptions,
+  type LookupOption,
+  type UserOption,
+} from "@/services/api/lookups";
 
 const newRecordSchema = z.object({
-  player: z.string().min(1, "Player obrigatório"),
-  segurado: z.string().min(1, "Segurado obrigatório"),
-  atividade: z.string().min(1, "Atividade obrigatória"),
-  guy: z.string().min(1, "Inspetor obrigatório"),
-  inspecao: z.date().optional(),
-  uf: z.string().min(1, "UF obrigatória"),
-  cidade: z.string().optional(),
+  idContr: z.number().min(1, "Contratante obrigatório"),
+  idSegur: z.number().min(1, "Segurado obrigatório"),
+  idAtivi: z.number().min(1, "Atividade obrigatória"),
+  idUserGuy: z.number().min(1, "Inspetor obrigatório"),
+  dtInspecao: z.date().optional(),
+  idUf: z.number().min(1, "UF obrigatória"),
+  idCidade: z.number().optional(),
   honorario: z.number().min(0).optional(),
   variosLocais: z.boolean().optional(),
 });
@@ -63,28 +73,6 @@ interface NewRecordModalProps {
   onSuccess: () => void;
 }
 
-const players = [
-  "Aon", "Swiss Re", "Howden", "Inter", "Free Job", "Marsh", "Lockton", "IRB", "Gallagher"
-];
-
-const inspetores = [
-  { value: "MVR", label: "MVR" },
-  { value: "AAS", label: "AAS" },
-  { value: "HEA", label: "HEA" },
-  { value: "RES", label: "RES" },
-  { value: "ALS", label: "ALS" },
-  { value: "LVS", label: "LVS" },
-];
-
-const atividades = [
-  "Mineradora", "Biodiesel", "Usina", "Armazém", "Porto", "Terminal", "Indústria", "Comercial"
-];
-
-const ufs = [
-  "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", 
-  "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"
-];
-
 const sectionVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
@@ -96,27 +84,64 @@ const sectionVariants = {
 
 export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalProps) {
   const [variosLocais, setVariosLocais] = useState(false);
+  const [contrOptions, setContrOptions] = useState<LookupOption[]>([]);
+  const [segurOptions, setSegurOptions] = useState<LookupOption[]>([]);
+  const [ativiOptions, setAtiviOptions] = useState<LookupOption[]>([]);
+  const [ufOptions, setUfOptions] = useState<LookupOption[]>([]);
+  const [cidadeOptions, setCidadeOptions] = useState<LookupOption[]>([]);
+  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchContrOptions().then(setContrOptions);
+      fetchSegurOptions().then(setSegurOptions);
+      fetchAtiviOptions().then(setAtiviOptions);
+      fetchUfOptions().then(setUfOptions);
+      fetchUsersOptions().then(setUserOptions);
+    }
+  }, [isOpen]);
 
   const form = useForm<NewRecordFormData>({
     resolver: zodResolver(newRecordSchema),
     defaultValues: {
-      player: "",
-      segurado: "",
-      atividade: "",
-      guy: "",
-      inspecao: undefined,
-      uf: "",
-      cidade: "",
+      idContr: 0,
+      idSegur: 0,
+      idAtivi: 0,
+      idUserGuy: 0,
+      dtInspecao: undefined,
+      idUf: 0,
+      idCidade: 0,
       honorario: 0,
       variosLocais: false,
     },
   });
 
+  const selectedUf = form.watch("idUf");
+
+  useEffect(() => {
+    if (selectedUf && selectedUf > 0) {
+      fetchCidadeOptions(selectedUf).then(setCidadeOptions);
+      form.setValue("idCidade", 0);
+    } else {
+      setCidadeOptions([]);
+    }
+  }, [selectedUf, form]);
+
   const createMutation = useMutation({
     mutationFn: async (data: NewRecordFormData) => {
       const payload = {
-        ...data,
-        inspecao: data.inspecao ? format(data.inspecao, "yyyy-MM-dd") : undefined,
+        idContr: data.idContr,
+        idSegur: data.idSegur,
+        idAtivi: data.idAtivi,
+        idUserGuy: data.idUserGuy,
+        idUserGuilty: data.idUserGuy,
+        idUf: data.idUf,
+        idCidade: data.idCidade || null,
+        dtInspecao: data.dtInspecao ? format(data.dtInspecao, "dd/MM") : null,
+        honorario: data.honorario || null,
+        loc: variosLocais ? 1 : null,
+        meta: 0,
+        ms: 0,
       };
       return apiRequest("POST", "/api/inspections", payload);
     },
@@ -131,8 +156,6 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
   const onSubmit = (data: NewRecordFormData) => {
     createMutation.mutate(data);
   };
-
-  const selectedUf = form.watch("uf");
 
   return (
     <Modal
@@ -201,7 +224,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               <div className="grid grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
-                  name="player"
+                  name="idContr"
                   render={({ field }) => (
                     <FormItem>
                       <div className="form-field-wrapper">
@@ -210,13 +233,16 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Player <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                          >
                             <SelectTrigger className="form-select" data-testid="select-player">
                               <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {players.map(p => (
-                                <SelectItem key={p} value={p}>{p}</SelectItem>
+                              {contrOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -229,7 +255,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
 
                 <FormField
                   control={form.control}
-                  name="segurado"
+                  name="idSegur"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <div className="form-field-wrapper">
@@ -238,37 +264,16 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Segurado <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Input
-                            placeholder="Digite ou selecione..."
-                            className="form-input"
-                            {...field}
-                            data-testid="input-segurado"
-                          />
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="atividade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <Briefcase className="w-3.5 h-3.5 text-primary" />
-                          Atividade <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger className="form-select" data-testid="select-atividade">
-                              <SelectValue placeholder="Digite ou selecione..." />
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                          >
+                            <SelectTrigger className="form-select" data-testid="select-segurado">
+                              <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {atividades.map(a => (
-                                <SelectItem key={a} value={a}>{a}</SelectItem>
+                              {segurOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -281,7 +286,38 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
 
                 <FormField
                   control={form.control}
-                  name="guy"
+                  name="idAtivi"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="form-field-wrapper">
+                        <label className="form-label">
+                          <Briefcase className="w-3.5 h-3.5 text-primary" />
+                          Atividade <span className="text-destructive">*</span>
+                        </label>
+                        <FormControl>
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                          >
+                            <SelectTrigger className="form-select" data-testid="select-atividade">
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ativiOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage className="form-error" />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="idUserGuy"
                   render={({ field }) => (
                     <FormItem>
                       <div className="form-field-wrapper">
@@ -290,13 +326,16 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Inspetor (Guy) <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                          >
                             <SelectTrigger className="form-select" data-testid="select-guy">
                               <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {inspetores.map(i => (
-                                <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>
+                              {userOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -321,7 +360,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               <div className="grid grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
-                  name="inspecao"
+                  name="dtInspecao"
                   render={({ field }) => (
                     <FormItem>
                       <div className="form-field-wrapper">
@@ -368,7 +407,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
 
                 <FormField
                   control={form.control}
-                  name="uf"
+                  name="idUf"
                   render={({ field }) => (
                     <FormItem>
                       <div className="form-field-wrapper">
@@ -377,13 +416,16 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           UF <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                          >
                             <SelectTrigger className="form-select" data-testid="select-uf">
                               <SelectValue placeholder="UF" />
                             </SelectTrigger>
                             <SelectContent>
-                              {ufs.map(uf => (
-                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                              {ufOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -396,27 +438,27 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
 
                 <FormField
                   control={form.control}
-                  name="cidade"
+                  name="idCidade"
                   render={({ field }) => (
                     <FormItem className="col-span-1">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Layers className="w-3.5 h-3.5 text-accent" />
-                          Cidade <span className="text-destructive">*</span>
+                          Cidade
                         </label>
                         <FormControl>
                           <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value}
-                            disabled={!selectedUf}
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value ? field.value.toString() : ""}
+                            disabled={!selectedUf || selectedUf === 0}
                           >
                             <SelectTrigger className="form-select" data-testid="select-cidade">
-                              <SelectValue placeholder={selectedUf ? "Selecione..." : "Selecione a UF primeiro..."} />
+                              <SelectValue placeholder={selectedUf && selectedUf > 0 ? "Selecione..." : "Selecione a UF primeiro..."} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="cidade1">Cidade 1</SelectItem>
-                              <SelectItem value="cidade2">Cidade 2</SelectItem>
-                              <SelectItem value="cidade3">Cidade 3</SelectItem>
+                              {cidadeOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormControl>

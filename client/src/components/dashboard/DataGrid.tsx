@@ -71,6 +71,15 @@ import {
   fetchUsersOptions,
   getMarkerTypes 
 } from "@/services/api/acoes";
+import {
+  fetchContrOptions,
+  fetchSegurOptions,
+  fetchAtiviOptions,
+  fetchUfOptions,
+  fetchUsersOptions as fetchUsersLookup,
+  getLabelById,
+  type LookupOption,
+} from "@/services/api/lookups";
 
 interface DataGridProps {
   data: Inspection[];
@@ -95,8 +104,19 @@ function formatDate(dateStr: string | null | undefined): string {
   return dateStr;
 }
 
-function getStatusColor(status: string | null | undefined): string {
-  if (!status) return "bg-muted/50 text-muted-foreground border-muted";
+function getMetaLabel(meta: number | null | undefined): string {
+  if (meta === 1) return "Sim";
+  if (meta === 0) return "Não";
+  return "-";
+}
+
+function getStatusColor(status: number | string | null | undefined): string {
+  if (status === null || status === undefined) return "bg-muted/50 text-muted-foreground border-muted";
+  if (typeof status === "number") {
+    return status === 1
+      ? "bg-success/15 text-success border-success/30"
+      : "bg-destructive/15 text-destructive border-destructive/30";
+  }
   const lowerStatus = status.toLowerCase();
   if (lowerStatus === "sim" || lowerStatus === "ok" || lowerStatus === "pago")
     return "bg-success/15 text-success border-success/30";
@@ -105,8 +125,13 @@ function getStatusColor(status: string | null | undefined): string {
   return "bg-warning/15 text-warning border-warning/30";
 }
 
-function getStatusGradient(status: string | null | undefined): string {
-  if (!status) return "from-muted/20 to-transparent";
+function getStatusGradient(status: number | string | null | undefined): string {
+  if (status === null || status === undefined) return "from-muted/20 to-transparent";
+  if (typeof status === "number") {
+    return status === 1
+      ? "from-success/10 to-transparent"
+      : "from-destructive/10 to-transparent";
+  }
   const lowerStatus = status.toLowerCase();
   if (lowerStatus === "sim" || lowerStatus === "ok" || lowerStatus === "pago")
     return "from-success/10 to-transparent";
@@ -183,12 +208,16 @@ function ActionCenter({
   onClose,
   onClearFilters,
   onRefresh,
+  contrLookup,
+  segurLookup,
 }: { 
   inspection: Inspection | null; 
   isOpen: boolean; 
   onClose: () => void;
   onClearFilters?: () => void;
   onRefresh?: () => void;
+  contrLookup: LookupOption[];
+  segurLookup: LookupOption[];
 }) {
   const { toast } = useToast();
   const [activePanel, setActivePanel] = useState<string | null>(null);
@@ -335,7 +364,7 @@ function ActionCenter({
                   Central de Ações
                 </SheetTitle>
                 <SheetDescription className="text-xs text-muted-foreground mt-0.5">
-                  {inspection.player} - Loc {inspection.loc?.toString().padStart(2, '0')}
+                  {getLabelById(contrLookup, inspection.idContr)} - Loc {inspection.loc?.toString().padStart(2, '0')}
                 </SheetDescription>
               </div>
             </div>
@@ -367,10 +396,10 @@ function ActionCenter({
                     >
                       <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                         <p className="text-sm text-muted-foreground">
-                          <strong className="text-foreground">{inspection.player}</strong> - {inspection.segurado}
+                          <strong className="text-foreground">{getLabelById(contrLookup, inspection.idContr)}</strong> - {getLabelById(segurLookup, inspection.idSegur)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Loc {inspection.loc?.toString().padStart(2, '0')} | {inspection.uf || 'N/A'}
+                          Loc {inspection.loc?.toString().padStart(2, '0')} | ID-{inspection.idPrinc}
                         </p>
                       </div>
                       <p className="text-sm text-red-400">
@@ -620,7 +649,20 @@ export function DataGrid({
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
+  const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
+  const [segurLookup, setSegurLookup] = useState<LookupOption[]>([]);
+  const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
+  const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
+  const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
   const rowsPerPage = 50;
+
+  useEffect(() => {
+    fetchContrOptions().then(setContrLookup);
+    fetchSegurOptions().then(setSegurLookup);
+    fetchUsersLookup().then((users) => setUsersLookup(users.map(u => ({ value: u.value, label: u.label }))));
+    fetchUfOptions().then(setUfLookup);
+    fetchAtiviOptions().then(setAtiviLookup);
+  }, []);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -846,26 +888,26 @@ export function DataGrid({
                           
                           {/* Grupo 2: Identificação */}
                           <TableCell className=" text-xs font-semibold text-foreground">
-                            {row.player || "-"}
+                            {getLabelById(contrLookup, row.idContr)}
                           </TableCell>
                           <TableCell className=" text-xs max-w-[140px] truncate">
-                            {row.segurado || "-"}
+                            {getLabelById(segurLookup, row.idSegur)}
                           </TableCell>
                           <TableCell className=" text-xs text-center font-mono">
                             {row.loc ?? "-"}
                           </TableCell>
                           <TableCell className=" text-xs">
-                            {row.nickGuilty || "-"}
+                            {getLabelById(usersLookup, row.idUserGuilty)}
                           </TableCell>
                           <TableCell className=" text-xs">
-                            {row.nickGuy || "-"}
+                            {getLabelById(usersLookup, row.idUserGuy)}
                           </TableCell>
                           <TableCell className="leading-tight">
                             <Badge
                               variant="outline"
                               className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
                             >
-                              {row.meta || "-"}
+                              {getMetaLabel(row.meta)}
                             </Badge>
                           </TableCell>
                           
@@ -1079,6 +1121,8 @@ export function DataGrid({
         isOpen={isActionCenterOpen}
         onClose={() => setIsActionCenterOpen(false)}
         onRefresh={onRefresh}
+        contrLookup={contrLookup}
+        segurLookup={segurLookup}
       />
     </motion.div>
   );

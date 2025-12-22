@@ -13,14 +13,6 @@ export interface IStorage {
 }
 
 function generateMockInspections(): Inspection[] {
-  const players = ["Aon", "Swiss Re", "Howden", "Inter", "Free Job", "Marsh", "Lockton", "IRB", "Gallagher"];
-  const segurados = [
-    "Nexa", "CLIR 2 CD", "CLO CD", "DeMilIus", "RAJLOG", "SAVOY", "Caramuru", 
-    "CEDRO Min...", "Vallourec", "Maracanã", "Top Paper", "Lwart", "CPFL PCHs",
-    "Belo Alimen...", "Mosaic", "ENGEPACK", "Cia Muller C...", "COMEXIM", "Echoenergí..."
-  ];
-  const guilties = ["AAS", "HEA", "MVR", "ARR", "ALS", "RES", "LVS"];
-  const guys = ["MVR", "AAS", "HEA"];
   const atividades = ["Mineradora", "CD", "Falação, Confe", "Biodiesel", "Mineração, Be...", "GO", "Papel", "Química, Óleo", "Hidro Usina, Pn", "Alimentos, Fria", "Terminal, Velcu", "Fertilizantes", "Grãos, Café", "Fotovoltaica", "Subesta..."];
 
   const inspections: Inspection[] = [];
@@ -33,16 +25,19 @@ function generateMockInspections(): Inspection[] {
 
     inspections.push({
       idPrinc: i + 1,
-      player: players[Math.floor(Math.random() * players.length)],
-      segurado: segurados[Math.floor(Math.random() * segurados.length)],
+      idContr: Math.floor(Math.random() * 9) + 1,
+      idSegur: Math.floor(Math.random() * 19) + 1,
+      idAtivi: Math.floor(Math.random() * 15) + 1,
+      idUf: Math.floor(Math.random() * 27) + 1,
+      idCidade: Math.floor(Math.random() * 11) + 1,
+      idUserGuy: Math.floor(Math.random() * 3) + 1,
+      idUserGuilty: Math.floor(Math.random() * 7) + 1,
       loc: Math.floor(Math.random() * 5) + 1,
-      nickGuilty: guilties[Math.floor(Math.random() * guilties.length)],
-      nickGuy: guys[Math.floor(Math.random() * guys.length)],
-      meta: Math.random() > 0.5 ? "Sim" : "Não",
+      meta: Math.random() > 0.5 ? 1 : 0,
+      ms: Math.random() > 0.7 ? 1 : 0,
       dtInspecao: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
       dtEntregue: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
       prazo: Math.floor(Math.random() * 50) + 1,
-      sw: Math.floor(Math.random() * 60) + 1,
       dtAcerto: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
       dtEnvio: `${Math.floor(Math.random() * 28) + 1}/11`,
       dtPago: `${Math.floor(Math.random() * 28) + 1}/11`,
@@ -55,10 +50,7 @@ function generateMockInspections(): Inspection[] {
       dtGuyDpago: `${Math.floor(Math.random() * 28) + 1}/09`,
       guyDespesa: parseFloat(guyDespesa.toFixed(2)),
       atividade: atividades[Math.floor(Math.random() * atividades.length)],
-      ms: null,
       obs: null,
-      uf: null,
-      cidade: null,
     });
   }
 
@@ -117,16 +109,19 @@ export class MemStorage implements IStorage {
     const idPrinc = this.nextInspectionId++;
     const inspection: Inspection = { 
       idPrinc,
-      player: insertInspection.player ?? null,
-      segurado: insertInspection.segurado ?? null,
+      idContr: insertInspection.idContr ?? null,
+      idSegur: insertInspection.idSegur ?? null,
+      idAtivi: insertInspection.idAtivi ?? null,
+      idUf: insertInspection.idUf ?? null,
+      idCidade: insertInspection.idCidade ?? null,
+      idUserGuy: insertInspection.idUserGuy ?? null,
+      idUserGuilty: insertInspection.idUserGuilty ?? null,
       loc: insertInspection.loc ?? null,
-      nickGuilty: insertInspection.nickGuilty ?? null,
-      nickGuy: insertInspection.nickGuy ?? null,
       meta: insertInspection.meta ?? null,
+      ms: insertInspection.ms ?? null,
       dtInspecao: insertInspection.dtInspecao ?? null,
       dtEntregue: insertInspection.dtEntregue ?? null,
       prazo: insertInspection.prazo ?? null,
-      sw: insertInspection.sw ?? null,
       dtAcerto: insertInspection.dtAcerto ?? null,
       dtEnvio: insertInspection.dtEnvio ?? null,
       dtPago: insertInspection.dtPago ?? null,
@@ -139,10 +134,7 @@ export class MemStorage implements IStorage {
       dtGuyDpago: insertInspection.dtGuyDpago ?? null,
       guyDespesa: insertInspection.guyDespesa ?? null,
       atividade: insertInspection.atividade ?? null,
-      ms: insertInspection.ms ?? null,
       obs: insertInspection.obs ?? null,
-      uf: insertInspection.uf ?? null,
-      cidade: insertInspection.cidade ?? null,
     };
     this.inspections.set(idPrinc, inspection);
     return inspection;

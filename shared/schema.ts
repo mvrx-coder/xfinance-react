@@ -25,16 +25,19 @@ export type User = typeof users.$inferSelect;
 // Inspections table - main grid data (aligned with SQLite xFinance original)
 export const inspections = sqliteTable("princ", {
   idPrinc: integer("id_princ").primaryKey(),
-  player: text("player"),
-  segurado: text("segurado"),
+  idContr: integer("id_contr"),
+  idSegur: integer("id_segur"),
+  idAtivi: integer("id_ativi"),
+  idUf: integer("id_uf"),
+  idCidade: integer("id_cidade"),
+  idUserGuy: integer("id_user_guy"),
+  idUserGuilty: integer("id_user_guilty"),
   loc: integer("loc"),
-  nickGuilty: text("nick_guilty"),
-  nickGuy: text("nick_guy"),
-  meta: text("meta"),
+  meta: integer("meta"),
+  ms: integer("ms"),
   dtInspecao: text("dt_inspecao"),
   dtEntregue: text("dt_entregue"),
   prazo: integer("prazo"),
-  sw: integer("sw"),
   dtAcerto: text("dt_acerto"),
   dtEnvio: text("dt_envio"),
   dtPago: text("dt_pago"),
@@ -47,10 +50,7 @@ export const inspections = sqliteTable("princ", {
   dtGuyDpago: text("dt_guy_dpago"),
   guyDespesa: real("guy_despesa"),
   atividade: text("atividade"),
-  ms: integer("ms"),
   obs: text("obs"),
-  uf: text("uf"),
-  cidade: text("cidade"),
 });
 
 export const insertInspectionSchema = createInsertSchema(inspections).omit({
