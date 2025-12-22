@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,10 @@ import {
   getLabelById,
   type LookupOption,
 } from "@/services/api/lookups";
+import { updateInspectionField } from "@/services/api/inspections";
 import { ActionCenter } from "./ActionCenter";
+import { EditableCell } from "./EditableCell";
+import { useToast } from "@/hooks/use-toast";
 
 interface DataGridProps {
   data: Inspection[];
@@ -157,6 +160,7 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
       {/* Grupo 7: Contexto */}
       <TableCell className="w-[150px] min-w-[150px] max-w-[150px] leading-tight"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
       <TableCell className="w-[160px] min-w-[160px] max-w-[160px] leading-tight"><div className="h-3 w-24 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
     </TableRow>
   );
 }
@@ -178,6 +182,7 @@ export function DataGrid({
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
   const rowsPerPage = 50;
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchContrOptions().then(setContrLookup);
@@ -186,6 +191,33 @@ export function DataGrid({
     fetchUfOptions().then(setUfLookup);
     fetchAtiviOptions().then(setAtiviLookup);
   }, []);
+
+  // Callback para edição inline
+  const handleCellEdit = useCallback(async (
+    idPrinc: number,
+    field: string,
+    value: string
+  ): Promise<boolean> => {
+    try {
+      const result = await updateInspectionField(idPrinc, field, value);
+      if (result.success) {
+        toast({
+          title: "Campo atualizado",
+          description: result.message,
+        });
+        onRefresh?.(); // Recarregar dados
+        return true;
+      }
+      return false;
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, [toast, onRefresh]);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -355,6 +387,9 @@ export function DataGrid({
                   <TableHead className="w-[160px] min-w-[160px] max-w-[160px] bg-card text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
                   </TableHead>
+                  <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card text-center">
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -412,12 +447,12 @@ export function DataGrid({
                           {/* Grupo 2: Identificação */}
                           <TableCell className="w-[100px] min-w-[100px] max-w-[100px] text-xs font-semibold text-foreground p-0">
                             <span className="block w-full px-2 py-1 truncate">
-                              {getLabelById(contrLookup, row.idContr)}
+                              {row.player || "-"}
                             </span>
                           </TableCell>
                           <TableCell className="w-[150px] min-w-[150px] max-w-[150px] text-xs p-0">
                             <span className="block w-full px-2 py-1 truncate">
-                              {getLabelById(segurLookup, row.idSegur)}
+                              {row.segurado || "-"}
                             </span>
                           </TableCell>
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
@@ -425,12 +460,12 @@ export function DataGrid({
                           </TableCell>
                           <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
                             <span className="block w-full px-2 py-1 truncate">
-                              {getLabelById(usersLookup, row.idUserGuilty)}
+                              {row.guilty || "-"}
                             </span>
                           </TableCell>
                           <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
                             <span className="block w-full px-2 py-1 truncate">
-                              {getLabelById(usersLookup, row.idUserGuy)}
+                              {row.guy || "-"}
                             </span>
                           </TableCell>
                           <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight">
@@ -450,11 +485,25 @@ export function DataGrid({
                           {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtInspecao)}
+                              <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtInspecao}
+                                  displayValue={formatDate(row.dtInspecao)}
+                                  field="dt_inspecao"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtEntregue)}
+                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtEntregue}
+                                  displayValue={formatDate(row.dtEntregue)}
+                                  field="dt_entregue"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
                               <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
@@ -470,17 +519,46 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtAcerto)}
+                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtAcerto}
+                                  displayValue={formatDate(row.dtAcerto)}
+                                  field="dt_acerto"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtEnvio)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtEnvio}
+                                  displayValue={formatDate(row.dtEnvio)}
+                                  field="dt_envio"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtPago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtPago}
+                                  displayValue={formatDate(row.dtPago)}
+                                  field="dt_pago"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs text-right font-mono font-semibold text-success">
-                                {formatCurrency(row.honorario)}
+                              <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs text-right font-mono font-semibold text-success p-0">
+                                <EditableCell
+                                  value={row.honorario}
+                                  displayValue={formatCurrency(row.honorario)}
+                                  field="honorario"
+                                  idPrinc={row.idPrinc}
+                                  type="currency"
+                                  className="text-right text-success"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
                               
                               {/* Separador */}
@@ -489,14 +567,36 @@ export function DataGrid({
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
-                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtDenvio)}
+                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtDenvio}
+                                  displayValue={formatDate(row.dtDenvio)}
+                                  field="dt_denvio"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtDpago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtDpago}
+                                  displayValue={formatDate(row.dtDpago)}
+                                  field="dt_dpago"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-emerald-400">
-                                {formatCurrency(row.despesa)}
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-emerald-400 p-0">
+                                <EditableCell
+                                  value={row.despesa}
+                                  displayValue={formatCurrency(row.despesa)}
+                                  field="despesa"
+                                  idPrinc={row.idPrinc}
+                                  type="currency"
+                                  className="text-right text-emerald-400"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
                               
                               {/* Separador */}
@@ -509,17 +609,47 @@ export function DataGrid({
                           {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
-                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtGuyPago)}
+                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtGuyPago}
+                                  displayValue={formatDate(row.dtGuyPago)}
+                                  field="dt_guy_pago"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[95px] min-w-[95px] max-w-[95px] text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.guyHonorario)}
+                              <TableCell className="w-[95px] min-w-[95px] max-w-[95px] text-xs text-right font-mono font-semibold text-warning p-0">
+                                <EditableCell
+                                  value={row.guyHonorario}
+                                  displayValue={formatCurrency(row.guyHonorario)}
+                                  field="guy_honorario"
+                                  idPrinc={row.idPrinc}
+                                  type="currency"
+                                  className="text-right text-warning"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtGuyDpago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
+                                <EditableCell
+                                  value={row.dtGuyDpago}
+                                  displayValue={formatDate(row.dtGuyDpago)}
+                                  field="dt_guy_dpago"
+                                  idPrinc={row.idPrinc}
+                                  type="date"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
-                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.guyDespesa)}
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-warning p-0">
+                                <EditableCell
+                                  value={row.guyDespesa}
+                                  displayValue={formatCurrency(row.guyDespesa)}
+                                  field="guy_despesa"
+                                  idPrinc={row.idPrinc}
+                                  type="currency"
+                                  className="text-right text-warning"
+                                  onSave={handleCellEdit}
+                                />
                               </TableCell>
                               
                               {/* Separador */}
@@ -535,7 +665,17 @@ export function DataGrid({
                               {row.atividade || "-"}
                             </span>
                           </TableCell>
-                          <TableCell className="w-[160px] min-w-[160px] max-w-[160px] leading-tight">
+                          <TableCell className="w-[160px] min-w-[160px] max-w-[160px] text-xs text-muted-foreground p-0">
+                            <EditableCell
+                              value={row.obs}
+                              displayValue={row.obs || "-"}
+                              field="obs"
+                              idPrinc={row.idPrinc}
+                              type="text"
+                              onSave={handleCellEdit}
+                            />
+                          </TableCell>
+                          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight">
                             <div className={`flex items-center justify-center gap-1 transition-opacity duration-200 ${hoveredRow === index ? "opacity-100" : "opacity-0"}`}>
                               <Button
                                 variant="ghost"

@@ -194,13 +194,35 @@ x_main/
 4. ✅ **GET /api/inspections** retornando 3078 registros
 5. ✅ **Sigilo por papel** implementado
 
-### 🔄 Em Andamento (Fase 3)
+### ✅ Concluído (Fase 3 - Integração)
 
-6. **Conectar Frontend ↔ Backend**
-   - [ ] Integrar `Login.tsx` com `/api/auth/login`
-   - [ ] Integrar `DataGrid` com `/api/inspections`
+6. ✅ **Conectar Frontend ↔ Backend**
+   - ✅ Integrar `Login.tsx` com `/api/auth/login`
+   - ✅ Integrar `DataGrid` com `/api/inspections`
+   - ✅ JOINs funcionando (Player, Segurado, Guilty, Guy, Atividade)
+   - ✅ Formatação de datas (DD/MM)
+   - ✅ Coluna Observação funcionando
    - [ ] Implementar `/api/kpis`
    - [ ] Implementar `/api/lookups/*`
+
+### 📋 NOVO: Plano de Migração do Grid
+
+> **📊 Ver `docs/GRID_MIGRATION.md` para plano completo**
+
+O grid é o CORAÇÃO do sistema. Antes de prosseguir, mapeamos TODAS as funcionalidades:
+
+| Fase | Itens | Status |
+|------|-------|--------|
+| Base de Dados | id_princ, state_*, status | ⏳ Pendente |
+| Seleção e Contexto | Seleção de linha, id_princ | ⏳ Pendente |
+| Central de Ações | Encaminhar, Excluir | ⏳ Pendente |
+| Marcadores | Pílulas azul/amarelo/vermelho | ⏳ Pendente |
+| Edição Inline | Datas, moedas, texto | ⏳ Pendente |
+| Cores Condicionais | gpay-*, delivery-* | ⏳ Pendente |
+| Colunas Calculadas | SW, prazo | ⏳ Pendente |
+| Ordenação | normal, player, prazo | ⏳ Pendente |
+| Grupos de Colunas | Workflow, Recebíveis, Pagamentos | ⏳ Pendente |
+| Filtros | My Job, DB Limit | ⏳ Pendente |
 
 ### Futuro (Fase 4+)
 
@@ -245,7 +267,8 @@ x_main/
 2. ✅ Rodando localmente em `http://localhost:5173`
 3. ✅ Backend FastAPI funcionando em `http://localhost:8000`
 4. ✅ **3078 inspeções** carregadas do SQLite real
-5. ⏳ **Próximo:** Integrar frontend com backend
+5. ✅ **Frontend integrado com backend** (login + grid)
+6. ⏳ **Próximo:** Seguir plano em `docs/GRID_MIGRATION.md`
 
 ### Comandos para Rodar
 

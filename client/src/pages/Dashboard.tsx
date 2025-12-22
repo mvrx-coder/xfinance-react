@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
 import { StatusBar } from "@/components/dashboard/StatusBar";
@@ -9,10 +10,14 @@ import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
 import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Inspection, FilterState, KPIs } from "@shared/schema";
+import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
+import { logout, getCurrentUser, type UserData } from "@/services/api/auth";
+import type { FilterState, KPIs, Inspection } from "@shared/schema";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  
   const [filters, setFilters] = useState<FilterState>({
     player: false,
     myJob: false,
@@ -38,13 +43,61 @@ export default function Dashboard() {
     guyPay: false,
   });
 
-  const { data: inspections = [], isLoading: isLoadingInspections, refetch: refetchInspections } = useQuery<Inspection[]>({
-    queryKey: ["/api/inspections"],
+  // Carregar usuário atual
+  useEffect(() => {
+    // Primeiro tenta do localStorage (cache)
+    const cachedUser = localStorage.getItem("xfinance_user");
+    if (cachedUser) {
+      setCurrentUser(JSON.parse(cachedUser));
+    }
+    
+    // Depois valida com o backend
+    getCurrentUser().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem("xfinance_user", JSON.stringify(user));
+      } else {
+        // Não autenticado - redireciona para login
+        localStorage.removeItem("xfinance_user");
+        setLocation("/login");
+      }
+    });
+  }, [setLocation]);
+
+  // Montar opções de busca baseadas nos filtros
+  const fetchOptions: FetchOptions = {
+    order: filters.player ? "player" : "normal",
+    limit: filters.dbLimit ? 800 : undefined,
+    myJob: filters.myJob,
+  };
+
+  // Buscar inspeções da API real
+  const { 
+    data: inspectionsResponse, 
+    isLoading: isLoadingInspections, 
+    refetch: refetchInspections,
+    error: inspectionsError
+  } = useQuery<InspectionsResponse>({
+    queryKey: ["inspections", fetchOptions],
+    queryFn: () => fetchInspections(fetchOptions),
+    enabled: !!currentUser, // Só busca se usuário estiver logado
+    retry: false,
   });
 
-  const { data: kpis = { express: 0, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 } } = useQuery<KPIs>({
-    queryKey: ["/api/kpis"],
-  });
+  // Extrair dados do response
+  const inspections = inspectionsResponse?.data || [];
+  const totalRecords = inspectionsResponse?.total || 0;
+
+  // KPIs (ainda mock - será implementado depois)
+  const kpis: KPIs = { express: totalRecords, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 };
+
+  // Redirecionar para login se não autenticado
+  useEffect(() => {
+    if (inspectionsError?.message === "Não autenticado") {
+      localStorage.removeItem("xfinance_user");
+      setLocation("/login");
+    }
+  }, [inspectionsError, setLocation]);
 
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
     const id = `toast-${Date.now()}`;
@@ -77,14 +130,18 @@ export default function Dashboard() {
     setModals((prev) => ({ ...prev, [modal]: false }));
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     addToast({
       type: "warning",
       title: "Logout",
-      message: "Você será desconectado em breve",
-      duration: 3000,
+      message: "Você será desconectado...",
+      duration: 2000,
     });
-  }, [addToast]);
+    
+    await logout();
+    localStorage.removeItem("xfinance_user");
+    setLocation("/login");
+  }, [addToast, setLocation]);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
     addToast({
@@ -113,7 +170,7 @@ export default function Dashboard() {
 
       {/* Top Bar */}
       <TopBar
-        userName="Marcus Vinicius"
+        userName={currentUser?.nome || currentUser?.nick || currentUser?.email || "Usuário"}
         kpis={kpis}
         filters={filters}
         onFiltersChange={setFilters}

@@ -118,6 +118,7 @@ def login(request: LoginRequest, response: Response):
     # Criar token JWT com dados do usuário
     token_data = {
         "sub": user.email,
+        "id_user": user.id_user,
         "papel": user.papel,
         "nome": user.nome,
         "nick": user.nick,

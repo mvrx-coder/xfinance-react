@@ -1,4 +1,8 @@
-export type MarkerType = 'urgente' | 'pendente' | 'auditoria' | 'followup';
+// Tipos de marcadores correspondem às colunas do tempstate
+export type MarkerType = 'state_loc' | 'state_dt_envio' | 'state_dt_denvio' | 'state_dt_pago';
+
+// Níveis de marcador: 0=sem, 1=azul, 2=amarelo, 3=vermelho
+export type MarkerLevel = 0 | 1 | 2 | 3;
 
 export interface EncaminharInput {
   ids_princ: number[];
@@ -9,8 +13,7 @@ export interface EncaminharInput {
 export interface MarcadorInput {
   ids_princ: number[];
   marker_type: MarkerType;
-  value: boolean;
-  obs?: string;
+  value: MarkerLevel;
 }
 
 export interface ExcluirInput {
@@ -33,6 +36,12 @@ export interface UserOption {
 
 export interface MarkerOption {
   type: MarkerType;
+  label: string;
+  field: string;  // Nome amigável do campo
+}
+
+export interface MarkerLevelOption {
+  level: MarkerLevel;
   label: string;
   color: string;
 }

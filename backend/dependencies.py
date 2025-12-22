@@ -30,10 +30,12 @@ class CurrentUser:
         self,
         email: str,
         papel: str,
+        id_user: Optional[int] = None,
         nome: Optional[str] = None,
         nick: Optional[str] = None,
         short_nome: Optional[str] = None,
     ):
+        self.id_user = id_user
         self.email = email
         self.papel = papel
         self.nome = nome
@@ -115,6 +117,7 @@ def get_current_user(
         )
     
     return CurrentUser(
+        id_user=user_data.get("id_user"),
         email=user_data["email"],
         papel=user_data["papel"],
         nome=user_data.get("nome"),
@@ -143,6 +146,7 @@ def get_current_user_optional(
         return None
     
     return CurrentUser(
+        id_user=user_data.get("id_user"),
         email=user_data["email"],
         papel=user_data["papel"],
         nome=user_data.get("nome"),

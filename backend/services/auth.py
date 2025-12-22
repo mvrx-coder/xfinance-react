@@ -26,12 +26,14 @@ class UserResponse:
     """Dados do usuário retornados após login."""
     def __init__(
         self,
+        id_user: int,
         email: str,
         papel: str,
         nome: Optional[str] = None,
         nick: Optional[str] = None,
         short_nome: Optional[str] = None,
     ):
+        self.id_user = id_user
         self.email = email
         self.papel = papel
         self.nome = nome
@@ -40,6 +42,7 @@ class UserResponse:
     
     def to_dict(self) -> dict:
         return {
+            "id_user": self.id_user,
             "email": self.email,
             "papel": self.papel,
             "nome": self.nome,
@@ -96,7 +99,8 @@ def verify_login(email: str, password: str) -> Optional[UserResponse]:
         
         cur.execute(
             """
-            SELECT hash_senha,
+            SELECT id_user,
+                   hash_senha,
                    salt,
                    papel,
                    nome,
@@ -117,6 +121,7 @@ def verify_login(email: str, password: str) -> Optional[UserResponse]:
             return None
         
         (
+            id_user_db,
             hash_db,
             _salt_db,
             papel_db,
@@ -159,6 +164,7 @@ def verify_login(email: str, password: str) -> Optional[UserResponse]:
             
             logger.info("Login bem-sucedido: %s (papel=%s)", email, papel_db)
             return UserResponse(
+                id_user=id_user_db,
                 email=email,
                 papel=papel_db,
                 nome=nome_db,
@@ -248,7 +254,7 @@ def get_current_user_from_token(token: str) -> Optional[dict]:
     Obtém dados do usuário a partir do token.
     
     Returns:
-        Dict com email e papel, ou None se token inválido
+        Dict com id_user, email e papel, ou None se token inválido
     """
     payload = decode_access_token(token)
     if not payload:
@@ -256,11 +262,13 @@ def get_current_user_from_token(token: str) -> Optional[dict]:
     
     email = payload.get("sub")
     papel = payload.get("papel")
+    id_user = payload.get("id_user")
     
     if not email or not papel:
         return None
     
     return {
+        "id_user": id_user,
         "email": email,
         "papel": papel,
         "nome": payload.get("nome"),
