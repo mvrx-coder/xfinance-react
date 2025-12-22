@@ -22,7 +22,18 @@ The frontend follows a component-based architecture with:
 - Page components in `client/src/pages/`
 - Reusable UI primitives in `client/src/components/ui/`
 - Dashboard-specific components in `client/src/components/dashboard/`
+- Modal components in `client/src/components/dashboard/modals/`
 - Custom hooks in `client/src/hooks/`
+
+### Performance Module Structure
+The PerformanceModal has been refactored into a modular structure:
+- `modals/performance/data.ts` - Centralized mock data, types, animation variants, and utility functions
+- `modals/performance/KPICard.tsx` - Reusable KPI card component
+- `modals/performance/PremiumTabs.tsx` - Tab navigation component
+- `modals/performance/MarketShareChart.tsx` - Horizontal bar chart for market share
+- `modals/performance/BusinessLineChart.tsx` - Multi-year line chart with hover interactions
+- `modals/performance/OperationalBarChart.tsx` - Grouped bar chart by person/year
+- `modals/performance/DetailsGrid.tsx` - Paginated table grid for player details
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
