@@ -1,14 +1,77 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertInspectionSchema } from "@shared/schema";
 import { z } from "zod";
+import fetch from "node-fetch";
+
+// Backend FastAPI URL
+const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8000";
+
+// Proxy manual para FastAPI
+async function proxyToFastAPI(req: Request, res: Response, path?: string) {
+  const targetPath = path || req.originalUrl;
+  const url = `${FASTAPI_URL}${targetPath}`;
+  
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (req.headers.cookie) {
+      headers["Cookie"] = req.headers.cookie;
+    }
+    
+    const fetchOptions: any = {
+      method: req.method,
+      headers,
+    };
+    
+    if (req.method !== "GET" && req.method !== "HEAD" && req.body) {
+      fetchOptions.body = JSON.stringify(req.body);
+    }
+    
+    const response = await fetch(url, fetchOptions);
+    
+    // Copiar headers relevantes
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      res.setHeader("Set-Cookie", setCookie);
+    }
+    
+    const contentType = response.headers.get("content-type");
+    if (contentType) {
+      res.setHeader("Content-Type", contentType);
+    }
+    
+    res.status(response.status);
+    const data = await response.text();
+    res.send(data);
+  } catch (error) {
+    console.error("Proxy error:", error);
+    res.status(502).json({ error: "Backend unavailable" });
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
   
+  // Rotas que devem ir para o FastAPI
+  app.all("/api/auth/*", (req, res) => proxyToFastAPI(req, res));
+  app.all("/api/acoes/*", (req, res) => proxyToFastAPI(req, res));
+  app.all("/api/lookups/*", (req, res) => proxyToFastAPI(req, res));
+  
+  // Rota de inspections - PATCH vai para FastAPI, GET com params também
+  app.patch("/api/inspections/:id", (req, res) => proxyToFastAPI(req, res));
+  app.get("/api/inspections", (req, res, next) => {
+    // Se tem query params, vai para FastAPI
+    if (Object.keys(req.query).length > 0) {
+      return proxyToFastAPI(req, res);
+    }
+    next();
+  });
+
   app.get("/api/inspections", async (req, res) => {
     try {
       const inspections = await storage.getInspections();

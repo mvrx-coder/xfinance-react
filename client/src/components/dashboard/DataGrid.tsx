@@ -41,6 +41,14 @@ import {
 import { updateInspectionField } from "@/services/api/inspections";
 import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
+import { AlertCell } from "./AlertCell";
+import {
+  getInspecaoAlert,
+  getAcertoAlert,
+  getDEnvioAlert,
+  getGPagoAlert,
+  getGDPagoAlert,
+} from "./alertRules";
 import { useToast } from "@/hooks/use-toast";
 
 interface DataGridProps {
@@ -486,9 +494,10 @@ export function DataGrid({
                           {filters.columnGroups.workflow && (
                             <>
                               <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
+                                <AlertCell
                                   value={row.dtInspecao}
                                   displayValue={formatDate(row.dtInspecao)}
+                                  alertLevel={getInspecaoAlert(row.dtInspecao, row.dtEntregue)}
                                   field="dt_inspecao"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -520,9 +529,10 @@ export function DataGrid({
                           {filters.columnGroups.recebiveis && (
                             <>
                               <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
+                                <AlertCell
                                   value={row.dtAcerto}
                                   displayValue={formatDate(row.dtAcerto)}
+                                  alertLevel={getAcertoAlert(row.dtEnvio, row.dtPago)}
                                   field="dt_acerto"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -568,9 +578,10 @@ export function DataGrid({
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
                               <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
+                                <AlertCell
                                   value={row.dtDenvio}
                                   displayValue={formatDate(row.dtDenvio)}
+                                  alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago)}
                                   field="dt_denvio"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -610,9 +621,10 @@ export function DataGrid({
                           {filters.columnGroups.pagamentos && (
                             <>
                               <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
+                                <AlertCell
                                   value={row.dtGuyPago}
                                   displayValue={formatDate(row.dtGuyPago)}
+                                  alertLevel={getGPagoAlert(row.dtEntregue, row.dtGuyPago)}
                                   field="dt_guy_pago"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -631,9 +643,10 @@ export function DataGrid({
                                 />
                               </TableCell>
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
+                                <AlertCell
                                   value={row.dtGuyDpago}
                                   displayValue={formatDate(row.dtGuyDpago)}
+                                  alertLevel={getGDPagoAlert(row.dtEntregue, row.dtGuyDpago)}
                                   field="dt_guy_dpago"
                                   idPrinc={row.idPrinc}
                                   type="date"
