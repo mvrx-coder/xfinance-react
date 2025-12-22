@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Modal } from "../Modal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,11 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { 
-  User, 
-  Shield, 
-  UserCog, 
   Sparkles, 
-  Mail, 
   Eye,
   EyeOff,
   ClipboardList,
@@ -26,19 +21,20 @@ import {
   Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { type Papel, PAPEIS, isPapelValido } from "@/types/usuario";
+import { createUsuario } from "@/services/api/usuarios";
 
 interface UsersModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type Role = "admin" | "Inspetor" | "Worker" | "financeiro";
-
 interface FormState {
   email: string;
   senha: string;
   confirmarSenha: string;
-  papel: Role | "";
+  papel: Papel | "";
+  ativo: boolean;
 }
 
 interface FormErrors {
@@ -49,19 +45,12 @@ interface FormErrors {
 }
 
 const mockUsers = [
-  { id: "1", email: "AAS@teste.com", role: "Inspetor" },
-  { id: "2", email: "ACB@teste.com", role: "Inspetor" },
-  { id: "3", email: "AGR@teste.com", role: "admin" },
-  { id: "4", email: "ALS@teste.com", role: "Inspetor" },
-  { id: "5", email: "CENTO@teste.com", role: "Worker" },
+  { id: "1", email: "AAS@teste.com", papel: "analista" as Papel },
+  { id: "2", email: "ACB@teste.com", papel: "analista" as Papel },
+  { id: "3", email: "AGR@teste.com", papel: "admin" as Papel },
+  { id: "4", email: "ALS@teste.com", papel: "auditor" as Papel },
+  { id: "5", email: "CENTO@teste.com", papel: "financeiro" as Papel },
 ];
-
-const roleLabels: Record<Role, string> = {
-  admin: "admin",
-  Inspetor: "Inspetor",
-  Worker: "Worker",
-  financeiro: "financeiro",
-};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -84,6 +73,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
     senha: "",
     confirmarSenha: "",
     papel: "",
+    ativo: true,
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -94,7 +84,10 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
   };
 
   const validatePassword = (senha: string): boolean => {
-    return senha.length >= 6;
+    if (senha.length < 8) return false;
+    const hasLetter = /[a-zA-Z]/.test(senha);
+    const hasNumber = /[0-9]/.test(senha);
+    return hasLetter && hasNumber;
   };
 
   const validateForm = (): boolean => {
@@ -109,7 +102,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
     if (!form.senha) {
       newErrors.senha = "Senha obrigatória";
     } else if (!validatePassword(form.senha)) {
-      newErrors.senha = "Min. 6 caracteres";
+      newErrors.senha = "Min. 8 caracteres com letra e número";
     }
     
     if (!form.confirmarSenha) {
@@ -120,13 +113,15 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
     
     if (!form.papel) {
       newErrors.papel = "Selecione um papel";
+    } else if (!isPapelValido(form.papel)) {
+      newErrors.papel = "Papel inválido";
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: keyof FormState, value: string) => {
+  const handleInputChange = (field: keyof FormState, value: string | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -135,23 +130,30 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
+    if (!form.papel || !isPapelValido(form.papel)) return;
     
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Usuário criado",
-        description: `${form.email} foi cadastrado com sucesso.`,
+      await createUsuario({
+        email: form.email,
+        senha: form.senha,
+        papel: form.papel,
+        ativo: form.ativo,
       });
       
-      setForm({ email: "", senha: "", confirmarSenha: "", papel: "" });
+      toast({
+        title: "Usuário criado com sucesso",
+        description: `O usuário foi cadastrado no sistema.`,
+      });
+      
+      setForm({ email: "", senha: "", confirmarSenha: "", papel: "", ativo: true });
       setErrors({});
-    } catch {
+      onClose();
+    } catch (error) {
       toast({
         title: "Erro ao criar usuário",
-        description: "Tente novamente mais tarde.",
+        description: error instanceof Error ? error.message : "Tente novamente mais tarde.",
         variant: "destructive",
       });
     } finally {
@@ -159,7 +161,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
     }
   };
 
-  const isFormValid = form.email && form.senha && form.confirmarSenha && form.papel;
+  const isFormValid = form.email && form.senha && form.confirmarSenha && form.papel && Object.keys(errors).length === 0;
 
   return (
     <Modal
@@ -211,7 +213,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="senha" className="text-sm text-foreground flex items-center gap-1">
-                  Senha (mínimo 6 caracteres) <span className="text-destructive">*</span>
+                  Senha (mínimo 8 caracteres) <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -236,7 +238,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
                 {errors.senha && (
                   <p className="text-xs text-destructive">{errors.senha}</p>
                 )}
-                <p className="text-xs text-muted-foreground">Min. 6 caracteres; evite senhas comuns.</p>
+                <p className="text-xs text-muted-foreground">Min. 8 caracteres com letra e número.</p>
               </div>
               
               <div className="space-y-2">
@@ -284,10 +286,11 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
                   <SelectValue placeholder="Selecione o papel..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">admin</SelectItem>
-                  <SelectItem value="Inspetor">Inspetor</SelectItem>
-                  <SelectItem value="Worker">Worker</SelectItem>
-                  <SelectItem value="financeiro">financeiro</SelectItem>
+                  {PAPEIS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {errors.papel && (
@@ -337,7 +340,7 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
                     data-testid={`user-row-${user.id}`}
                   >
                     <span className="text-sm text-foreground">{user.email}</span>
-                    <span className="text-sm text-muted-foreground">{user.role}</span>
+                    <span className="text-sm text-muted-foreground">{PAPEIS.find(p => p.value === user.papel)?.label || user.papel}</span>
                   </motion.div>
                 ))}
               </motion.div>
