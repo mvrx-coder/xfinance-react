@@ -322,7 +322,7 @@ export function DataGrid({
                       </TableHead>
                       
                       {/* Separador vertical - GDPago é separador de grupo */}
-                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-warning" />
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card column-separator column-separator-warning" />
                       
                       <TableHead className="w-[60px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
