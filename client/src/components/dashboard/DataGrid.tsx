@@ -27,6 +27,8 @@ import {
   CreditCard,
   FileText,
   Sparkles,
+  DollarSign,
+  AlertCircle,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -460,7 +462,39 @@ export function DataGrid({
                           {filters.columnGroups.recebiveis && (
                             <>
                               <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.dtAcerto)}
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {formatDate(row.dtAcerto)}
+                                  
+                                  {/* DEMO: Opção 1 - Mini Badge com Clock (linha 0) */}
+                                  {index === 0 && (
+                                    <Badge variant="outline" className="px-1.5 py-0 h-5 text-[9px] bg-warning/10 border-warning/40 text-warning gap-0.5">
+                                      <Clock className="w-2.5 h-2.5" />
+                                      <span>Aguard.</span>
+                                    </Badge>
+                                  )}
+                                  
+                                  {/* DEMO: Opção 2 - Dot Pulsante (linha 1) */}
+                                  {index === 1 && (
+                                    <span className="relative flex h-2.5 w-2.5">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning"></span>
+                                    </span>
+                                  )}
+                                  
+                                  {/* DEMO: Opção 3 - Badge Moeda (linha 2) */}
+                                  {index === 2 && (
+                                    <Badge variant="outline" className="px-1 py-0 h-5 text-[9px] bg-amber-500/10 border-amber-500/40 text-amber-400">
+                                      <DollarSign className="w-3 h-3" />
+                                    </Badge>
+                                  )}
+                                  
+                                  {/* DEMO: Opção 4 - Badge Outline Glow (linha 3) */}
+                                  {index === 3 && (
+                                    <Badge variant="outline" className="px-1.5 py-0 h-5 text-[9px] border-warning/60 text-warning shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+                                      <AlertCircle className="w-3 h-3" />
+                                    </Badge>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className=" text-xs text-muted-foreground text-center">
                                 {formatDate(row.dtEnvio)}
