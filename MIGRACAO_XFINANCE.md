@@ -65,13 +65,18 @@ Migrar o xFinance para uma arquitetura moderna mantendo:
 | Constants centralizadas | ✅ index.ts |
 | Documentação atualizada | ✅ ARCHITECTURE.md |
 
-### Backend FastAPI
+### Backend FastAPI ✅ IMPLEMENTADO
 
 | Item | Status |
 |------|--------|
-| Estrutura | ❌ A criar |
-| Rotas API | ❌ A criar |
-| Conexão SQLite | ❌ A criar |
+| Estrutura base | ✅ main.py, config.py, database.py |
+| Autenticação | ✅ JWT + Cookie httponly |
+| Serviço de permissões | ✅ Consulta tabela `permi` |
+| SQLs de ordenação | ✅ Copiados do x_main |
+| GET /api/auth/login | ✅ Testado |
+| GET /api/auth/me | ✅ Testado |
+| GET /api/inspections | ✅ **3078 registros** |
+| Sigilo por papel | ✅ Implementado |
 
 ---
 
@@ -126,7 +131,20 @@ x_finan/
 │   │
 │   └── index.html
 │
-├── backend/                    # FastAPI (A CRIAR)
+├── backend/                    # FastAPI ✅ CRIADO
+│   ├── main.py                 # Entry point
+│   ├── config.py               # Configurações
+│   ├── database.py             # Conexão SQLite
+│   ├── dependencies.py         # CurrentUser, require_admin
+│   ├── routers/
+│   │   ├── auth.py             # Login/logout/me
+│   │   └── inspections.py      # CRUD inspeções
+│   └── services/
+│       ├── auth.py             # JWT + bcrypt
+│       ├── permissions.py      # Sigilo por papel
+│       └── queries/
+│           ├── column_metadata.py
+│           └── grid.py         # SQLs complexas
 ├── shared/
 │   └── schema.ts               # Drizzle SQLite
 └── docs/
@@ -168,35 +186,30 @@ x_main/
 
 ## 📝 Próximos Passos
 
-### Imediato (Backend FastAPI)
+### ✅ Concluído (Fase 1 e 2)
 
-1. **Criar estrutura backend/**
-   ```
-   backend/
-   ├── main.py
-   ├── config.py
-   ├── database.py
-   ├── routers/
-   │   ├── inspections.py
-   │   ├── users.py
-   │   ├── kpis.py
-   │   └── lookups.py
-   └── services/
-       └── queries.py
-   ```
+1. ✅ **Estrutura backend/** criada
+2. ✅ **Autenticação JWT** funcionando
+3. ✅ **Queries SQL migradas** do x_main
+4. ✅ **GET /api/inspections** retornando 3078 registros
+5. ✅ **Sigilo por papel** implementado
 
-2. **Migrar Queries SQL do x_main**
-   - Copiar de `x_main/app/services/`
-   - Adaptar para FastAPI
+### 🔄 Em Andamento (Fase 3)
 
-3. **Conectar Frontend ↔ Backend**
-   - Substituir mocks por chamadas reais
-   - Testar CRUD completo
+6. **Conectar Frontend ↔ Backend**
+   - [ ] Integrar `Login.tsx` com `/api/auth/login`
+   - [ ] Integrar `DataGrid` com `/api/inspections`
+   - [ ] Implementar `/api/kpis`
+   - [ ] Implementar `/api/lookups/*`
 
-### Futuro
+### Futuro (Fase 4+)
 
-4. **Testes E2E**
-5. **Deploy unificado**
+7. **CRUD Completo**
+   - POST /api/inspections (criar)
+   - PATCH /api/inspections/{id} (editar)
+   - DELETE /api/inspections/{id} (excluir)
+8. **Testes E2E**
+9. **Deploy unificado**
 
 ---
 
@@ -230,7 +243,31 @@ x_main/
 
 1. ✅ Frontend React prototipado e refatorado
 2. ✅ Rodando localmente em `http://localhost:5173`
-3. ⏳ **Próximo:** Criar backend FastAPI com acesso ao SQLite real
+3. ✅ Backend FastAPI funcionando em `http://localhost:8000`
+4. ✅ **3078 inspeções** carregadas do SQLite real
+5. ⏳ **Próximo:** Integrar frontend com backend
+
+### Comandos para Rodar
+
+```powershell
+# Backend (terminal 1)
+cd E:\MVRX\Financeiro\xFinance_3.0\x_finan\backend
+.\.venv\Scripts\Activate.ps1
+$env:XF_BASE_DIR="E:\MVRX\Financeiro\xFinance_3.0"
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+
+# Frontend (terminal 2)
+cd E:\MVRX\Financeiro\xFinance_3.0\x_finan
+npm run dev
+```
+
+### Testar Login
+
+```powershell
+# Usuário de teste (senha resetada)
+# Email: AGR@teste.com
+# Senha: admin123
+```
 
 ---
 
