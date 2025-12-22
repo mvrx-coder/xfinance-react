@@ -60,11 +60,9 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import type { Inspection, FilterState } from "@shared/schema";
 import type { MarkerType, UserOption } from "@/types/acoes";
-import { setSelected, getSelected, toggleSelection, clearSelection } from "@/stores/selection";
 import { 
   excluir, 
   encaminhar, 
@@ -89,7 +87,6 @@ interface DataGridProps {
   isLoading?: boolean;
   onRowClick?: (inspection: Inspection) => void;
   onRefresh?: () => void;
-  onOpenActionCenter?: () => void;
 }
 
 function formatCurrency(value: number | null | undefined): string {
@@ -647,27 +644,11 @@ export function DataGrid({
   isLoading = false,
   onRowClick,
   onRefresh,
-  onOpenActionCenter,
 }: DataGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(new Set());
-
-  const handleRowSelect = (id: number, checked: boolean) => {
-    setSelectedRowIds((prev) => {
-      const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(id);
-      } else {
-        newSet.delete(id);
-      }
-      setSelected(Array.from(newSet));
-      return newSet;
-    });
-  };
-
   const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
   const [segurLookup, setSegurLookup] = useState<LookupOption[]>([]);
   const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
@@ -688,19 +669,6 @@ export function DataGrid({
   const endIndex = startIndex + rowsPerPage;
   const currentData = data.slice(startIndex, endIndex);
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIds = currentData.map((row) => row.idPrinc).filter((id): id is number => id !== null && id !== undefined);
-      setSelectedRowIds(new Set(allIds));
-      setSelected(allIds);
-    } else {
-      setSelectedRowIds(new Set());
-      clearSelection();
-    }
-  };
-
-  const isAllSelected = currentData.length > 0 && currentData.every((row) => row.idPrinc && selectedRowIds.has(row.idPrinc));
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -715,19 +683,9 @@ export function DataGrid({
             <Table>
               <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
                 <TableRow className="border-b border-white/10">
-                  {/* Checkbox de seleção */}
-                  <TableHead className="w-[40px] bg-card relative">
-                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
-                      className="border-white/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      data-testid="checkbox-select-all"
-                    />
-                  </TableHead>
-                  
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] bg-card relative">
+                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
                     <span className="text-xs font-bold text-primary tracking-wider">#</span>
                   </TableHead>
                   
@@ -902,28 +860,12 @@ export function DataGrid({
                         key={row.idPrinc || index}
                         className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
                           ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
-                          ${row.idPrinc && selectedRowIds.has(row.idPrinc) ? "bg-primary/10" : ""}
                         `}
                         onClick={() => onRowClick?.(row)}
                         onMouseEnter={() => setHoveredRow(index)}
                         onMouseLeave={() => setHoveredRow(null)}
                         data-testid={`row-inspection-${row.idPrinc || index}`}
                       >
-                          {/* Checkbox de seleção */}
-                          <TableCell className="w-[40px]">
-                            <Checkbox
-                              checked={row.idPrinc ? selectedRowIds.has(row.idPrinc) : false}
-                              onCheckedChange={(checked) => {
-                                if (row.idPrinc) {
-                                  handleRowSelect(row.idPrinc, checked as boolean);
-                                }
-                              }}
-                              onClick={(e) => e.stopPropagation()}
-                              className="border-white/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                              data-testid={`checkbox-row-${row.idPrinc || index}`}
-                            />
-                          </TableCell>
-                          
                           {/* Grupo 1: Ação */}
                           <TableCell className="leading-tight">
                             <button
@@ -931,11 +873,7 @@ export function DataGrid({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedInspection(row);
-                                if (onOpenActionCenter) {
-                                  onOpenActionCenter();
-                                } else {
-                                  setIsActionCenterOpen(true);
-                                }
+                                setIsActionCenterOpen(true);
                               }}
                               data-testid={`badge-action-${row.idPrinc || index}`}
                             >

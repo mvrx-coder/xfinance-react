@@ -9,7 +9,6 @@ import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
 import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
-import { ActionCenterDrawer } from "@/components/dashboard/ActionCenter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Inspection, FilterState, KPIs } from "@shared/schema";
 
@@ -38,8 +37,6 @@ export default function Dashboard() {
     financial: false,
     guyPay: false,
   });
-
-  const [actionCenterOpen, setActionCenterOpen] = useState(false);
 
   const { data: inspections = [], isLoading: isLoadingInspections, refetch: refetchInspections } = useQuery<Inspection[]>({
     queryKey: ["/api/inspections"],
@@ -93,7 +90,7 @@ export default function Dashboard() {
     addToast({
       type: "info",
       title: "Registro selecionado",
-      message: `ID: ${inspection.idPrinc}`,
+      message: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
       duration: 3000,
     });
   }, [addToast]);
@@ -139,7 +136,6 @@ export default function Dashboard() {
         isLoading={isLoadingInspections}
         onRowClick={handleRowClick}
         onRefresh={handleSearch}
-        onOpenActionCenter={() => setActionCenterOpen(true)}
       />
 
       {/* Modals */}
@@ -167,19 +163,6 @@ export default function Dashboard() {
       <GuyPayModal
         isOpen={modals.guyPay}
         onClose={() => handleCloseModal("guyPay")}
-      />
-
-      {/* Action Center Drawer */}
-      <ActionCenterDrawer
-        isOpen={actionCenterOpen}
-        onClose={() => setActionCenterOpen(false)}
-        onRefresh={handleSearch}
-        onClearFilters={() => setFilters({
-          player: false,
-          myJob: false,
-          dbLimit: true,
-          columnGroups: { workflow: true, recebiveis: true, pagamentos: true },
-        })}
       />
     </div>
   );
