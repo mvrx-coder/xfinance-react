@@ -203,7 +203,7 @@ export function DataGrid({
         {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-[calc(100vh-180px)]">
-            <Table className="min-w-[1600px] table-fixed">
+            <Table fullWidth={false} className="min-w-[1600px] table-fixed">
               <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
                 <TableRow className="border-b border-white/10">
                   {/* Grupo 1: Ação */}
