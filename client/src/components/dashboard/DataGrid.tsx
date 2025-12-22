@@ -148,6 +148,8 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
         <>
           <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          {/* Separador - GDPago é grupo */}
+          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-warning/30" /></TableCell>
           <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
           <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
@@ -502,6 +504,12 @@ export function DataGrid({
                               <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
                                 {formatCurrency(row.guyHonorario)}
                               </TableCell>
+                              
+                              {/* Separador - GDPago é grupo */}
+                              <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
+                                <div className="w-[1px] h-full bg-warning/30" />
+                              </TableCell>
+                              
                               <TableCell className=" text-xs text-muted-foreground text-center">
                                 {formatDate(row.dtGuyDpago)}
                               </TableCell>
