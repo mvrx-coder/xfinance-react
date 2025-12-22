@@ -35,6 +35,15 @@ The PerformanceModal has been refactored into a modular structure:
 - `modals/performance/OperationalBarChart.tsx` - Grouped bar chart by person/year
 - `modals/performance/DetailsGrid.tsx` - Paginated table grid for player details
 
+### Investments Module Structure
+The InvestmentsModal has been refactored into a modular structure:
+- `modals/investments/data.ts` - Centralized mock data, formatters, and animation variants
+- `modals/investments/KPICard.tsx` - Reusable KPI card component with gradient backgrounds
+- `modals/investments/HighlightCard.tsx` - Card for top winner/loser/largest position
+- `modals/investments/AllocationLegend.tsx` - Interactive legend for donut chart
+- `modals/investments/PremiumDonutChart.tsx` - Interactive animated donut chart
+- `modals/investments/PortfolioGrid.tsx` - Paginated portfolio table with investment details
+
 ### Backend Architecture
 - **Runtime**: Node.js with Express
 - **Language**: TypeScript with ESM modules

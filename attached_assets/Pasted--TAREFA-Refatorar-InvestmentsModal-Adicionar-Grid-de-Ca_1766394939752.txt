@@ -1,0 +1,190 @@
+# TAREFA: Refatorar InvestmentsModal + Adicionar Grid de Carteira
+
+## ⚠️ REGRAS IMPORTANTES
+- NÃO alterar estética/visual existente (cores, animações, gráfico donut)
+- Manter TODAS as funcionalidades (KPIs, Destaques, Alocação)
+- O modal deve continuar funcionando perfeitamente após as alterações
+
+---
+
+## PROBLEMA 1: Arquivo muito grande (601 linhas)
+
+O arquivo `client/src/components/dashboard/modals/InvestmentsModal.tsx` precisa ser refatorado.
+
+### AÇÃO: Extrair componentes para arquivos separados
+
+Criar pasta e arquivos:
+client/src/components/dashboard/modals/investments/├── index.ts # Re-export do InvestmentsModal├── data.ts # Dados mockados (mockAllocations, mockHighlights, mockKPIs, mockPortfolio)├── PremiumDonutChart.tsx # Gráfico donut interativo├── KPICard.tsx # Componente de card KPI├── HighlightCard.tsx # Card de destaque (Winner, Loser, Maior)├── AllocationLegend.tsx # Legenda da alocação└── PortfolioGrid.tsx # NOVO - Grid da carteira de investimentos
+---
+## PROBLEMA 2: Falta o Grid "Carteira de Investimentos"
+Na versão original do xFinance (Dash), o modal de Investimentos tinha um **grid completo** na parte inferior mostrando cada investimento individual.
+### Colunas do Grid Original:
+- Excluir (botão)
+- Investidor
+- Instituição
+- Tipo
+- Detalhe
+- Aplicado (valor)
+- Bruto (valor)
+- Líquido (valor)
+- G/P (ganho/perda - cor condicional)
+- RBruto (resgate bruto)
+- Rentab. % (cor condicional)
+- Aplicação (data)
+- Vencimento (data)
+- IR/IOF
+### AÇÃO: Criar PortfolioGrid.tsx
+// client/src/components/dashboard/modals/investments/PortfolioGrid.tsx
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ChevronLeft, ChevronRight, Trash2, Wallet } from "lucide-react";
+import { mockPortfolio, formatCurrency, itemVariants } from "./data";
+export function PortfolioGrid() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(mockPortfolio.length / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = mockPortfolio.slice(startIndex, startIndex + itemsPerPage);
+  return (
+    <motion.div variants={itemVariants} className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Wallet className="w-4 h-4 text-primary" />
+        <span className="text-sm font-medium text-foreground">Carteira de Investimentos</span>
+        <Badge variant="outline" className="text-xs border-white/20 ml-auto">
+          {mockPortfolio.length} ativos
+        </Badge>
+      </div>
+      
+      <div className="rounded-xl border border-white/10 overflow-hidden bg-[rgba(15,15,35,0.6)]">
+        <ScrollArea className="w-full">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-white/10">
+                <TableHead className="w-[50px] text-center text-xs text-muted-foreground">Del</TableHead>
+                <TableHead className="text-xs text-muted-foreground">Investidor</TableHead>
+                <TableHead className="text-xs text-muted-foreground">Instituição</TableHead>
+                <TableHead className="text-xs text-muted-foreground">Tipo</TableHead>
+                <TableHead className="text-xs text-muted-foreground">Detalhe</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right">Aplicado</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right">Bruto</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right">Líquido</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right">G/P</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right">Rentab.</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-center">Aplicação</TableHead>
+                <TableHead className="text-xs text-muted-foreground text-center">Vencimento</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentData.map((row) => (
+                <TableRow 
+                  key={row.id} 
+                  className="h-[28px] border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                >
+                  <TableCell className="text-center">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive/60 hover:text-destructive">
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </TableCell>
+                  <TableCell className="text-xs font-medium">{row.investidor}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{row.instituicao}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{row.tipo}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[120px] truncate">{row.detalhe}</TableCell>
+                  <TableCell className="text-xs text-right font-mono">{formatCurrency(row.aplicado)}</TableCell>
+                  <TableCell className="text-xs text-right font-mono">{formatCurrency(row.bruto)}</TableCell>
+                  <TableCell className="text-xs text-right font-mono">{formatCurrency(row.liquido)}</TableCell>
+                  <TableCell className={`text-xs text-right font-mono ${row.ganhoPperda >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {row.ganhoPerda >= 0 ? '+' : ''}{formatCurrency(row.ganhoPerda)}
+                  </TableCell>
+                  <TableCell className={`text-xs text-right font-mono ${row.rentabilidade >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {row.rentabilidade >= 0 ? '+' : ''}{row.rentabilidade.toFixed(2)}%
+                  </TableCell>
+                  <TableCell className="text-xs text-center text-muted-foreground">{row.dtAplicacao}</TableCell>
+                  <TableCell className="text-xs text-center text-muted-foreground">{row.dtVencimento}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+      
+      {/* Paginação */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
+          Mostrando {startIndex + 1}-{Math.min(startIndex + itemsPerPage, mockPortfolio.length)} de {mockPortfolio.length}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="h-7 w-7"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-xs text-muted-foreground">{currentPage} / {totalPages}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="h-7 w-7"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}### Adicionar dados mockados em data.ts:
+export const mockPortfolio = [
+  { id: "1", investidor: "Marcus", instituicao: "XP", tipo: "CDB", detalhe: "CDB VOLKSWAGEN 112%", aplicado: 50000, bruto: 60629.63, liquido: 58500, ganhoPerda: 8500, rentabilidade: 17.0, dtAplicacao: "15/01/24", dtVencimento: "15/01/26" },
+  { id: "2", investidor: "Marcus", instituicao: "Nubank", tipo: "CDB", detalhe: "CDB AFINZ 115%", aplicado: 30000, bruto: 34500, liquido: 33200, ganhoPerda: 3200, rentabilidade: 10.7, dtAplicacao: "20/03/24", dtVencimento: "20/03/25" },
+  { id: "3", investidor: "Marcus", instituicao: "BTG", tipo: "LCI", detalhe: "LCI BTG 94%", aplicado: 80000, bruto: 86400, liquido: 86400, ganhoPerda: 6400, rentabilidade: 8.0, dtAplicacao: "01/02/24", dtVencimento: "01/02/26" },
+  { id: "4", investidor: "Empresa", instituicao: "Tesouro", tipo: "Tesouro", detalhe: "Tesouro Prefixado 2027", aplicado: 40000, bruto: 50187.85, liquido: 48500, ganhoPerda: 8500, rentabilidade: 21.25, dtAplicacao: "10/06/23", dtVencimento: "01/01/27" },
+  { id: "5", investidor: "Marcus", instituicao: "Inter", tipo: "LCA", detalhe: "LCA Inter 92%", aplicado: 25000, bruto: 26755.23, liquido: 26755.23, ganhoPerda: 1755.23, rentabilidade: 7.02, dtAplicacao: "05/05/24", dtVencimento: "05/11/25" },
+  { id: "6", investidor: "Empresa", instituicao: "XP", tipo: "Fundo", detalhe: "FIRF CP XP", aplicado: 20000, bruto: 22122.31, liquido: 21500, ganhoPerda: 1500, rentabilidade: 7.5, dtAplicacao: "01/01/24", dtVencimento: "-" },
+  { id: "7", investidor: "Marcus", instituicao: "Rico", tipo: "CDB", detalhe: "CDB Original 110%", aplicado: 15000, bruto: 16200, liquido: 15800, ganhoPerda: 800, rentabilidade: 5.3, dtAplicacao: "10/04/24", dtVencimento: "10/04/25" },
+  { id: "8", investidor: "Empresa", instituicao: "BTG", tipo: "Fundo", detalhe: "FIRF LP BTG", aplicado: 7000, bruto: 7736.69, liquido: 7500, ganhoPerda: 500, rentabilidade: 7.14, dtAplicacao: "15/02/24", dtVencimento: "-" },
+];---
+## ESTRUTURA FINAL ESPERADA
+Adicionar dados mockados em data.ts:
+export const mockPortfolio = [
+  { id: "1", investidor: "Marcus", instituicao: "XP", tipo: "CDB", detalhe: "CDB VOLKSWAGEN 112%", aplicado: 50000, bruto: 60629.63, liquido: 58500, ganhoPerda: 8500, rentabilidade: 17.0, dtAplicacao: "15/01/24", dtVencimento: "15/01/26" },
+  { id: "2", investidor: "Marcus", instituicao: "Nubank", tipo: "CDB", detalhe: "CDB AFINZ 115%", aplicado: 30000, bruto: 34500, liquido: 33200, ganhoPerda: 3200, rentabilidade: 10.7, dtAplicacao: "20/03/24", dtVencimento: "20/03/25" },
+  { id: "3", investidor: "Marcus", instituicao: "BTG", tipo: "LCI", detalhe: "LCI BTG 94%", aplicado: 80000, bruto: 86400, liquido: 86400, ganhoPerda: 6400, rentabilidade: 8.0, dtAplicacao: "01/02/24", dtVencimento: "01/02/26" },
+  { id: "4", investidor: "Empresa", instituicao: "Tesouro", tipo: "Tesouro", detalhe: "Tesouro Prefixado 2027", aplicado: 40000, bruto: 50187.85, liquido: 48500, ganhoPerda: 8500, rentabilidade: 21.25, dtAplicacao: "10/06/23", dtVencimento: "01/01/27" },
+  { id: "5", investidor: "Marcus", instituicao: "Inter", tipo: "LCA", detalhe: "LCA Inter 92%", aplicado: 25000, bruto: 26755.23, liquido: 26755.23, ganhoPerda: 1755.23, rentabilidade: 7.02, dtAplicacao: "05/05/24", dtVencimento: "05/11/25" },
+  { id: "6", investidor: "Empresa", instituicao: "XP", tipo: "Fundo", detalhe: "FIRF CP XP", aplicado: 20000, bruto: 22122.31, liquido: 21500, ganhoPerda: 1500, rentabilidade: 7.5, dtAplicacao: "01/01/24", dtVencimento: "-" },
+  { id: "7", investidor: "Marcus", instituicao: "Rico", tipo: "CDB", detalhe: "CDB Original 110%", aplicado: 15000, bruto: 16200, liquido: 15800, ganhoPerda: 800, rentabilidade: 5.3, dtAplicacao: "10/04/24", dtVencimento: "10/04/25" },
+  { id: "8", investidor: "Empresa", instituicao: "BTG", tipo: "Fundo", detalhe: "FIRF LP BTG", aplicado: 7000, bruto: 7736.69, liquido: 7500, ganhoPerda: 500, rentabilidade: 7.14, dtAplicacao: "15/02/24", dtVencimento: "-" },
+];
+________________________________________
+ESTRUTURA FINAL ESPERADA
+modals/
+├── InvestmentsModal.tsx (~250 linhas)
+└── investments/
+    ├── index.ts
+    ├── data.ts (~100 linhas)
+    ├── PremiumDonutChart.tsx (~150 linhas)
+    ├── KPICard.tsx (~50 linhas)
+    ├── HighlightCard.tsx (~50 linhas)
+    ├── AllocationLegend.tsx (~60 linhas)
+    └── PortfolioGrid.tsx (~100 linhas) ← NOVO
+________________________________________
+NO InvestmentsModal.tsx
+Adicionar o PortfolioGrid após a seção do gráfico donut:
+import { PortfolioGrid } from "./investments/PortfolioGrid";
+// ... dentro do componente, após o grid de 2 colunas (KPIs + Gráfico):
+<PortfolioGrid />
+________________________________________
+NÃO FAZER
+•	NÃO alterar o gráfico donut (PremiumDonutChart)
+•	NÃO alterar cores ou animações existentes
+•	NÃO remover funcionalidades (KPIs, Destaques, Alocação)
