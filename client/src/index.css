@@ -331,6 +331,29 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.02);
   }
 
+  /* Header separator line with gradient fade and glow */
+  .header-separator {
+    position: relative;
+    border-bottom: none !important;
+  }
+  .header-separator::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      rgba(206, 98, 217, 0.6) 0%,
+      rgba(206, 98, 217, 0.4) 30%,
+      rgba(0, 188, 212, 0.3) 60%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 8px rgba(206, 98, 217, 0.3),
+      0 0 4px rgba(0, 188, 212, 0.2);
+  }
+
   /* Gradient utilities */
   .gradient-primary {
     @apply bg-gradient-to-r from-primary via-secondary to-primary;

@@ -205,7 +205,7 @@ export function DataGrid({
           <ScrollArea className="h-[calc(100vh-180px)]">
             <Table fullWidth={false} className="min-w-[1600px] table-fixed">
               <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
-                <TableRow className="border-b border-white/10">
+                <TableRow className="header-separator">
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
