@@ -1,64 +1,56 @@
 import { type User, type InsertUser, type Inspection, type InsertInspection, type KPIs } from "@shared/schema";
-import { randomUUID } from "crypto";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getInspections(): Promise<Inspection[]>;
-  getInspection(id: string): Promise<Inspection | undefined>;
+  getInspection(id: number): Promise<Inspection | undefined>;
   createInspection(inspection: InsertInspection): Promise<Inspection>;
-  updateInspection(id: string, inspection: Partial<InsertInspection>): Promise<Inspection | undefined>;
-  deleteInspection(id: string): Promise<boolean>;
+  updateInspection(id: number, inspection: Partial<InsertInspection>): Promise<Inspection | undefined>;
+  deleteInspection(id: number): Promise<boolean>;
   getKPIs(): Promise<KPIs>;
 }
 
 function generateMockInspections(): Inspection[] {
-  const players = ["Aon", "Swiss Re", "Howden", "Inter", "Free Job", "Marsh", "Lockton", "IRB", "Gallagher"];
-  const segurados = [
-    "Nexa", "CLIR 2 CD", "CLO CD", "DeMilIus", "RAJLOG", "SAVOY", "Caramuru", 
-    "CEDRO Min...", "Vallourec", "Maracanã", "Top Paper", "Lwart", "CPFL PCHs",
-    "Belo Alimen...", "Mosaic", "ENGEPACK", "Cia Muller C...", "COMEXIM", "Echoenergí..."
-  ];
-  const guilties = ["AAS", "HEA", "MVR", "ARR", "ALS", "RES", "LVS"];
-  const guys = ["MVR", "AAS", "HEA"];
   const atividades = ["Mineradora", "CD", "Falação, Confe", "Biodiesel", "Mineração, Be...", "GO", "Papel", "Química, Óleo", "Hidro Usina, Pn", "Alimentos, Fria", "Terminal, Velcu", "Fertilizantes", "Grãos, Café", "Fotovoltaica", "Subesta..."];
 
   const inspections: Inspection[] = [];
 
   for (let i = 0; i < 25; i++) {
-    const honorarios = Math.random() * 5000 + 500;
-    const despesas = Math.random() * 1500 + 100;
-    const gHonorarios = Math.random() * 4000;
-    const gDespesas = Math.random() * 1000;
+    const honorario = Math.random() * 5000 + 500;
+    const despesa = Math.random() * 1500 + 100;
+    const guyHonorario = Math.random() * 4000;
+    const guyDespesa = Math.random() * 1000;
 
     inspections.push({
-      id: randomUUID(),
-      player: players[Math.floor(Math.random() * players.length)],
-      segurado: segurados[Math.floor(Math.random() * segurados.length)],
+      idPrinc: i + 1,
+      idContr: Math.floor(Math.random() * 9) + 1,
+      idSegur: Math.floor(Math.random() * 19) + 1,
+      idAtivi: Math.floor(Math.random() * 15) + 1,
+      idUf: Math.floor(Math.random() * 27) + 1,
+      idCidade: Math.floor(Math.random() * 11) + 1,
+      idUserGuy: Math.floor(Math.random() * 3) + 1,
+      idUserGuilty: Math.floor(Math.random() * 7) + 1,
       loc: Math.floor(Math.random() * 5) + 1,
-      guilty: guilties[Math.floor(Math.random() * guilties.length)],
-      guy: guys[Math.floor(Math.random() * guys.length)],
-      meta: Math.random() > 0.5 ? "Sim" : "Não",
-      inspecao: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
-      entregue: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      meta: Math.random() > 0.5 ? 1 : 0,
+      ms: Math.random() > 0.7 ? 1 : 0,
+      dtInspecao: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      dtEntregue: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
       prazo: Math.floor(Math.random() * 50) + 1,
-      sw: Math.floor(Math.random() * 60) + 1,
-      acerto: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
-      envio: `${Math.floor(Math.random() * 28) + 1}/11`,
-      pago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      honorarios: parseFloat(honorarios.toFixed(2)),
-      dEnvio: `${Math.floor(Math.random() * 28) + 1}/10`,
-      dPago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      despesas: parseFloat(despesas.toFixed(2)),
-      gPago: `${Math.floor(Math.random() * 28) + 1}/11`,
-      gHonorarios: parseFloat(gHonorarios.toFixed(2)),
-      gdPago: `${Math.floor(Math.random() * 28) + 1}/09`,
-      gDespesas: parseFloat(gDespesas.toFixed(2)),
+      dtAcerto: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}`,
+      dtEnvio: `${Math.floor(Math.random() * 28) + 1}/11`,
+      dtPago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      honorario: parseFloat(honorario.toFixed(2)),
+      dtDenvio: `${Math.floor(Math.random() * 28) + 1}/10`,
+      dtDpago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      despesa: parseFloat(despesa.toFixed(2)),
+      dtGuyPago: `${Math.floor(Math.random() * 28) + 1}/11`,
+      guyHonorario: parseFloat(guyHonorario.toFixed(2)),
+      dtGuyDpago: `${Math.floor(Math.random() * 28) + 1}/09`,
+      guyDespesa: parseFloat(guyDespesa.toFixed(2)),
       atividade: atividades[Math.floor(Math.random() * atividades.length)],
-      isWorkflow: true,
-      isRecebiveis: true,
-      isPagamentos: true,
+      obs: null,
     });
   }
 
@@ -66,8 +58,10 @@ function generateMockInspections(): Inspection[] {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private inspections: Map<string, Inspection>;
+  private users: Map<number, User>;
+  private inspections: Map<number, Inspection>;
+  private nextUserId: number = 1;
+  private nextInspectionId: number = 26;
 
   constructor() {
     this.users = new Map();
@@ -75,11 +69,11 @@ export class MemStorage implements IStorage {
     
     const mockData = generateMockInspections();
     mockData.forEach(inspection => {
-      this.inspections.set(inspection.id, inspection);
+      this.inspections.set(inspection.idPrinc, inspection);
     });
   }
 
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
@@ -90,8 +84,15 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const id = this.nextUserId++;
+    const user: User = { 
+      ...insertUser, 
+      id,
+      displayName: insertUser.displayName ?? null,
+      role: "user",
+      nick: null,
+      ativo: 1,
+    };
     this.users.set(id, user);
     return user;
   }
@@ -100,24 +101,46 @@ export class MemStorage implements IStorage {
     return Array.from(this.inspections.values());
   }
 
-  async getInspection(id: string): Promise<Inspection | undefined> {
+  async getInspection(id: number): Promise<Inspection | undefined> {
     return this.inspections.get(id);
   }
 
   async createInspection(insertInspection: InsertInspection): Promise<Inspection> {
-    const id = randomUUID();
+    const idPrinc = this.nextInspectionId++;
     const inspection: Inspection = { 
-      ...insertInspection, 
-      id,
-      isWorkflow: insertInspection.isWorkflow ?? true,
-      isRecebiveis: insertInspection.isRecebiveis ?? true,
-      isPagamentos: insertInspection.isPagamentos ?? true,
+      idPrinc,
+      idContr: insertInspection.idContr ?? null,
+      idSegur: insertInspection.idSegur ?? null,
+      idAtivi: insertInspection.idAtivi ?? null,
+      idUf: insertInspection.idUf ?? null,
+      idCidade: insertInspection.idCidade ?? null,
+      idUserGuy: insertInspection.idUserGuy ?? null,
+      idUserGuilty: insertInspection.idUserGuilty ?? null,
+      loc: insertInspection.loc ?? null,
+      meta: insertInspection.meta ?? null,
+      ms: insertInspection.ms ?? null,
+      dtInspecao: insertInspection.dtInspecao ?? null,
+      dtEntregue: insertInspection.dtEntregue ?? null,
+      prazo: insertInspection.prazo ?? null,
+      dtAcerto: insertInspection.dtAcerto ?? null,
+      dtEnvio: insertInspection.dtEnvio ?? null,
+      dtPago: insertInspection.dtPago ?? null,
+      honorario: insertInspection.honorario ?? null,
+      dtDenvio: insertInspection.dtDenvio ?? null,
+      dtDpago: insertInspection.dtDpago ?? null,
+      despesa: insertInspection.despesa ?? null,
+      dtGuyPago: insertInspection.dtGuyPago ?? null,
+      guyHonorario: insertInspection.guyHonorario ?? null,
+      dtGuyDpago: insertInspection.dtGuyDpago ?? null,
+      guyDespesa: insertInspection.guyDespesa ?? null,
+      atividade: insertInspection.atividade ?? null,
+      obs: insertInspection.obs ?? null,
     };
-    this.inspections.set(id, inspection);
+    this.inspections.set(idPrinc, inspection);
     return inspection;
   }
 
-  async updateInspection(id: string, updates: Partial<InsertInspection>): Promise<Inspection | undefined> {
+  async updateInspection(id: number, updates: Partial<InsertInspection>): Promise<Inspection | undefined> {
     const existing = this.inspections.get(id);
     if (!existing) return undefined;
     
@@ -126,24 +149,24 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteInspection(id: string): Promise<boolean> {
+  async deleteInspection(id: number): Promise<boolean> {
     return this.inspections.delete(id);
   }
 
   async getKPIs(): Promise<KPIs> {
     const inspections = Array.from(this.inspections.values());
     
-    const honorarios = inspections.reduce((sum, i) => sum + (i.honorarios || 0), 0);
-    const despesas = inspections.reduce((sum, i) => sum + (i.despesas || 0), 0);
-    const gHonorarios = inspections.reduce((sum, i) => sum + (i.gHonorarios || 0), 0);
-    const gDespesas = inspections.reduce((sum, i) => sum + (i.gDespesas || 0), 0);
+    const honorarios = inspections.reduce((sum, i) => sum + (i.honorario || 0), 0);
+    const despesas = inspections.reduce((sum, i) => sum + (i.despesa || 0), 0);
+    const guyHonorario = inspections.reduce((sum, i) => sum + (i.guyHonorario || 0), 0);
+    const guyDespesa = inspections.reduce((sum, i) => sum + (i.guyDespesa || 0), 0);
     
     return {
-      express: honorarios + despesas - gHonorarios - gDespesas,
+      express: honorarios + despesas - guyHonorario - guyDespesa,
       honorarios,
-      gHonorarios,
+      guyHonorario,
       despesas,
-      gDespesas,
+      guyDespesa,
     };
   }
 }

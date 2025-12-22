@@ -1,16 +1,9 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -27,21 +20,25 @@ import {
   FileSpreadsheet,
   Eye,
   Edit3,
-  Send,
-  AlertTriangle,
-  MapPin,
-  Sparkles,
-  Trash2,
-  Filter,
-  X,
   Briefcase,
   Clock,
   Wallet,
   Receipt,
   CreditCard,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
+import {
+  fetchContrOptions,
+  fetchSegurOptions,
+  fetchAtiviOptions,
+  fetchUfOptions,
+  fetchUsersOptions as fetchUsersLookup,
+  getLabelById,
+  type LookupOption,
+} from "@/services/api/lookups";
+import { ActionCenter } from "./ActionCenter";
 
 interface DataGridProps {
   data: Inspection[];
@@ -66,8 +63,19 @@ function formatDate(dateStr: string | null | undefined): string {
   return dateStr;
 }
 
-function getStatusColor(status: string | null | undefined): string {
-  if (!status) return "bg-muted/50 text-muted-foreground border-muted";
+function getMetaLabel(meta: number | null | undefined): string {
+  if (meta === 1) return "Sim";
+  if (meta === 0) return "Não";
+  return "-";
+}
+
+function getStatusColor(status: number | string | null | undefined): string {
+  if (status === null || status === undefined) return "bg-muted/50 text-muted-foreground border-muted";
+  if (typeof status === "number") {
+    return status === 1
+      ? "bg-success/15 text-success border-success/30"
+      : "bg-destructive/15 text-destructive border-destructive/30";
+  }
   const lowerStatus = status.toLowerCase();
   if (lowerStatus === "sim" || lowerStatus === "ok" || lowerStatus === "pago")
     return "bg-success/15 text-success border-success/30";
@@ -76,8 +84,13 @@ function getStatusColor(status: string | null | undefined): string {
   return "bg-warning/15 text-warning border-warning/30";
 }
 
-function getStatusGradient(status: string | null | undefined): string {
-  if (!status) return "from-muted/20 to-transparent";
+function getStatusGradient(status: number | string | null | undefined): string {
+  if (status === null || status === undefined) return "from-muted/20 to-transparent";
+  if (typeof status === "number") {
+    return status === 1
+      ? "from-success/10 to-transparent"
+      : "from-destructive/10 to-transparent";
+  }
   const lowerStatus = status.toLowerCase();
   if (lowerStatus === "sim" || lowerStatus === "ok" || lowerStatus === "pago")
     return "from-success/10 to-transparent";
@@ -90,150 +103,61 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
   return (
     <TableRow className="border-b border-white/5">
       {/* Grupo 1: Ação */}
-      <TableCell className="leading-tight">
+      <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
         <div className="h-4 w-6 shimmer rounded-md" />
       </TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-primary/30" /></TableCell>
+      <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-primary/30" /></TableCell>
       {/* Grupo 2: Identificação */}
-      <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-3 w-6 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[100px] min-w-[100px] max-w-[100px] leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[150px] min-w-[150px] max-w-[150px] leading-tight"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight"><div className="h-3 w-6 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight"><div className="h-4 w-10 shimmer rounded-md" /></TableCell>
       {/* Separador */}
-      <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-muted-foreground/30" /></TableCell>
+      <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-muted-foreground/30" /></TableCell>
       {/* Grupo 3: Workflow */}
       {filters.columnGroups.workflow && (
         <>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-8 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[70px] min-w-[70px] max-w-[70px] leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight"><div className="h-3 w-8 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-accent/30" /></TableCell>
+          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-accent/30" /></TableCell>
         </>
       )}
       {/* Grupo 4 e 5: Recebíveis */}
       {filters.columnGroups.recebiveis && (
         <>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[70px] min-w-[70px] max-w-[70px] leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[60px] min-w-[60px] max-w-[60px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[60px] min-w-[60px] max-w-[60px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[90px] min-w-[90px] max-w-[90px] leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-success/30" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-success/30" /></TableCell>
+          <TableCell className="w-[65px] min-w-[65px] max-w-[65px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[60px] min-w-[60px] max-w-[60px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[85px] min-w-[85px] max-w-[85px] leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-emerald-400/30" /></TableCell>
+          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-emerald-400/30" /></TableCell>
         </>
       )}
       {/* Grupo 6: Pagamentos */}
       {filters.columnGroups.pagamentos && (
         <>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-14 shimmer rounded-md" /></TableCell>
-          <TableCell className="leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[65px] min-w-[65px] max-w-[65px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[95px] min-w-[95px] max-w-[95px] leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[60px] min-w-[60px] max-w-[60px] leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+          <TableCell className="w-[85px] min-w-[85px] max-w-[85px] leading-tight"><div className="h-3 w-16 shimmer rounded-md" /></TableCell>
           {/* Separador */}
-          <TableCell className="w-[1px] p-0"><div className="w-[1px] h-full bg-warning/30" /></TableCell>
+          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0"><div className="w-[1px] h-full bg-warning/30" /></TableCell>
         </>
       )}
       {/* Grupo 7: Contexto */}
-      <TableCell className="leading-tight"><div className="h-3 w-20 shimmer rounded-md" /></TableCell>
-      <TableCell className="leading-tight"><div className="h-3 w-12 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[150px] min-w-[150px] max-w-[150px] leading-tight"><div className="h-3 w-28 shimmer rounded-md" /></TableCell>
+      <TableCell className="w-[160px] min-w-[160px] max-w-[160px] leading-tight"><div className="h-3 w-24 shimmer rounded-md" /></TableCell>
     </TableRow>
-  );
-}
-
-function ActionCenter({ 
-  inspection, 
-  isOpen, 
-  onClose 
-}: { 
-  inspection: Inspection | null; 
-  isOpen: boolean; 
-  onClose: () => void;
-}) {
-  if (!inspection) return null;
-
-  const actionButtons = [
-    { icon: Trash2, label: "Excluir inspeção", color: "red", testId: "action-delete-inspection" },
-    { icon: Send, label: "Encaminhar inspeção", color: "orange", testId: "action-forward-inspection" },
-    { icon: AlertTriangle, label: "Marcador de alerta", color: "yellow", testId: "action-alert-marker" },
-    { icon: MapPin, label: "Visualizar demais locais", color: "green", testId: "action-view-locations" },
-    { icon: Filter, label: "Limpar Filtros (Global)", color: "blue", testId: "action-clear-filters" },
-    { icon: Sparkles, label: "Em breve", color: "purple", testId: "action-coming-soon" },
-  ];
-
-  const colorClasses: Record<string, string> = {
-    red: "border-red-500 text-red-400 shadow-red-500/20 hover:shadow-red-500/40 hover:bg-red-500/10",
-    orange: "border-orange-500 text-orange-400 shadow-orange-500/20 hover:shadow-orange-500/40 hover:bg-orange-500/10",
-    yellow: "border-yellow-500 text-yellow-400 shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:bg-yellow-500/10",
-    green: "border-green-500 text-green-400 shadow-green-500/20 hover:shadow-green-500/40 hover:bg-green-500/10",
-    blue: "border-blue-500 text-blue-400 shadow-blue-500/20 hover:shadow-blue-500/40 hover:bg-blue-500/10",
-    purple: "border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10",
-  };
-
-  return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent 
-        side="right" 
-        className="w-[360px] sm:w-[400px] bg-[rgba(10,10,31,0.95)] backdrop-blur-2xl border-l border-primary/20 p-0 overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-        
-        <SheetHeader className="relative p-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <SheetTitle className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Central de Ações
-              </SheetTitle>
-              <SheetDescription className="text-xs text-muted-foreground mt-0.5">
-                {inspection.player} - Loc {inspection.loc?.toString().padStart(2, '0')}
-              </SheetDescription>
-            </div>
-          </div>
-        </SheetHeader>
-        
-        <div className="relative p-6 flex flex-col gap-3">
-          {actionButtons.map((action, index) => (
-            <motion.div
-              key={action.testId}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Button
-                className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses[action.color]}`}
-                variant="outline"
-                data-testid={action.testId}
-              >
-                <action.icon className="w-4 h-4" />
-                <span className="font-medium">{action.label}</span>
-              </Button>
-            </motion.div>
-          ))}
-          
-          <div className="border-t border-white/10 pt-4 mt-3">
-            <Button
-              className="w-full justify-center gap-2 rounded-xl border border-white/20 bg-white/5 text-muted-foreground hover:bg-white/10 transition-all duration-300"
-              variant="outline"
-              onClick={onClose}
-              data-testid="action-cancel"
-            >
-              <X className="w-4 h-4" />
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }
 
@@ -248,7 +172,20 @@ export function DataGrid({
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
+  const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
+  const [segurLookup, setSegurLookup] = useState<LookupOption[]>([]);
+  const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
+  const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
+  const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
   const rowsPerPage = 50;
+
+  useEffect(() => {
+    fetchContrOptions().then(setContrLookup);
+    fetchSegurOptions().then(setSegurLookup);
+    fetchUsersLookup().then((users) => setUsersLookup(users.map(u => ({ value: u.value, label: u.label }))));
+    fetchUfOptions().then(setUfLookup);
+    fetchAtiviOptions().then(setAtiviLookup);
+  }, []);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -266,68 +203,68 @@ export function DataGrid({
         {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-[calc(100vh-180px)]">
-            <Table>
+            <Table className="w-auto min-w-max">
               <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
                 <TableRow className="border-b border-white/10">
                   {/* Grupo 1: Ação */}
-                  <TableHead className="w-[50px] bg-card relative">
+                  <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
                     <span className="text-xs font-bold text-primary tracking-wider">#</span>
                   </TableHead>
                   
                   {/* Separador */}
-                  <TableHead className="w-[1px] p-0 bg-card">
+                  <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                     <div className="w-[1px] h-full bg-primary/40" />
                   </TableHead>
                   
                   {/* Grupo 2: Identificação */}
-                  <TableHead className="bg-card relative">
+                  <TableHead className="w-[100px] min-w-[100px] max-w-[100px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
                     <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                       <Briefcase className="w-3 h-3" />
                       Player
                     </span>
                   </TableHead>
-                  <TableHead className="bg-card">
+                  <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
                   </TableHead>
-                  <TableHead className="w-[60px] bg-card">
+                  <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
                   </TableHead>
-                  <TableHead className="bg-card">
+                  <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
                   </TableHead>
-                  <TableHead className="bg-card">
+                  <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
                   </TableHead>
-                  <TableHead className="bg-card">
+                  <TableHead className="w-[55px] min-w-[55px] max-w-[55px] bg-card">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
                   </TableHead>
                   
                   {/* Separador */}
-                  <TableHead className="w-[1px] p-0 bg-card">
+                  <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                     <div className="w-[1px] h-full bg-muted-foreground/40" />
                   </TableHead>
                   
                   {/* Grupo 3: Workflow Principal */}
                   {filters.columnGroups.workflow && (
                     <>
-                      <TableHead className="bg-card relative text-center">
+                      <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
                         <span className="text-xs font-bold text-accent tracking-wider flex items-center justify-center gap-1">
                           <Clock className="w-3 h-3" />
                           Inspeção
                         </span>
                       </TableHead>
-                      <TableHead className="bg-card text-center">
+                      <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card text-center">
                         <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
                       </TableHead>
-                      <TableHead className="w-[60px] bg-card">
+                      <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
                         <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
                       </TableHead>
                       
                       {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                         <div className="w-[1px] h-full bg-accent/40" />
                       </TableHead>
                     </>
@@ -336,45 +273,45 @@ export function DataGrid({
                   {/* Grupo 4: Recebíveis - Honorários */}
                   {filters.columnGroups.recebiveis && (
                     <>
-                      <TableHead className="bg-card relative text-center">
+                      <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
                         <span className="text-xs font-bold text-success tracking-wider flex items-center justify-center gap-1">
                           <Wallet className="w-3 h-3" />
                           Acerto
                         </span>
                       </TableHead>
-                      <TableHead className="bg-card text-center">
+                      <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Envio</span>
                       </TableHead>
-                      <TableHead className="bg-card text-center">
+                      <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Pago</span>
                       </TableHead>
-                      <TableHead className="bg-card text-right">
+                      <TableHead className="w-[90px] min-w-[90px] max-w-[90px] bg-card text-right">
                         <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
                       </TableHead>
                       
                       {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                         <div className="w-[1px] h-full bg-success/40" />
                       </TableHead>
                       
                       {/* Grupo 5: Recebíveis - Despesas */}
-                      <TableHead className="bg-card relative text-center">
+                      <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
                         <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center justify-center gap-1">
                           <Receipt className="w-3 h-3" />
                           DEnvio
                         </span>
                       </TableHead>
-                      <TableHead className="bg-card text-center">
+                      <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
                       </TableHead>
-                      <TableHead className="bg-card text-right">
+                      <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
                       </TableHead>
                       
                       {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                         <div className="w-[1px] h-full bg-emerald-400/40" />
                       </TableHead>
                     </>
@@ -383,39 +320,39 @@ export function DataGrid({
                   {/* Grupo 6: Pagamentos Colaborador */}
                   {filters.columnGroups.pagamentos && (
                     <>
-                      <TableHead className="bg-card relative text-center">
+                      <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
                         <span className="text-xs font-bold text-warning tracking-wider flex items-center justify-center gap-1">
                           <CreditCard className="w-3 h-3" />
                           GPago
                         </span>
                       </TableHead>
-                      <TableHead className="bg-card text-right">
+                      <TableHead className="w-[95px] min-w-[95px] max-w-[95px] bg-card text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
                       </TableHead>
-                      <TableHead className="bg-card text-center">
+                      <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
                         <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
                       </TableHead>
-                      <TableHead className="bg-card text-right">
+                      <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
                       </TableHead>
                       
                       {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
                         <div className="w-[1px] h-full bg-warning/40" />
                       </TableHead>
                     </>
                   )}
                   
                   {/* Grupo 7: Contexto */}
-                  <TableHead className="bg-card relative">
+                  <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
                     <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                       <FileText className="w-3 h-3" />
                       Atividade
                     </span>
                   </TableHead>
-                  <TableHead className="w-[80px] bg-card text-center">
+                  <TableHead className="w-[160px] min-w-[160px] max-w-[160px] bg-card text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
                   </TableHead>
                 </TableRow>
@@ -443,17 +380,17 @@ export function DataGrid({
                   ) : (
                     currentData.map((row, index) => (
                       <TableRow
-                        key={row.id || index}
+                        key={row.idPrinc || index}
                         className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
                           ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
                         `}
                         onClick={() => onRowClick?.(row)}
                         onMouseEnter={() => setHoveredRow(index)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        data-testid={`row-inspection-${row.id || index}`}
+                        data-testid={`row-inspection-${row.idPrinc || index}`}
                       >
                           {/* Grupo 1: Ação */}
-                          <TableCell className="leading-tight">
+                          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
                             <button
                               className={`p-1 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
                               onClick={(e) => {
@@ -461,62 +398,70 @@ export function DataGrid({
                                 setSelectedInspection(row);
                                 setIsActionCenterOpen(true);
                               }}
-                              data-testid={`badge-action-${row.id || index}`}
+                              data-testid={`badge-action-${row.idPrinc || index}`}
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
                           </TableCell>
                           
                           {/* Separador */}
-                          <TableCell className="w-[1px] p-0">
+                          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                             <div className="w-[1px] h-full bg-primary/30" />
                           </TableCell>
                           
                           {/* Grupo 2: Identificação */}
-                          <TableCell className=" text-xs font-semibold text-foreground">
-                            {row.player || "-"}
+                          <TableCell className="w-[100px] min-w-[100px] max-w-[100px] text-xs font-semibold text-foreground p-0">
+                            <span className="block w-full px-2 py-1 truncate">
+                              {getLabelById(contrLookup, row.idContr)}
+                            </span>
                           </TableCell>
-                          <TableCell className=" text-xs max-w-[140px] truncate">
-                            {row.segurado || "-"}
+                          <TableCell className="w-[150px] min-w-[150px] max-w-[150px] text-xs p-0">
+                            <span className="block w-full px-2 py-1 truncate">
+                              {getLabelById(segurLookup, row.idSegur)}
+                            </span>
                           </TableCell>
-                          <TableCell className=" text-xs text-center font-mono">
+                          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
                             {row.loc ?? "-"}
                           </TableCell>
-                          <TableCell className=" text-xs">
-                            {row.guilty || "-"}
+                          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
+                            <span className="block w-full px-2 py-1 truncate">
+                              {getLabelById(usersLookup, row.idUserGuilty)}
+                            </span>
                           </TableCell>
-                          <TableCell className=" text-xs">
-                            {row.guy || "-"}
+                          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
+                            <span className="block w-full px-2 py-1 truncate">
+                              {getLabelById(usersLookup, row.idUserGuy)}
+                            </span>
                           </TableCell>
-                          <TableCell className="leading-tight">
+                          <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight">
                             <Badge
                               variant="outline"
                               className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
                             >
-                              {row.meta || "-"}
+                              {getMetaLabel(row.meta)}
                             </Badge>
                           </TableCell>
                           
                           {/* Separador */}
-                          <TableCell className="w-[1px] p-0">
+                          <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                             <div className="w-[1px] h-full bg-muted-foreground/30" />
                           </TableCell>
                           
                           {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.inspecao)}
+                              <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtInspecao)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.entregue)}
+                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtEntregue)}
                               </TableCell>
-                              <TableCell className=" text-xs text-center font-mono">
+                              <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
                                 {row.prazo ?? "-"}
                               </TableCell>
                               
                               {/* Separador */}
-                              <TableCell className="w-[1px] p-0">
+                              <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                                 <div className="w-[1px] h-full bg-accent/30" />
                               </TableCell>
                             </>
@@ -525,37 +470,37 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.acerto)}
+                              <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtAcerto)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.envio)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtEnvio)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.pago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtPago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-success">
-                                {formatCurrency(row.honorarios)}
+                              <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs text-right font-mono font-semibold text-success">
+                                {formatCurrency(row.honorario)}
                               </TableCell>
                               
                               {/* Separador */}
-                              <TableCell className="w-[1px] p-0">
+                              <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                                 <div className="w-[1px] h-full bg-success/30" />
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.dEnvio)}
+                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtDenvio)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.dPago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtDpago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-emerald-400">
-                                {formatCurrency(row.despesas)}
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-emerald-400">
+                                {formatCurrency(row.despesa)}
                               </TableCell>
                               
                               {/* Separador */}
-                              <TableCell className="w-[1px] p-0">
+                              <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                                 <div className="w-[1px] h-full bg-emerald-400/30" />
                               </TableCell>
                             </>
@@ -564,38 +509,40 @@ export function DataGrid({
                           {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.gPago)}
+                              <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtGuyPago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.gHonorarios)}
+                              <TableCell className="w-[95px] min-w-[95px] max-w-[95px] text-xs text-right font-mono font-semibold text-warning">
+                                {formatCurrency(row.guyHonorario)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
-                                {formatDate(row.gdPago)}
+                              <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center">
+                                {formatDate(row.dtGuyDpago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
-                                {formatCurrency(row.gDespesas)}
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-warning">
+                                {formatCurrency(row.guyDespesa)}
                               </TableCell>
                               
                               {/* Separador */}
-                              <TableCell className="w-[1px] p-0">
+                              <TableCell className="w-[1px] min-w-[1px] max-w-[1px] p-0">
                                 <div className="w-[1px] h-full bg-warning/30" />
                               </TableCell>
                             </>
                           )}
                           
                           {/* Grupo 7: Contexto */}
-                          <TableCell className=" text-xs text-muted-foreground max-w-[100px] truncate">
-                            {row.atividade || "-"}
+                          <TableCell className="w-[150px] min-w-[150px] max-w-[150px] text-xs text-muted-foreground p-0">
+                            <span className="block w-full px-2 py-1 truncate">
+                              {row.atividade || "-"}
+                            </span>
                           </TableCell>
-                          <TableCell className="leading-tight">
+                          <TableCell className="w-[160px] min-w-[160px] max-w-[160px] leading-tight">
                             <div className={`flex items-center justify-center gap-1 transition-opacity duration-200 ${hoveredRow === index ? "opacity-100" : "opacity-0"}`}>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="glass border border-white/10"
                                 onClick={(e) => { e.stopPropagation(); }}
-                                data-testid={`button-view-${row.id || index}`}
+                                data-testid={`button-view-${row.idPrinc || index}`}
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </Button>
@@ -604,7 +551,7 @@ export function DataGrid({
                                 size="icon"
                                 className="glass border border-white/10"
                                 onClick={(e) => { e.stopPropagation(); }}
-                                data-testid={`button-edit-${row.id || index}`}
+                                data-testid={`button-edit-${row.idPrinc || index}`}
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </Button>
@@ -706,6 +653,9 @@ export function DataGrid({
         inspection={selectedInspection}
         isOpen={isActionCenterOpen}
         onClose={() => setIsActionCenterOpen(false)}
+        onRefresh={onRefresh}
+        contrLookup={contrLookup}
+        segurLookup={segurLookup}
       />
     </motion.div>
   );

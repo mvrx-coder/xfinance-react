@@ -7,7 +7,7 @@ import { ToastContainer, type Toast } from "@/components/dashboard/ToastContaine
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
 import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
-import { FinancialModal } from "@/components/dashboard/modals/FinancialModal";
+import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Inspection, FilterState, KPIs } from "@shared/schema";
@@ -42,7 +42,7 @@ export default function Dashboard() {
     queryKey: ["/api/inspections"],
   });
 
-  const { data: kpis = { express: 0, honorarios: 0, gHonorarios: 0, despesas: 0, gDespesas: 0 } } = useQuery<KPIs>({
+  const { data: kpis = { express: 0, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 } } = useQuery<KPIs>({
     queryKey: ["/api/kpis"],
   });
 
@@ -90,7 +90,7 @@ export default function Dashboard() {
     addToast({
       type: "info",
       title: "Registro selecionado",
-      message: `ID: ${inspection.id} - ${inspection.segurado || "Sem nome"}`,
+      message: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
       duration: 3000,
     });
   }, [addToast]);
@@ -155,7 +155,7 @@ export default function Dashboard() {
         onClose={() => handleCloseModal("investments")}
       />
 
-      <FinancialModal
+      <PerformanceModal
         isOpen={modals.financial}
         onClose={() => handleCloseModal("financial")}
       />

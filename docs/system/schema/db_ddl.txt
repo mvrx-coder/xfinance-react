@@ -1,0 +1,180 @@
+-- Schema do Banco de Dados xFinance (SQLite)
+-- Arquivo de referência: x_main/docs/system/schema/db_ddl.txt
+
+-- =============================================================================
+-- TABELA PRINCIPAL: princ (Inspeções)
+-- =============================================================================
+
+CREATE TABLE "princ" (
+    id_princ INTEGER PRIMARY KEY,
+    loc INT,
+    dt_acerto TEXT,
+    dt_envio TEXT,
+    dt_pago TEXT,
+    honorario REAL,
+    dt_inspecao TEXT,
+    dt_entregue TEXT,
+    prazo INT,
+    dt_denvio TEXT,
+    dt_dpago TEXT,
+    despesa REAL,
+    dt_guy_pago TEXT,
+    guy_honorario REAL,
+    dt_guy_dpago TEXT,
+    guy_despesa REAL,
+    atividade TEXT,
+    obs TEXT,
+    id_ativi INT,
+    id_segur INT,
+    id_user_guilty INT,
+    id_user_guy INT,
+    meta INT,
+    id_contr INT,
+    id_uf INT,
+    id_cidade INT,
+    ms INTEGER DEFAULT (0),
+    
+    CONSTRAINT FK_princ_ativi FOREIGN KEY (id_ativi) REFERENCES ativi(id_ativi),
+    CONSTRAINT FK_princ_cidade FOREIGN KEY (id_cidade) REFERENCES cidade(id_cidade),
+    CONSTRAINT FK_princ_contr FOREIGN KEY (id_contr) REFERENCES contr(id_contr),
+    CONSTRAINT FK_princ_segur FOREIGN KEY (id_segur) REFERENCES segur(id_segur),
+    CONSTRAINT FK_princ_uf FOREIGN KEY (id_uf) REFERENCES uf(id_uf),
+    CONSTRAINT FK_princ_user_guy FOREIGN KEY (id_user_guy) REFERENCES "user"(id_user),
+    CONSTRAINT FK_princ_user_guilty FOREIGN KEY (id_user_guilty) REFERENCES "user"(id_user)
+);
+
+-- =============================================================================
+-- TABELAS DE LOOKUP
+-- =============================================================================
+
+CREATE TABLE "user" (
+    id_user INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    hash_senha TEXT NOT NULL,
+    salt TEXT NOT NULL,
+    papel TEXT NOT NULL,
+    nome TEXT,
+    nick TEXT,
+    id_autor INTEGER,
+    id_papel INTEGER,
+    short_nome TEXT,
+    ativo INTEGER,
+    failed_attempts INTEGER DEFAULT 0,
+    locked_until TEXT
+);
+
+CREATE TABLE "contr" (
+    id_contr INTEGER PRIMARY KEY,
+    player TEXT NOT NULL,
+    atua TEXT,
+    ativo INTEGER,
+    diretorio INTEGER DEFAULT 0
+);
+
+CREATE TABLE "segur" (
+    id_segur INTEGER PRIMARY KEY,
+    segur_nome TEXT
+);
+
+CREATE TABLE "ativi" (
+    id_ativi INTEGER PRIMARY KEY,
+    atividade TEXT
+);
+
+CREATE TABLE "uf" (
+    id_uf INTEGER PRIMARY KEY,
+    uf_sigla TEXT NOT NULL UNIQUE,
+    uf_nome TEXT NOT NULL
+);
+
+CREATE TABLE "cidade" (
+    id_cidade INTEGER PRIMARY KEY AUTOINCREMENT,
+    cidade_nome TEXT NOT NULL,
+    id_uf INTEGER NOT NULL REFERENCES uf(id_uf)
+);
+
+-- =============================================================================
+-- TABELAS DE SUPORTE
+-- =============================================================================
+
+CREATE TABLE "finan" (
+    id_finan INTEGER PRIMARY KEY AUTOINCREMENT,
+    investidor TEXT NOT NULL,
+    instituicao TEXT,
+    tipo TEXT NOT NULL,
+    detalhe TEXT,
+    v_aplicado REAL,
+    v_bruto REAL,
+    v_liquido REAL,
+    ganho_perda INTEGER,
+    resgate_bruto REAL,
+    rentabilidade TEXT,
+    dt_aplicacao TEXT,
+    dt_vence TEXT,
+    ir_iof REAL
+);
+
+CREATE TABLE "demais_locais" (
+    id_local_adicional INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_princ INTEGER NOT NULL,
+    dt_inspecao TEXT,
+    id_uf INTEGER NOT NULL,
+    id_cidade INTEGER NOT NULL,
+    guy_demais INTEGER,
+    CONSTRAINT FK_pla_princ FOREIGN KEY (id_princ) REFERENCES princ(id_princ),
+    CONSTRAINT FK_pla_uf FOREIGN KEY (id_uf) REFERENCES uf(id_uf),
+    CONSTRAINT FK_pla_cidade FOREIGN KEY (id_cidade) REFERENCES cidade(id_cidade)
+);
+
+CREATE TABLE "papel" (
+    id_papel INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL UNIQUE,
+    descricao TEXT
+);
+
+CREATE TABLE "permi" (
+    user_papel TEXT NOT NULL,
+    coluna TEXT NOT NULL,
+    id_papel INTEGER,
+    PRIMARY KEY (user_papel, coluna)
+);
+
+CREATE TABLE "sauda" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    frase TEXT NOT NULL,
+    ativo BOOLEAN DEFAULT 0,
+    dt_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    frase_end TEXT
+);
+
+CREATE TABLE "tempstate" (
+    id_state INTEGER PRIMARY KEY AUTOINCREMENT,
+    state_id_princ INTEGER NOT NULL,
+    state_dt_envio INTEGER DEFAULT 0,
+    state_dt_denvio INTEGER DEFAULT 0,
+    state_loc INTEGER,
+    state_dt_pago INTEGER DEFAULT 0,
+    UNIQUE (state_id_princ)
+);
+
+-- =============================================================================
+-- ÍNDICES RECOMENDADOS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_princ_ms ON princ (ms);
+CREATE INDEX IF NOT EXISTS idx_princ_dt_inspecao ON princ (dt_inspecao);
+CREATE INDEX IF NOT EXISTS idx_princ_dt_envio ON princ (dt_envio);
+CREATE INDEX IF NOT EXISTS idx_princ_dt_pago ON princ (dt_pago);
+CREATE INDEX IF NOT EXISTS idx_princ_prazo ON princ (prazo);
+CREATE INDEX IF NOT EXISTS idx_princ_dt_acerto ON princ (dt_acerto);
+CREATE INDEX IF NOT EXISTS idx_princ_id_contr ON princ (id_contr);
+CREATE INDEX IF NOT EXISTS idx_princ_id_segur ON princ (id_segur);
+CREATE INDEX IF NOT EXISTS idx_princ_id_ativi ON princ (id_ativi);
+CREATE INDEX IF NOT EXISTS idx_princ_id_user_guy ON princ (id_user_guy);
+CREATE INDEX IF NOT EXISTS idx_princ_id_user_guilty ON princ (id_user_guilty);
+CREATE INDEX IF NOT EXISTS idx_contr_player ON contr (player);
+CREATE INDEX IF NOT EXISTS idx_segur_nome ON segur (segur_nome);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cidade_uf_nome ON cidade (id_uf, cidade_nome);
+CREATE INDEX IF NOT EXISTS idx_user_nick ON user (nick);
+CREATE INDEX IF NOT EXISTS idx_ativi_atividade ON ativi (atividade);
+

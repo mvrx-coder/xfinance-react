@@ -20,7 +20,11 @@ export async function registerRoutes(
 
   app.get("/api/inspections/:id", async (req, res) => {
     try {
-      const inspection = await storage.getInspection(req.params.id);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const inspection = await storage.getInspection(id);
       if (!inspection) {
         return res.status(404).json({ error: "Inspection not found" });
       }
@@ -36,25 +40,29 @@ export async function registerRoutes(
         player: z.string().min(1),
         segurado: z.string().min(1),
         loc: z.number().min(1),
-        guilty: z.string().optional(),
-        guy: z.string().optional(),
+        nickGuilty: z.string().optional(),
+        nickGuy: z.string().optional(),
         meta: z.string().optional(),
-        inspecao: z.string().optional(),
-        entregue: z.string().optional(),
+        dtInspecao: z.string().optional(),
+        dtEntregue: z.string().optional(),
         prazo: z.number().optional(),
         sw: z.number().optional(),
-        acerto: z.string().optional(),
-        envio: z.string().optional(),
-        pago: z.string().optional(),
-        honorarios: z.number().optional(),
-        dEnvio: z.string().optional(),
-        dPago: z.string().optional(),
-        despesas: z.number().optional(),
-        gPago: z.string().optional(),
-        gHonorarios: z.number().optional(),
-        gdPago: z.string().optional(),
-        gDespesas: z.number().optional(),
+        dtAcerto: z.string().optional(),
+        dtEnvio: z.string().optional(),
+        dtPago: z.string().optional(),
+        honorario: z.number().optional(),
+        dtDenvio: z.string().optional(),
+        dtDpago: z.string().optional(),
+        despesa: z.number().optional(),
+        dtGuyPago: z.string().optional(),
+        guyHonorario: z.number().optional(),
+        dtGuyDpago: z.string().optional(),
+        guyDespesa: z.number().optional(),
         atividade: z.string().optional(),
+        ms: z.number().optional(),
+        obs: z.string().optional(),
+        uf: z.string().optional(),
+        cidade: z.string().optional(),
       });
 
       const parsed = validationSchema.parse(req.body);
@@ -70,7 +78,11 @@ export async function registerRoutes(
 
   app.patch("/api/inspections/:id", async (req, res) => {
     try {
-      const inspection = await storage.updateInspection(req.params.id, req.body);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const inspection = await storage.updateInspection(id, req.body);
       if (!inspection) {
         return res.status(404).json({ error: "Inspection not found" });
       }
@@ -82,7 +94,11 @@ export async function registerRoutes(
 
   app.delete("/api/inspections/:id", async (req, res) => {
     try {
-      const success = await storage.deleteInspection(req.params.id);
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid inspection ID" });
+      }
+      const success = await storage.deleteInspection(id);
       if (!success) {
         return res.status(404).json({ error: "Inspection not found" });
       }

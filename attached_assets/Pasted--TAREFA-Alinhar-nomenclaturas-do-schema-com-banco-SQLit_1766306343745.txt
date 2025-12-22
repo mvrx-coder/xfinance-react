@@ -1,0 +1,90 @@
+# TAREFA: Alinhar nomenclaturas do schema com banco SQLite original
+
+## Objetivo
+Renomear campos para corresponder ao banco de dados SQLite do xFinance original, facilitando a integração futura.
+
+## ⚠️ LEMBRETE: NÃO ALTERAR ESTÉTICA
+- Manter todas as cores, espaçamentos, fontes, animações
+- Não mexer em CSS, Tailwind classes, ou estilos inline
+- Preservar o visual glassmorphism atual
+
+---
+
+## Arquivo 1: `shared/schema.ts`
+
+### Renomear campos da interface Inspection:
+
+// DE -> PARA (manter camelCase no TypeScript)
+id -> idPrinc
+player -> player (manter)
+segurado -> segurado (manter)
+loc -> loc (manter)
+guilty -> nickGuilty
+guy -> nickGuy
+meta -> meta (manter)
+inspecao -> dtInspecao
+entregue -> dtEntregue
+prazo -> prazo (manter)
+sw -> sw (manter)
+acerto -> dtAcerto
+envio -> dtEnvio
+pago -> dtPago
+honorarios -> honorario (singular)
+dEnvio -> dtDenvio
+dPago -> dtDpago
+despesas -> despesa (singular)
+gPago -> dtGuyPago
+gHonorarios -> guyHonorario (singular)
+gdPago -> dtGuyDpago
+gDespesas -> guyDespesa (singular)
+atividade -> atividade (manter)### Adicionar campos faltantes na interface Inspection:
+ms: number | null;        // Marcador de alerta (0 ou 1)
+obs: string | null;       // Observação
+uf: string | null;        // Sigla do estado
+cidade: string | null;    // Nome da cidade### Atualizar interface KPIs:
+// DE -> PARA
+gHonorarios -> guyHonorario
+gDespesas -> guyDespesa---
+
+## Arquivo 2: `client/src/components/dashboard/DataGrid.tsx`
+
+Substituir TODAS as referências aos nomes antigos pelos novos.
+Exemplo: `row.honorarios` -> `row.honorario`
+
+**NÃO ALTERAR:**
+- Classes CSS
+- Estrutura do JSX
+- Estilos inline
+- Animações
+
+---
+
+## Arquivo 3: `client/src/components/dashboard/TopBar.tsx`
+
+Substituir referências em `ExpressKPIPanel`:
+- `kpis.gHonorarios` -> `kpis.guyHonorario`
+- `kpis.gDespesas` -> `kpis.guyDespesa`
+
+**NÃO ALTERAR nada visual.**
+
+---
+
+## Arquivo 4: `client/src/pages/Dashboard.tsx`
+
+Atualizar o valor default de kpis:
+const { data: kpis = { 
+  express: 0, 
+  honorarios: 0, 
+  guyHonorario: 0,  // era gHonorarios
+  despesas: 0, 
+  guyDespesa: 0     // era gDespesas
+} } = useQuery<KPIs>({ ... });---
+
+## Verificação Final
+
+Após as alterações:
+1. O app deve compilar sem erros
+2. O visual deve estar IDÊNTICO ao anterior
+3. O grid deve renderizar (mesmo que com dados vazios)
+
+Se algo visual mudar, DESFAÇA a alteração que causou isso.
