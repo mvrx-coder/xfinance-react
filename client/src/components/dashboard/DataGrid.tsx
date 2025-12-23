@@ -27,9 +27,6 @@ import {
   CreditCard,
   FileText,
   Sparkles,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   FilterX,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
@@ -55,7 +52,7 @@ import {
 } from "./alertRules";
 import { useToast } from "@/hooks/use-toast";
 import { useDataGrid } from "@/hooks/useDataGrid";
-import { flexRender } from "@tanstack/react-table";
+import { flexRender, Column } from "@tanstack/react-table";
 
 interface DataGridProps {
   data: Inspection[];
@@ -77,6 +74,11 @@ function formatCurrency(value: number | null | undefined): string {
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "-";
+  // Formatar de yyyy-mm-dd para dd/mm/yy
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0].slice(2)}`;
+  }
   return dateStr;
 }
 
@@ -179,43 +181,20 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
   );
 }
 
-// Componente para header com ordenação e filtro
-interface SortableHeaderProps {
-  column: ReturnType<typeof useDataGrid>["table"]["getColumn"]>;
+// Componente para header com filtro e ordenação (via popover)
+interface FilterableHeaderProps {
+  column: Column<Inspection, unknown> | undefined;
   children: React.ReactNode;
   className?: string;
-  enableFilter?: boolean;
 }
 
-function SortableHeader({ column, children, className, enableFilter = true }: SortableHeaderProps) {
+function FilterableHeader({ column, children, className }: FilterableHeaderProps) {
   if (!column) return <>{children}</>;
   
-  const isSorted = column.getIsSorted();
-  const canSort = column.getCanSort();
-  
   return (
-    <div className={`flex items-center gap-1 ${className || ""}`}>
-      <button
-        className={`flex items-center gap-1 ${canSort ? "cursor-pointer hover:text-foreground" : ""}`}
-        onClick={() => canSort && column.toggleSorting()}
-      >
-        {children}
-        {canSort && (
-          <span className="text-muted-foreground/50">
-            {isSorted === "asc" ? (
-              <ArrowUp className="w-3 h-3 text-primary" />
-            ) : isSorted === "desc" ? (
-              <ArrowDown className="w-3 h-3 text-primary" />
-            ) : (
-              <ArrowUpDown className="w-3 h-3" />
-            )}
-          </span>
-        )}
-      </button>
-      {enableFilter && column.getCanFilter() && (
-        <ColumnFilter column={column} />
-      )}
-    </div>
+    <ColumnFilter column={column} className={className}>
+      {children}
+    </ColumnFilter>
   );
 }
 
@@ -313,37 +292,37 @@ export function DataGrid({
                   {/* Grupo 2: Identificação */}
                   <TableHead className="w-[100px] min-w-[100px] max-w-[100px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
-                    <SortableHeader column={getColumn("player")}>
+                    <FilterableHeader column={getColumn("player")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                         <Briefcase className="w-3 h-3" />
                         Player
                       </span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card">
-                    <SortableHeader column={getColumn("segurado")}>
+                    <FilterableHeader column={getColumn("segurado")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
-                    <SortableHeader column={getColumn("loc")}>
+                    <FilterableHeader column={getColumn("loc")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-                    <SortableHeader column={getColumn("guilty")}>
+                    <FilterableHeader column={getColumn("guilty")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-                    <SortableHeader column={getColumn("guy")}>
+                    <FilterableHeader column={getColumn("guy")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[55px] min-w-[55px] max-w-[55px] bg-card">
-                    <SortableHeader column={getColumn("meta")}>
+                    <FilterableHeader column={getColumn("meta")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   
                   {/* Separador */}
@@ -356,22 +335,22 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
-                        <SortableHeader column={getColumn("dtInspecao")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtInspecao")} className="justify-center">
                           <span className="text-xs font-bold text-accent tracking-wider flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             Inspeção
                           </span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card text-center">
-                        <SortableHeader column={getColumn("dtEntregue")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtEntregue")} className="justify-center">
                           <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
-                        <SortableHeader column={getColumn("prazo")} className="justify-center">
+                        <FilterableHeader column={getColumn("prazo")} className="justify-center">
                           <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -386,27 +365,27 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
-                        <SortableHeader column={getColumn("dtAcerto")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtAcerto")} className="justify-center">
                           <span className="text-xs font-bold text-success tracking-wider flex items-center gap-1">
                             <Wallet className="w-3 h-3" />
                             Acerto
                           </span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <SortableHeader column={getColumn("dtEnvio")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtEnvio")} className="justify-center">
                           <span className="text-xs font-bold text-success tracking-wider">Envio</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <SortableHeader column={getColumn("dtPago")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtPago")} className="justify-center">
                           <span className="text-xs font-bold text-success tracking-wider">Pago</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[90px] min-w-[90px] max-w-[90px] bg-card text-right">
-                        <SortableHeader column={getColumn("honorario")} className="justify-end">
+                        <FilterableHeader column={getColumn("honorario")} className="justify-end">
                           <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -417,22 +396,22 @@ export function DataGrid({
                       {/* Grupo 5: Recebíveis - Despesas */}
                       <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
-                        <SortableHeader column={getColumn("dtDenvio")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtDenvio")} className="justify-center">
                           <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center gap-1">
                             <Receipt className="w-3 h-3" />
                             DEnvio
                           </span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <SortableHeader column={getColumn("dtDpago")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtDpago")} className="justify-center">
                           <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
-                        <SortableHeader column={getColumn("despesa")} className="justify-end">
+                        <FilterableHeader column={getColumn("despesa")} className="justify-end">
                           <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -447,27 +426,27 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
-                        <SortableHeader column={getColumn("dtGuyPago")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtGuyPago")} className="justify-center">
                           <span className="text-xs font-bold text-warning tracking-wider flex items-center gap-1">
                             <CreditCard className="w-3 h-3" />
                             GPago
                           </span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[95px] min-w-[95px] max-w-[95px] bg-card text-right">
-                        <SortableHeader column={getColumn("guyHonorario")} className="justify-end">
+                        <FilterableHeader column={getColumn("guyHonorario")} className="justify-end">
                           <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <SortableHeader column={getColumn("dtGuyDpago")} className="justify-center">
+                        <FilterableHeader column={getColumn("dtGuyDpago")} className="justify-center">
                           <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
-                        <SortableHeader column={getColumn("guyDespesa")} className="justify-end">
+                        <FilterableHeader column={getColumn("guyDespesa")} className="justify-end">
                           <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
-                        </SortableHeader>
+                        </FilterableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -480,17 +459,17 @@ export function DataGrid({
                   {/* Grupo 7: Contexto */}
                   <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
-                    <SortableHeader column={getColumn("atividade")}>
+                    <FilterableHeader column={getColumn("atividade")}>
                       <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                         <FileText className="w-3 h-3" />
                         Atividade
                       </span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[160px] min-w-[160px] max-w-[160px] bg-card text-center">
-                    <SortableHeader column={getColumn("obs")} className="justify-center">
+                    <FilterableHeader column={getColumn("obs")} className="justify-center">
                       <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
-                    </SortableHeader>
+                    </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
@@ -562,7 +541,7 @@ export function DataGrid({
                               {row.segurado || "-"}
                             </span>
                           </TableCell>
-                          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
+                          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
                             {row.loc ?? "-"}
                           </TableCell>
                           <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
@@ -613,7 +592,7 @@ export function DataGrid({
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
-                              <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center font-mono">
+                              <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
                                 {row.prazo ?? "-"}
                               </TableCell>
                               
@@ -658,14 +637,14 @@ export function DataGrid({
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
-                              <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs text-right font-mono font-semibold text-success p-0">
+                              <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs p-0">
                                 <EditableCell
                                   value={row.honorario}
                                   displayValue={formatCurrency(row.honorario)}
                                   field="honorario"
                                   idPrinc={row.idPrinc}
                                   type="currency"
-                                  className="text-right text-success"
+                                  className="text-right text-success currency-value"
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
@@ -697,14 +676,14 @@ export function DataGrid({
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
-                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-emerald-400 p-0">
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs p-0">
                                 <EditableCell
                                   value={row.despesa}
                                   displayValue={formatCurrency(row.despesa)}
                                   field="despesa"
                                   idPrinc={row.idPrinc}
                                   type="currency"
-                                  className="text-right text-emerald-400"
+                                  className="text-right text-emerald-400 currency-value"
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
@@ -730,14 +709,14 @@ export function DataGrid({
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
-                              <TableCell className="w-[95px] min-w-[95px] max-w-[95px] text-xs text-right font-mono font-semibold text-warning p-0">
+                              <TableCell className="w-[95px] min-w-[95px] max-w-[95px] text-xs p-0">
                                 <EditableCell
                                   value={row.guyHonorario}
                                   displayValue={formatCurrency(row.guyHonorario)}
                                   field="guy_honorario"
                                   idPrinc={row.idPrinc}
                                   type="currency"
-                                  className="text-right text-warning"
+                                  className="text-right text-warning currency-value"
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
@@ -752,14 +731,14 @@ export function DataGrid({
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>
-                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs text-right font-mono font-semibold text-warning p-0">
+                              <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs p-0">
                                 <EditableCell
                                   value={row.guyDespesa}
                                   displayValue={formatCurrency(row.guyDespesa)}
                                   field="guy_despesa"
                                   idPrinc={row.idPrinc}
                                   type="currency"
-                                  className="text-right text-warning"
+                                  className="text-right text-warning currency-value"
                                   onSave={handleCellEdit}
                                 />
                               </TableCell>

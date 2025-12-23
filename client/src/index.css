@@ -81,9 +81,16 @@
   --chart-5: 263 84% 58%;
   
   /* Typography */
-  --font-sans: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-display: 'Outfit', 'Inter', sans-serif;
+  
+  /* Typography Sizes */
+  --text-grid: 12px;
+  --text-grid-header: 11px;
+  --text-kpi-value: 28px;
+  --text-kpi-label: 10px;
   
   /* Border Radius */
   --radius: 0.75rem;
@@ -216,6 +223,88 @@
 }
 
 @layer utilities {
+  /* ========================================
+     TYPOGRAPHY - Financial Data Optimization
+     ======================================== */
+  
+  /* Tabular numbers for aligned data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+  }
+  
+  /* Monospace for financial values */
+  .font-financial {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 1;
+    letter-spacing: -0.02em;
+  }
+  
+  /* Grid data cells */
+  .data-cell {
+    font-family: var(--font-sans);
+    font-size: var(--text-grid);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Grid header cells */
+  .header-cell {
+    font-family: var(--font-sans);
+    font-size: var(--text-grid-header);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Currency values - monospace for perfect alignment */
+  .currency-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-grid);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 1;
+    letter-spacing: -0.02em;
+  }
+  
+  /* Date values - monospace for alignment */
+  .date-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-grid);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    letter-spacing: -0.01em;
+  }
+  
+  /* KPI large numbers */
+  .kpi-value {
+    font-family: var(--font-sans);
+    font-size: var(--text-kpi-value);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  
+  /* KPI labels */
+  .kpi-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-kpi-label);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
+  }
+  
+  /* Display font for titles */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
   /* Hide ugly search cancel button */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
