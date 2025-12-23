@@ -245,13 +245,19 @@ export function novaFuncao() { } // ERRADO!
 
 ## 📚 DOCUMENTAÇÃO OBRIGATÓRIA
 
-Antes de trabalhar no projeto, leia:
+Antes de trabalhar no projeto, leia **nesta ordem**:
 
-1. **`CLAUDE.md`** (este arquivo) - Regras para agentes
-2. **`docs/system/SIGILO.md`** - Matriz de permissões detalhada
-3. **`docs/system/ARCHITECTURE.md`** - Arquitetura do sistema
-4. **`docs/system/BOAS_PRATICAS.md`** - Padrões de código
-5. **`docs/system/padroes/areas_de_codigo.md`** - Onde editar
+| # | Documento | Conteúdo |
+|---|-----------|----------|
+| 1 | `CLAUDE.md` (este arquivo) | Regras críticas para agentes |
+| 2 | `docs/system/SIGILO.md` | Matriz de permissões por papel |
+| 3 | `docs/system/ARCHITECTURE.md` | Arquitetura do sistema |
+| 4 | `docs/system/padroes/areas_de_codigo.md` | Onde editar cada tipo de código |
+| 5 | `docs/system/ui/TYPOGRAPHY.md` | Esquema de fontes |
+| 6 | `docs/system/ui/TOAST.md` | Sistema de notificações |
+| 7 | `docs/system/ui/GRID.md` | Regras do grid principal |
+
+> 📁 Índice completo: `docs/system/README.md`
 
 ---
 
@@ -261,9 +267,10 @@ Antes de trabalhar no projeto, leia:
 2. **Estrutura:** Verifique como componentes similares estão organizados.
 3. **Nomenclatura:** Consulte `shared/schema.ts` para nomes de campos.
 4. **Permissões:** Consulte a tabela `permi` no banco SQLite.
+5. **UI/UX:** Consulte `docs/system/ui/` para padrões visuais.
 
 ---
 
-*Última atualização: 22/12/2024*
+*Última atualização: 23/12/2024*
 *Projeto: xFinance 3.0 - Migração React + FastAPI*
 
