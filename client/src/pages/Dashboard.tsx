@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
 import { StatusBar } from "@/components/dashboard/StatusBar";
-import { ToastContainer, type Toast } from "@/components/dashboard/ToastContainer";
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
 import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
@@ -28,8 +28,6 @@ export default function Dashboard() {
     Array<{ id: string; type: "success" | "error" | "warning" | "info"; message: string }>
   >([]);
 
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
   const [modals, setModals] = useState({
     newRecord: false,
     users: false,
@@ -46,28 +44,17 @@ export default function Dashboard() {
     queryKey: ["/api/kpis"],
   });
 
-  const addToast = useCallback((toast: Omit<Toast, "id">) => {
-    const id = `toast-${Date.now()}`;
-    setToasts((prev) => [...prev, { ...toast, id }]);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
   const dismissStatus = useCallback((id: string) => {
     setStatusMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
   const handleSearch = useCallback(() => {
     refetchInspections();
-    addToast({
-      type: "info",
-      title: "Buscando...",
-      message: "Atualizando dados do grid",
+    toast.info("Buscando...", {
+      description: "Atualizando dados do grid",
       duration: 3000,
     });
-  }, [refetchInspections, addToast]);
+  }, [refetchInspections]);
 
   const handleOpenModal = useCallback((modal: keyof typeof modals) => {
     setModals((prev) => ({ ...prev, [modal]: true }));
@@ -78,39 +65,30 @@ export default function Dashboard() {
   }, []);
 
   const handleLogout = useCallback(() => {
-    addToast({
-      type: "warning",
-      title: "Logout",
-      message: "Você será desconectado em breve",
+    toast.warning("Logout", {
+      description: "Você será desconectado em breve",
       duration: 3000,
     });
-  }, [addToast]);
+  }, []);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
-    addToast({
-      type: "info",
-      title: "Registro selecionado",
-      message: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
+    toast.info("Registro selecionado", {
+      description: `ID: ${inspection.idPrinc}`,
       duration: 3000,
     });
-  }, [addToast]);
+  }, []);
 
   const handleNewRecordSuccess = useCallback(() => {
     handleCloseModal("newRecord");
     refetchInspections();
-    addToast({
-      type: "success",
-      title: "Sucesso!",
-      message: "Novo registro criado com sucesso",
+    toast.success("Sucesso!", {
+      description: "Novo registro criado com sucesso",
       duration: 4000,
     });
-  }, [handleCloseModal, refetchInspections, addToast]);
+  }, [handleCloseModal, refetchInspections]);
 
   return (
     <div className="flex flex-col h-screen bg-background bg-depth-gradient" data-testid="dashboard">
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-
       {/* Top Bar */}
       <TopBar
         userName="Marcus Vinicius"
