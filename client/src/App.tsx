@@ -25,21 +25,22 @@ function App() {
         <RadixToaster />
         <SonnerToaster 
           position="top-right"
-          toastOptions={{
-            style: {
-              background: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--foreground))',
-            },
-            classNames: {
-              success: 'border-success/30 text-success',
-              error: 'border-destructive/30 text-destructive',
-              warning: 'border-warning/30 text-warning',
-              info: 'border-accent/30 text-accent',
-            },
-          }}
+          theme="dark"
+          expand={false}
           richColors
           closeButton
+          toastOptions={{
+            classNames: {
+              toast: 'sonner-glass',
+              title: 'sonner-title',
+              description: 'sonner-description',
+              success: 'sonner-success',
+              error: 'sonner-error',
+              warning: 'sonner-warning',
+              info: 'sonner-info',
+              closeButton: 'sonner-close',
+            },
+          }}
         />
         <Router />
       </TooltipProvider>
