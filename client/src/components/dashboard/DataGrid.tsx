@@ -50,7 +50,7 @@ import {
   getGPagoAlert,
   getGDPagoAlert,
 } from "./alertRules";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useDataGrid } from "@/hooks/useDataGrid";
 import { flexRender, Column } from "@tanstack/react-table";
 
@@ -213,7 +213,6 @@ export function DataGrid({
   const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
-  const { toast } = useToast();
 
   // TanStack Table
   const {
@@ -243,8 +242,7 @@ export function DataGrid({
     try {
       const result = await updateInspectionField(idPrinc, field, value);
       if (result.success) {
-        toast({
-          title: "Campo atualizado",
+        toast.success("Campo atualizado", {
           description: result.message,
         });
         onRefresh?.();
@@ -252,14 +250,12 @@ export function DataGrid({
       }
       return false;
     } catch (error) {
-      toast({
-        title: "Erro ao atualizar",
+      toast.error("Erro ao atualizar", {
         description: error instanceof Error ? error.message : "Erro desconhecido",
-        variant: "destructive",
       });
       return false;
     }
-  }, [toast, onRefresh]);
+  }, [onRefresh]);
 
   // Helper para obter coluna
   const getColumn = (id: string) => table.getColumn(id);

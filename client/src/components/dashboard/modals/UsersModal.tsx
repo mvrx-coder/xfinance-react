@@ -20,7 +20,7 @@ import {
   X,
   Loader2
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { type Papel, PAPEIS, isPapelValido } from "@/types/usuario";
 import { createUsuario } from "@/services/api/usuarios";
 
@@ -63,7 +63,6 @@ const itemVariants = {
 };
 
 export function UsersModal({ isOpen, onClose }: UsersModalProps) {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -142,19 +141,16 @@ export function UsersModal({ isOpen, onClose }: UsersModalProps) {
         ativo: form.ativo,
       });
       
-      toast({
-        title: "Usuário criado com sucesso",
-        description: `O usuário foi cadastrado no sistema.`,
+      toast.success("Usuário criado com sucesso", {
+        description: "O usuário foi cadastrado no sistema.",
       });
       
       setForm({ email: "", senha: "", confirmarSenha: "", papel: "", ativo: true });
       setErrors({});
       onClose();
     } catch (error) {
-      toast({
-        title: "Erro ao criar usuário",
+      toast.error("Erro ao criar usuário", {
         description: error instanceof Error ? error.message : "Tente novamente mais tarde.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

@@ -535,6 +535,120 @@
   }
 }
 
+/* ========================================
+   SONNER TOAST - Premium Glassmorphism
+   ======================================== */
+
+[data-sonner-toaster] {
+  --normal-bg: rgba(10, 10, 31, 0.85);
+  --normal-border: rgba(255, 255, 255, 0.12);
+  --normal-text: #E0E0FF;
+  font-family: var(--font-sans);
+}
+
+[data-sonner-toast] {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 12px !important;
+  padding: 16px !important;
+  gap: 12px !important;
+}
+
+/* Info Toast - Cyan */
+[data-sonner-toast][data-type="info"] {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
+  border: 1px solid rgba(0, 188, 212, 0.4) !important;
+  box-shadow: 
+    0 0 30px rgba(0, 188, 212, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #00BCD4 !important;
+}
+
+/* Success Toast - Emerald */
+[data-sonner-toast][data-type="success"] {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 
+    0 0 30px rgba(16, 185, 129, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #10B981 !important;
+}
+
+/* Warning Toast - Amber */
+[data-sonner-toast][data-type="warning"] {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 
+    0 0 30px rgba(245, 158, 11, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #F59E0B !important;
+}
+
+/* Error Toast - Red */
+[data-sonner-toast][data-type="error"] {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 
+    0 0 30px rgba(239, 68, 68, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #EF4444 !important;
+}
+
+/* Toast Title */
+[data-sonner-toast] [data-title] {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: -0.01em;
+}
+
+/* Toast Description */
+[data-sonner-toast] [data-description] {
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  line-height: 1.4;
+}
+
+/* Close Button */
+[data-sonner-toast] [data-close-button] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 6px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+/* Action Button */
+[data-sonner-toast] [data-button] {
+  background: rgba(206, 98, 217, 0.2) !important;
+  border: 1px solid rgba(206, 98, 217, 0.4) !important;
+  color: #CE62D9 !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background: rgba(206, 98, 217, 0.3) !important;
+}
+
 /* Custom scrollbar for the entire page */
 ::-webkit-scrollbar {
   width: 8px;
