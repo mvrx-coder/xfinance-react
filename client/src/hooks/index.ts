@@ -45,3 +45,9 @@ export {
   type UseFiltersReturn,
 } from "./use-filters";
 
+export {
+  useDataGrid,
+  type UseDataGridOptions,
+  type UseDataGridReturn,
+} from "./useDataGrid";
+

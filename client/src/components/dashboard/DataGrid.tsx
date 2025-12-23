@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,10 @@ import {
   CreditCard,
   FileText,
   Sparkles,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  FilterX,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -35,13 +39,13 @@ import {
   fetchAtiviOptions,
   fetchUfOptions,
   fetchUsersOptions as fetchUsersLookup,
-  getLabelById,
   type LookupOption,
 } from "@/services/api/lookups";
 import { updateInspectionField } from "@/services/api/inspections";
 import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
+import { ColumnFilter } from "./ColumnFilter";
 import {
   getInspecaoAlert,
   getAcertoAlert,
@@ -50,6 +54,8 @@ import {
   getGDPagoAlert,
 } from "./alertRules";
 import { useToast } from "@/hooks/use-toast";
+import { useDataGrid } from "@/hooks/useDataGrid";
+import { flexRender } from "@tanstack/react-table";
 
 interface DataGridProps {
   data: Inspection[];
@@ -173,6 +179,46 @@ function SkeletonRow({ filters }: { filters: FilterState }) {
   );
 }
 
+// Componente para header com ordenação e filtro
+interface SortableHeaderProps {
+  column: ReturnType<typeof useDataGrid>["table"]["getColumn"]>;
+  children: React.ReactNode;
+  className?: string;
+  enableFilter?: boolean;
+}
+
+function SortableHeader({ column, children, className, enableFilter = true }: SortableHeaderProps) {
+  if (!column) return <>{children}</>;
+  
+  const isSorted = column.getIsSorted();
+  const canSort = column.getCanSort();
+  
+  return (
+    <div className={`flex items-center gap-1 ${className || ""}`}>
+      <button
+        className={`flex items-center gap-1 ${canSort ? "cursor-pointer hover:text-foreground" : ""}`}
+        onClick={() => canSort && column.toggleSorting()}
+      >
+        {children}
+        {canSort && (
+          <span className="text-muted-foreground/50">
+            {isSorted === "asc" ? (
+              <ArrowUp className="w-3 h-3 text-primary" />
+            ) : isSorted === "desc" ? (
+              <ArrowDown className="w-3 h-3 text-primary" />
+            ) : (
+              <ArrowUpDown className="w-3 h-3" />
+            )}
+          </span>
+        )}
+      </button>
+      {enableFilter && column.getCanFilter() && (
+        <ColumnFilter column={column} />
+      )}
+    </div>
+  );
+}
+
 export function DataGrid({
   data,
   filters,
@@ -180,7 +226,6 @@ export function DataGrid({
   onRowClick,
   onRefresh,
 }: DataGridProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
@@ -189,8 +234,18 @@ export function DataGrid({
   const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
-  const rowsPerPage = 50;
   const { toast } = useToast();
+
+  // TanStack Table
+  const {
+    table,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useDataGrid({ data, pageSize: 50 });
+
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const totalPages = table.getPageCount();
+  const paginatedRows = table.getRowModel().rows;
 
   useEffect(() => {
     fetchContrOptions().then(setContrLookup);
@@ -213,7 +268,7 @@ export function DataGrid({
           title: "Campo atualizado",
           description: result.message,
         });
-        onRefresh?.(); // Recarregar dados
+        onRefresh?.();
         return true;
       }
       return false;
@@ -227,10 +282,8 @@ export function DataGrid({
     }
   }, [toast, onRefresh]);
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  // Helper para obter coluna
+  const getColumn = (id: string) => table.getColumn(id);
 
   return (
     <motion.div
@@ -260,25 +313,37 @@ export function DataGrid({
                   {/* Grupo 2: Identificação */}
                   <TableHead className="w-[100px] min-w-[100px] max-w-[100px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
-                      <Briefcase className="w-3 h-3" />
-                      Player
-                    </span>
+                    <SortableHeader column={getColumn("player")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
+                        <Briefcase className="w-3 h-3" />
+                        Player
+                      </span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
+                    <SortableHeader column={getColumn("segurado")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
+                    <SortableHeader column={getColumn("loc")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
+                    <SortableHeader column={getColumn("guilty")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
+                    <SortableHeader column={getColumn("guy")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[55px] min-w-[55px] max-w-[55px] bg-card">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
+                    <SortableHeader column={getColumn("meta")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
+                    </SortableHeader>
                   </TableHead>
                   
                   {/* Separador */}
@@ -291,16 +356,22 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
-                        <span className="text-xs font-bold text-accent tracking-wider flex items-center justify-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          Inspeção
-                        </span>
+                        <SortableHeader column={getColumn("dtInspecao")} className="justify-center">
+                          <span className="text-xs font-bold text-accent tracking-wider flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Inspeção
+                          </span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card text-center">
-                        <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
+                        <SortableHeader column={getColumn("dtEntregue")} className="justify-center">
+                          <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card">
-                        <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
+                        <SortableHeader column={getColumn("prazo")} className="justify-center">
+                          <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
+                        </SortableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -315,19 +386,27 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[70px] min-w-[70px] max-w-[70px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
-                        <span className="text-xs font-bold text-success tracking-wider flex items-center justify-center gap-1">
-                          <Wallet className="w-3 h-3" />
-                          Acerto
-                        </span>
+                        <SortableHeader column={getColumn("dtAcerto")} className="justify-center">
+                          <span className="text-xs font-bold text-success tracking-wider flex items-center gap-1">
+                            <Wallet className="w-3 h-3" />
+                            Acerto
+                          </span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <span className="text-xs font-bold text-success tracking-wider">Envio</span>
+                        <SortableHeader column={getColumn("dtEnvio")} className="justify-center">
+                          <span className="text-xs font-bold text-success tracking-wider">Envio</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <span className="text-xs font-bold text-success tracking-wider">Pago</span>
+                        <SortableHeader column={getColumn("dtPago")} className="justify-center">
+                          <span className="text-xs font-bold text-success tracking-wider">Pago</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[90px] min-w-[90px] max-w-[90px] bg-card text-right">
-                        <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
+                        <SortableHeader column={getColumn("honorario")} className="justify-end">
+                          <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
+                        </SortableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -338,16 +417,22 @@ export function DataGrid({
                       {/* Grupo 5: Recebíveis - Despesas */}
                       <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
-                        <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center justify-center gap-1">
-                          <Receipt className="w-3 h-3" />
-                          DEnvio
-                        </span>
+                        <SortableHeader column={getColumn("dtDenvio")} className="justify-center">
+                          <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center gap-1">
+                            <Receipt className="w-3 h-3" />
+                            DEnvio
+                          </span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
+                        <SortableHeader column={getColumn("dtDpago")} className="justify-center">
+                          <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
-                        <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
+                        <SortableHeader column={getColumn("despesa")} className="justify-end">
+                          <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
+                        </SortableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -362,19 +447,27 @@ export function DataGrid({
                     <>
                       <TableHead className="w-[65px] min-w-[65px] max-w-[65px] bg-card relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
-                        <span className="text-xs font-bold text-warning tracking-wider flex items-center justify-center gap-1">
-                          <CreditCard className="w-3 h-3" />
-                          GPago
-                        </span>
+                        <SortableHeader column={getColumn("dtGuyPago")} className="justify-center">
+                          <span className="text-xs font-bold text-warning tracking-wider flex items-center gap-1">
+                            <CreditCard className="w-3 h-3" />
+                            GPago
+                          </span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[95px] min-w-[95px] max-w-[95px] bg-card text-right">
-                        <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
+                        <SortableHeader column={getColumn("guyHonorario")} className="justify-end">
+                          <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[60px] min-w-[60px] max-w-[60px] bg-card text-center">
-                        <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
+                        <SortableHeader column={getColumn("dtGuyDpago")} className="justify-center">
+                          <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
+                        </SortableHeader>
                       </TableHead>
                       <TableHead className="w-[85px] min-w-[85px] max-w-[85px] bg-card text-right">
-                        <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
+                        <SortableHeader column={getColumn("guyDespesa")} className="justify-end">
+                          <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
+                        </SortableHeader>
                       </TableHead>
                       
                       {/* Separador */}
@@ -387,13 +480,17 @@ export function DataGrid({
                   {/* Grupo 7: Contexto */}
                   <TableHead className="w-[150px] min-w-[150px] max-w-[150px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
-                      <FileText className="w-3 h-3" />
-                      Atividade
-                    </span>
+                    <SortableHeader column={getColumn("atividade")}>
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
+                        <FileText className="w-3 h-3" />
+                        Atividade
+                      </span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[160px] min-w-[160px] max-w-[160px] bg-card text-center">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
+                    <SortableHeader column={getColumn("obs")} className="justify-center">
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
+                    </SortableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
@@ -405,7 +502,7 @@ export function DataGrid({
                     Array.from({ length: 12 }).map((_, i) => (
                       <SkeletonRow key={`skeleton-${i}`} filters={filters} />
                     ))
-                  ) : currentData.length === 0 ? (
+                  ) : paginatedRows.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={30}
@@ -421,7 +518,9 @@ export function DataGrid({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    currentData.map((row, index) => (
+                    paginatedRows.map((tableRow, index) => {
+                      const row = tableRow.original;
+                      return (
                       <TableRow
                         key={row.idPrinc || index}
                         className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
@@ -711,7 +810,7 @@ export function DataGrid({
                             </div>
                           </TableCell>
                       </TableRow>
-                    ))
+                    );})
                   )}
               </TableBody>
             </Table>
@@ -724,19 +823,40 @@ export function DataGrid({
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">
               Mostrando{" "}
-              <span className="font-semibold text-foreground">{startIndex + 1}</span>
+              <span className="font-semibold text-foreground">
+                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+              </span>
               {" - "}
-              <span className="font-semibold text-foreground">{Math.min(endIndex, data.length)}</span>
+              <span className="font-semibold text-foreground">
+                {Math.min(
+                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  table.getFilteredRowModel().rows.length
+                )}
+              </span>
               {" de "}
-              <span className="font-semibold text-accent">{data.length}</span>
+              <span className="font-semibold text-accent">{table.getFilteredRowModel().rows.length}</span>
+              {hasActiveFilters && (
+                <span className="text-muted-foreground/70"> (filtrado de {data.length})</span>
+              )}
             </span>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-destructive hover:text-destructive"
+                onClick={clearAllFilters}
+              >
+                <FilterX className="w-3 h-3 mr-1" />
+                Limpar filtros
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
               className="glass border border-white/10 disabled:opacity-30"
               data-testid="button-first-page"
             >
@@ -745,8 +865,8 @@ export function DataGrid({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
               className="glass border border-white/10 disabled:opacity-30"
               data-testid="button-prev-page"
             >
@@ -769,7 +889,7 @@ export function DataGrid({
                     key={pageNum}
                     variant={pageNum === currentPage ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setCurrentPage(pageNum)}
+                    onClick={() => table.setPageIndex(pageNum - 1)}
                     className={`min-w-[32px] ${pageNum === currentPage ? "bg-primary/80 text-primary-foreground" : "glass border border-white/10"}`}
                     data-testid={`button-page-${pageNum}`}
                   >
@@ -781,8 +901,8 @@ export function DataGrid({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
               className="glass border border-white/10 disabled:opacity-30"
               data-testid="button-next-page"
             >
@@ -791,8 +911,8 @@ export function DataGrid({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() => table.setPageIndex(totalPages - 1)}
+              disabled={!table.getCanNextPage()}
               className="glass border border-white/10 disabled:opacity-30"
               data-testid="button-last-page"
             >
