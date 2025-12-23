@@ -174,6 +174,7 @@ export function DataGrid({
 }: DataGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
   const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
@@ -377,13 +378,26 @@ export function DataGrid({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    currentData.map((row, index) => (
+                    currentData.map((row, index) => {
+                      const isHovered = hoveredRow === index;
+                      const isSelected = selectedRowIndex === index;
+                      const showPulse = isHovered || isSelected;
+                      
+                      return (
                       <TableRow
                         key={row.idPrinc || index}
-                        className={`h-[24px] border-b border-white/5 cursor-pointer transition-all duration-200 group
-                          ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
+                        className={`h-[24px] border-b cursor-pointer transition-all duration-200 group
+                          ${isSelected 
+                            ? `bg-gradient-to-r ${getStatusGradient(row.meta)} border-primary/40 selected-row-glow` 
+                            : isHovered 
+                              ? `bg-gradient-to-r ${getStatusGradient(row.meta)} border-white/5` 
+                              : "border-white/5 hover:bg-white/[0.02]"
+                          }
                         `}
-                        onClick={() => onRowClick?.(row)}
+                        onClick={() => {
+                          setSelectedRowIndex(index);
+                          onRowClick?.(row);
+                        }}
                         onMouseEnter={() => setHoveredRow(index)}
                         onMouseLeave={() => setHoveredRow(null)}
                         data-testid={`row-inspection-${row.idPrinc || index}`}
@@ -391,9 +405,10 @@ export function DataGrid({
                           {/* Grupo 1: Ação */}
                           <TableCell className="leading-tight">
                             <button
-                              className={`action-center-trigger p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent`}
+                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent ${showPulse ? 'action-center-trigger' : ''}`}
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setSelectedRowIndex(index);
                                 setSelectedInspection(row);
                                 setIsActionCenterOpen(true);
                               }}
@@ -563,7 +578,8 @@ export function DataGrid({
                             </div>
                           </TableCell>
                       </TableRow>
-                    ))
+                    );
+                    })
                   )}
               </TableBody>
             </Table>
