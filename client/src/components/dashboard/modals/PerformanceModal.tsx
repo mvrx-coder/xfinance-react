@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Modal } from "../Modal";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DollarSign,
   Receipt,
@@ -15,13 +16,16 @@ import {
   Wallet,
   FileText,
   ChevronDown,
+  AlertCircle,
 } from "lucide-react";
 
 import {
-  mockKPIs,
-  mockMarketShare,
-  mockBusinessData,
-  mockOperationalData,
+  usePerformance,
+  usePerformanceFilters,
+  type PerformanceFilters,
+} from "@/hooks";
+
+import {
   containerVariants,
   itemVariants,
   formatCurrency,
@@ -42,8 +46,72 @@ interface PerformanceModalProps {
 
 export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("market");
-  const [dateFilter, setDateFilter] = useState<"envio" | "pago" | "acerto">("envio");
-  const [use12Months, setUse12Months] = useState(true);
+  const [dateFilter, setDateFilter] = useState<"dt_envio" | "dt_pago" | "dt_acerto">("dt_envio");
+  const [anoIni, setAnoIni] = useState<number | undefined>(undefined);
+  const [anoFim, setAnoFim] = useState<number | undefined>(undefined);
+  const [use12Months, setUse12Months] = useState(false);
+  const [detailsPage, setDetailsPage] = useState(1);
+  const detailsPageSize = 10;
+
+  // Buscar opções de filtro (anos disponíveis)
+  const { data: filterOptions } = usePerformanceFilters(isOpen);
+
+  // Montar filtros para queries
+  const filters: PerformanceFilters = useMemo(() => ({
+    baseDate: dateFilter,
+    anoIni,
+    anoFim,
+    mm12: use12Months,
+  }), [dateFilter, anoIni, anoFim, use12Months]);
+
+  // Buscar dados de performance
+  const {
+    kpis,
+    marketShare,
+    business,
+    operational,
+    details,
+    isLoadingKPIs,
+    isLoadingMarket,
+    isLoadingBusiness,
+    isLoadingOperational,
+    isLoadingDetails,
+    hasError,
+    kpisError,
+  } = usePerformance({ filters, enabled: isOpen });
+
+  // Lista de anos para os selects
+  const anosDisponiveis = filterOptions?.anos ?? [];
+
+  // Erro de acesso (403)
+  const isAccessDenied = kpisError?.message?.includes("administradores");
+
+  // Se não tem acesso, mostrar mensagem
+  if (isAccessDenied) {
+    return (
+      <Modal
+        id="performance-modal"
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Performance"
+        subtitle="Acesso Restrito"
+        maxWidth="md"
+      >
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <div className="p-4 rounded-2xl bg-destructive/20 border border-destructive/30">
+            <AlertCircle className="w-8 h-8 text-destructive" />
+          </div>
+          <p className="text-foreground font-medium">Acesso Restrito</p>
+          <p className="text-sm text-muted-foreground text-center">
+            Apenas administradores podem acessar os dados de Performance.
+          </p>
+          <Button variant="outline" onClick={onClose} className="mt-4">
+            Fechar
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -96,16 +164,16 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
               className="flex items-center gap-3"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="envio" id="envio" className="border-destructive text-destructive" />
-                <Label htmlFor="envio" className="text-xs text-muted-foreground cursor-pointer">Envio</Label>
+                <RadioGroupItem value="dt_envio" id="dt_envio" className="border-destructive text-destructive" />
+                <Label htmlFor="dt_envio" className="text-xs text-muted-foreground cursor-pointer">Envio</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="pago" id="pago" className="border-white/30" />
-                <Label htmlFor="pago" className="text-xs text-muted-foreground cursor-pointer">Pago</Label>
+                <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30" />
+                <Label htmlFor="dt_pago" className="text-xs text-muted-foreground cursor-pointer">Pago</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="acerto" id="acerto" className="border-white/30" />
-                <Label htmlFor="acerto" className="text-xs text-muted-foreground cursor-pointer">Acerto</Label>
+                <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30" />
+                <Label htmlFor="dt_acerto" className="text-xs text-muted-foreground cursor-pointer">Acerto</Label>
               </div>
             </RadioGroup>
 
@@ -113,24 +181,36 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
 
             <div className="flex items-center gap-3">
               <span className="text-xs text-muted-foreground">Período:</span>
-              <Select defaultValue="inicio">
+              <Select 
+                value={anoIni?.toString() ?? "todos"} 
+                onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
+              >
                 <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
                   <SelectValue placeholder="Início" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="inicio">Início</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {anosDisponiveis.map((ano) => (
+                    <SelectItem key={ano.value} value={ano.value.toString()}>
+                      {ano.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <Select defaultValue="fim">
+              <Select 
+                value={anoFim?.toString() ?? "todos"} 
+                onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
+              >
                 <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
                   <SelectValue placeholder="Fim" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fim">Fim</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {anosDisponiveis.map((ano) => (
+                    <SelectItem key={ano.value} value={ano.value.toString()}>
+                      {ano.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -142,45 +222,56 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                 onCheckedChange={(checked) => setUse12Months(checked as boolean)}
                 className="border-white/30"
               />
-              <Label htmlFor="12months" className="text-xs text-muted-foreground cursor-pointer">12 meses</Label>
+              <Label htmlFor="12months" className="text-xs text-muted-foreground cursor-pointer">MM12</Label>
             </div>
           </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
           <motion.div variants={itemVariants} className="space-y-3">
-            <KPICard
-              icon={DollarSign}
-              label="Honorários"
-              value={`R$ ${formatCurrency(mockKPIs.honorarios)}`}
-              colorClass="bg-gradient-to-br from-amber-500/20 to-amber-600/10"
-              iconColorClass="text-amber-400"
-              delay={0}
-            />
-            <KPICard
-              icon={Receipt}
-              label="Despesas"
-              value={`R$ ${formatCurrency(mockKPIs.despesas)}`}
-              colorClass="bg-gradient-to-br from-rose-500/20 to-rose-600/10"
-              iconColorClass="text-rose-400"
-              delay={0.1}
-            />
-            <KPICard
-              icon={Target}
-              label="Resultado Operacional"
-              value={`R$ ${formatCurrency(mockKPIs.resultadoOperacional)}`}
-              colorClass="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10"
-              iconColorClass="text-emerald-400"
-              delay={0.2}
-            />
-            <KPICard
-              icon={Activity}
-              label="Inspeções"
-              value={mockKPIs.inspecoes.toString()}
-              colorClass="bg-gradient-to-br from-blue-500/20 to-blue-600/10"
-              iconColorClass="text-blue-400"
-              delay={0.3}
-            />
+            {isLoadingKPIs ? (
+              <>
+                <Skeleton className="h-[72px] w-full rounded-xl" />
+                <Skeleton className="h-[72px] w-full rounded-xl" />
+                <Skeleton className="h-[72px] w-full rounded-xl" />
+                <Skeleton className="h-[72px] w-full rounded-xl" />
+              </>
+            ) : (
+              <>
+                <KPICard
+                  icon={DollarSign}
+                  label="Honorários"
+                  value={`R$ ${formatCurrency(kpis?.honorarios)}`}
+                  colorClass="bg-gradient-to-br from-amber-500/20 to-amber-600/10"
+                  iconColorClass="text-amber-400"
+                  delay={0}
+                />
+                <KPICard
+                  icon={Receipt}
+                  label="Despesas"
+                  value={`R$ ${formatCurrency(kpis?.despesas)}`}
+                  colorClass="bg-gradient-to-br from-rose-500/20 to-rose-600/10"
+                  iconColorClass="text-rose-400"
+                  delay={0.1}
+                />
+                <KPICard
+                  icon={Target}
+                  label="Resultado Operacional"
+                  value={`R$ ${formatCurrency(kpis?.resultado_oper)}`}
+                  colorClass="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10"
+                  iconColorClass="text-emerald-400"
+                  delay={0.2}
+                />
+                <KPICard
+                  icon={Activity}
+                  label="Inspeções"
+                  value={kpis?.inspecoes?.toString() ?? "0"}
+                  colorClass="bg-gradient-to-br from-blue-500/20 to-blue-600/10"
+                  iconColorClass="text-blue-400"
+                  delay={0.3}
+                />
+              </>
+            )}
           </motion.div>
 
           <motion.div variants={itemVariants} className="space-y-4">
@@ -197,7 +288,15 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <MarketShareChart data={mockMarketShare} />
+                      {isLoadingMarket ? (
+                        <div className="space-y-3">
+                          {[...Array(6)].map((_, i) => (
+                            <Skeleton key={i} className="h-7 w-full rounded-lg" />
+                          ))}
+                        </div>
+                      ) : (
+                        <MarketShareChart data={marketShare ?? []} />
+                      )}
                     </motion.div>
                   )}
                   
@@ -209,7 +308,11 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <BusinessLineChart data={mockBusinessData} />
+                      {isLoadingBusiness ? (
+                        <Skeleton className="h-[280px] w-full rounded-lg" />
+                      ) : (
+                        <BusinessLineChart data={business ?? { months: [], series: [] }} />
+                      )}
                     </motion.div>
                   )}
                   
@@ -221,7 +324,11 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <OperationalBarChart data={mockOperationalData} />
+                      {isLoadingOperational ? (
+                        <Skeleton className="h-[280px] w-full rounded-lg" />
+                      ) : (
+                        <OperationalBarChart data={operational ?? []} />
+                      )}
                     </motion.div>
                   )}
                   
@@ -249,7 +356,14 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
           </motion.div>
         </div>
 
-        <DetailsGrid />
+        <DetailsGrid 
+          data={details?.data ?? []} 
+          total={details?.total ?? 0}
+          page={detailsPage}
+          pageSize={detailsPageSize}
+          onPageChange={setDetailsPage}
+          isLoading={isLoadingDetails}
+        />
       </motion.div>
     </Modal>
   );

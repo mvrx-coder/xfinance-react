@@ -51,3 +51,22 @@ export {
   type UseDataGridReturn,
 } from "./useDataGrid";
 
+// Performance (Financial Dashboard)
+export {
+  usePerformance,
+  usePerformanceFilters,
+  usePerformanceKPIs,
+  useMarketShare,
+  useBusiness,
+  useOperational,
+  usePerformanceDetails,
+  type PerformanceFilters,
+  type KPIsResponse,
+  type MarketShareItem,
+  type BusinessResponse,
+  type OperationalItem,
+  type DetailsItem,
+  type DetailsResponse,
+  type UsePerformanceOptions,
+  type UsePerformanceReturn,
+} from "./use-performance";

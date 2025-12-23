@@ -61,6 +61,7 @@ export async function registerRoutes(
   app.all("/api/auth/*", (req, res) => proxyToFastAPI(req, res));
   app.all("/api/acoes/*", (req, res) => proxyToFastAPI(req, res));
   app.all("/api/lookups/*", (req, res) => proxyToFastAPI(req, res));
+  app.all("/api/performance/*", (req, res) => proxyToFastAPI(req, res));
   
   // Rota de inspections - PATCH vai para FastAPI, GET com params também
   app.patch("/api/inspections/:id", (req, res) => proxyToFastAPI(req, res));

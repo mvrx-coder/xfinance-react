@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { mockMarketShare } from "./data";
+import type { MarketShareItem } from "@/hooks";
 
 interface MarketShareChartProps {
-  data: typeof mockMarketShare;
+  data: MarketShareItem[];
 }
 
 export function MarketShareChart({ data }: MarketShareChartProps) {
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+  
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Nenhum dado disponível
+      </div>
+    );
+  }
+  
   const maxValue = Math.max(...data.map(d => d.value));
 
   return (
