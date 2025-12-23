@@ -606,7 +606,7 @@ export function DataGrid({
                                 <AlertCell
                                   value={row.dtAcerto}
                                   displayValue={formatDate(row.dtAcerto)}
-                                  alertLevel={getAcertoAlert(row.dtEnvio, row.dtPago)}
+                                  alertLevel={getAcertoAlert(row.dtEnvio, row.dtPago, row.honorario)}
                                   field="dt_acerto"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -655,7 +655,7 @@ export function DataGrid({
                                 <AlertCell
                                   value={row.dtDenvio}
                                   displayValue={formatDate(row.dtDenvio)}
-                                  alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago)}
+                                  alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago, row.despesa)}
                                   field="dt_denvio"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -698,7 +698,7 @@ export function DataGrid({
                                 <AlertCell
                                   value={row.dtGuyPago}
                                   displayValue={formatDate(row.dtGuyPago)}
-                                  alertLevel={getGPagoAlert(row.dtEntregue, row.dtGuyPago)}
+                                  alertLevel={getGPagoAlert(row.dtEntregue, row.dtGuyPago, row.guyHonorario)}
                                   field="dt_guy_pago"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -720,7 +720,7 @@ export function DataGrid({
                                 <AlertCell
                                   value={row.dtGuyDpago}
                                   displayValue={formatDate(row.dtGuyDpago)}
-                                  alertLevel={getGDPagoAlert(row.dtEntregue, row.dtGuyDpago)}
+                                  alertLevel={getGDPagoAlert(row.dtEntregue, row.dtGuyDpago, row.guyDespesa)}
                                   field="dt_guy_dpago"
                                   idPrinc={row.idPrinc}
                                   type="date"

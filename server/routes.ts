@@ -6,7 +6,7 @@ import { z } from "zod";
 import fetch from "node-fetch";
 
 // Backend FastAPI URL
-const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8000";
+const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8001";
 
 // Proxy manual para FastAPI
 async function proxyToFastAPI(req: Request, res: Response, path?: string) {
@@ -62,6 +62,8 @@ export async function registerRoutes(
   app.all("/api/acoes/*", (req, res) => proxyToFastAPI(req, res));
   app.all("/api/lookups/*", (req, res) => proxyToFastAPI(req, res));
   app.all("/api/performance/*", (req, res) => proxyToFastAPI(req, res));
+  app.all("/api/investments", (req, res) => proxyToFastAPI(req, res));
+  app.all("/api/investments/*", (req, res) => proxyToFastAPI(req, res));
   
   // Rota de inspections - PATCH vai para FastAPI, GET com params também
   app.patch("/api/inspections/:id", (req, res) => proxyToFastAPI(req, res));

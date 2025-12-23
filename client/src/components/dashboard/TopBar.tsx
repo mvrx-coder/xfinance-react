@@ -16,7 +16,6 @@ import {
   LogOut,
   Calendar,
   Clock,
-  Sparkles,
   Gamepad2,
   Target,
   Database,
@@ -180,7 +179,7 @@ export function TopBar({
         {/* Welcome Panel */}
         <div className="flex flex-col justify-center gap-1 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
             <span className="text-base font-semibold">Bora, {userName}!!! Vascoooo!</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -304,7 +303,7 @@ export function TopBar({
               onClick={onSearch}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-primary/50 bg-slate-900/80 text-primary backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-search"
             >
               <Search className="w-4 h-4" />
@@ -315,7 +314,7 @@ export function TopBar({
               onClick={onOpenUsers}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-users"
             >
               <Users className="w-4 h-4 text-primary" />
@@ -326,7 +325,7 @@ export function TopBar({
               onClick={onOpenInvestments}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-investments"
             >
               <TrendingUp className="w-4 h-4 text-success" />
@@ -337,7 +336,7 @@ export function TopBar({
               onClick={onOpenFinancial}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[110px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-performance"
             >
               <PieChart className="w-4 h-4 text-violet-400" />
@@ -351,7 +350,7 @@ export function TopBar({
               onClick={onNewRecord}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-accent bg-slate-900/80 text-accent backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-green-500 bg-slate-900/60 text-green-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:bg-green-500/10"
               data-testid="button-new"
             >
               <Plus className="w-4 h-4" />
@@ -362,7 +361,7 @@ export function TopBar({
               onClick={onOpenGuyPay}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-foreground backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-guypay"
             >
               <Wallet className="w-4 h-4 text-warning" />
@@ -372,7 +371,7 @@ export function TopBar({
               id="btn-coming-soon"
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-white/20 bg-slate-900/80 text-muted-foreground backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500/50 bg-slate-900/60 text-purple-400/50 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/10"
               disabled
               data-testid="button-coming-soon"
             >
@@ -384,7 +383,7 @@ export function TopBar({
               onClick={onLogout}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-full border-orange-500/70 bg-slate-900/80 text-orange-400 backdrop-blur-sm w-[100px] justify-center"
+              className="gap-1.5 text-sm rounded-xl border-2 border-red-500 bg-slate-900/60 text-red-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/40 hover:bg-red-500/10"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />

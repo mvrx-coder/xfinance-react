@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { itemVariants } from "./data";
 
 interface KPICardProps {
@@ -9,6 +10,7 @@ interface KPICardProps {
   suffix?: string;
   gradient: string;
   delay: number;
+  isLoading?: boolean;
 }
 
 export function KPICard({ 
@@ -17,7 +19,8 @@ export function KPICard({
   value, 
   suffix,
   gradient,
-  delay 
+  delay,
+  isLoading 
 }: KPICardProps) {
   return (
     <motion.div
@@ -33,10 +36,16 @@ export function KPICard({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground truncate">{label}</p>
-              <p className="text-xl font-bold text-foreground mt-0.5">
-                {value}
-                {suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
-              </p>
+              {isLoading ? (
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <p className="text-xl font-bold text-foreground mt-0.5">
+                  {value}
+                  {suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

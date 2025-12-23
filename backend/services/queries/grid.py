@@ -7,6 +7,7 @@ Contém:
 - Cláusulas ORDER BY complexas
 - Função load_grid para carregar dados com permissões
 - Cálculo de status para cores condicionais
+- Cálculo dinâmico do campo prazo
 """
 
 import logging
@@ -62,6 +63,153 @@ def _compute_delivery_status(dt_entregue: Optional[str], dt_envio: Optional[str]
     if entregue and entregue not in ("", "None", "nan") and (not envio or envio in ("", "None", "nan")):
         return "highlight"
     return ""
+
+
+# =============================================================================
+# CÁLCULO DO CAMPO PRAZO
+# =============================================================================
+
+def _is_valid_date(date_str: Optional[str]) -> bool:
+    """Verifica se uma string de data é válida (não vazia/nula)."""
+    if not date_str:
+        return False
+    s = str(date_str).strip()
+    return s not in ("", "None", "nan", "NaN", "null")
+
+
+def _parse_date(date_str: str) -> Optional[date]:
+    """Converte string para date. Retorna None se inválida."""
+    try:
+        return datetime.strptime(str(date_str)[:10], "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
+    """
+    Calcula o valor do campo prazo seguindo a lógica de negócio.
+    
+    Regras (em ordem de prioridade):
+    1. Se prazo > 0 no DB → retorna valor do DB (não calcular)
+    2. BLOQUEIO: dt_pago preenchido E dt_entregue vazio → retorna None
+    3. Se dt_entregue vazio → calcula (hoje - dt_inspecao)
+    4. Se dt_entregue preenchido E dt_envio vazio → retorna None
+    5. Se dt_entregue E dt_envio preenchidos E dt_pago vazio → calcula (hoje - dt_envio)
+    6. Se dt_pago E dt_entregue preenchidos → calcula (dt_entregue - dt_inspecao) e GRAVA
+    
+    Returns:
+        tuple: (valor_prazo, deve_gravar)
+            - valor_prazo: int ou None
+            - deve_gravar: True se deve persistir no banco
+    """
+    # Obter valores
+    prazo_db = row.get("prazo")
+    dt_pago = row.get("dt_pago")
+    dt_entregue = row.get("dt_entregue")
+    dt_envio = row.get("dt_envio")
+    dt_inspecao = row.get("dt_inspecao")
+    
+    # Verificar se prazo já existe no DB
+    prazo_existente = None
+    if prazo_db is not None:
+        try:
+            prazo_int = int(prazo_db)
+            if prazo_int > 0:
+                prazo_existente = prazo_int
+        except (ValueError, TypeError):
+            pass
+    
+    # Regra 0: Se prazo já existe no DB, usar esse valor
+    if prazo_existente is not None:
+        return (prazo_existente, False)
+    
+    # Verificar campos de data
+    has_pago = _is_valid_date(dt_pago)
+    has_entregue = _is_valid_date(dt_entregue)
+    has_envio = _is_valid_date(dt_envio)
+    has_inspecao = _is_valid_date(dt_inspecao)
+    
+    # BLOQUEIO: dt_pago preenchido E dt_entregue vazio (caso anômalo)
+    if has_pago and not has_entregue:
+        return (None, False)
+    
+    today = date.today()
+    
+    # Regra 1: dt_entregue vazio → calcular (hoje - dt_inspecao)
+    if not has_entregue:
+        if has_inspecao:
+            dt_insp = _parse_date(dt_inspecao)
+            if dt_insp:
+                dias = (today - dt_insp).days
+                # Se negativo (data futura), retorna None
+                return (dias if dias >= 0 else None, False)
+        return (None, False)
+    
+    # Regra 2: dt_entregue preenchido E dt_envio vazio → não calcular
+    if has_entregue and not has_envio:
+        return (None, False)
+    
+    # Regra 3: dt_entregue E dt_envio preenchidos E dt_pago vazio → (hoje - dt_envio)
+    if has_entregue and has_envio and not has_pago:
+        dt_env = _parse_date(dt_envio)
+        if dt_env:
+            dias = (today - dt_env).days
+            # Se negativo (data futura), retorna None
+            return (dias if dias >= 0 else None, False)
+        return (None, False)
+    
+    # Regra 4: dt_pago E dt_entregue preenchidos → (dt_entregue - dt_inspecao) e GRAVAR
+    if has_pago and has_entregue:
+        dt_ent = _parse_date(dt_entregue)
+        dt_insp = _parse_date(dt_inspecao)
+        if dt_ent and dt_insp:
+            dias = (dt_ent - dt_insp).days
+            # Se negativo (entregue antes de inspecionar - anômalo), retorna None
+            return (dias if dias >= 0 else None, dias >= 0)
+        return (None, False)
+    
+    return (None, False)
+
+
+def _save_prazo_to_db(id_princ: int, prazo: int) -> None:
+    """
+    Grava o prazo calculado no banco de dados.
+    
+    Chamado quando o registro está finalizado (dt_pago E dt_entregue preenchidos).
+    """
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "UPDATE princ SET prazo = ? WHERE id_princ = ?",
+                (prazo, id_princ)
+            )
+            conn.commit()
+        logger.info("Prazo %d gravado para id_princ=%d", prazo, id_princ)
+    except Exception as e:
+        logger.error("Erro ao gravar prazo para id_princ=%d: %s", id_princ, e)
+
+
+def _enrich_with_prazo(rows: list[dict]) -> list[dict]:
+    """
+    Calcula o prazo dinâmico para cada linha.
+    
+    - Se prazo já existe no DB, mantém
+    - Senão, calcula conforme regras de negócio
+    - Se registro finalizado, grava prazo no DB
+    """
+    for row in rows:
+        prazo_calculado, deve_gravar = _compute_prazo(row)
+        
+        # Atualizar valor do prazo na row
+        row["prazo"] = prazo_calculado
+        
+        # Se deve gravar e tem id_princ válido
+        if deve_gravar and prazo_calculado is not None:
+            id_princ = row.get("id_princ")
+            if id_princ:
+                _save_prazo_to_db(int(id_princ), prazo_calculado)
+    
+    return rows
 
 
 def _enrich_with_status(rows: list[dict]) -> list[dict]:
@@ -302,6 +450,13 @@ def load_grid(
         logger.warning("Nenhuma coluna válida para papel: %s", papel)
         return []
     
+    # Colunas auxiliares para cálculo do prazo (sempre incluir, mesmo sem permissão de exibição)
+    # Necessários para calcular prazo dinâmico independente do papel
+    prazo_aux_fields = ["dt_inspecao", "dt_entregue", "dt_envio", "dt_pago", "prazo", "id_princ"]
+    for field in prazo_aux_fields:
+        if field not in permissoes:
+            colunas_sql.append(f'p.{field} AS "{field}"')
+    
     # Colunas de marcadores (tempstate) - sempre incluir para ações do grid
     # Valores 0-3: 0=sem marcador, 1=azul, 2=amarelo, 3=vermelho
     marker_columns = [
@@ -378,6 +533,9 @@ def load_grid(
         cursor = conn.cursor()
         cursor.execute(query, query_params)
         rows = cursor.fetchall()
+    
+    # Calcular prazo dinâmico (e gravar se finalizado)
+    rows = _enrich_with_prazo(rows)
     
     # Enriquecer com status calculados (para cores condicionais)
     rows = _enrich_with_status(rows)

@@ -58,8 +58,10 @@ export function getInspecaoAlert(
 /** Acerto: verde se pago, vermelho se envio sem pago */
 export function getAcertoAlert(
   dtEnvio: string | null | undefined,
-  dtPago: string | null | undefined
+  dtPago: string | null | undefined,
+  honorario: number | null | undefined
 ): AlertLevel {
+  if (honorario == null || honorario <= 1) return "none";
   if (isDateFilled(dtPago)) return "success";
   if (isDateFilled(dtEnvio)) return "danger";
   return "none";
@@ -68,8 +70,10 @@ export function getAcertoAlert(
 /** DEnvio: verde se dpago, vermelho se denvio sem dpago */
 export function getDEnvioAlert(
   dtDenvio: string | null | undefined,
-  dtDpago: string | null | undefined
+  dtDpago: string | null | undefined,
+  despesa: number | null | undefined
 ): AlertLevel {
+  if (despesa == null || despesa <= 1) return "none";
   if (isDateFilled(dtDpago)) return "success";
   if (isDateFilled(dtDenvio)) return "danger";
   return "none";
@@ -78,8 +82,10 @@ export function getDEnvioAlert(
 /** GPago: verde se guy_pago, vermelho se entregue sem guy_pago */
 export function getGPagoAlert(
   dtEntregue: string | null | undefined,
-  dtGuyPago: string | null | undefined
+  dtGuyPago: string | null | undefined,
+  guyHonorario: number | null | undefined
 ): AlertLevel {
+  if (guyHonorario == null || guyHonorario <= 1) return "none";
   if (isDateFilled(dtGuyPago)) return "success";
   if (isDateFilled(dtEntregue)) return "danger";
   return "none";
@@ -88,8 +94,10 @@ export function getGPagoAlert(
 /** GDPago: verde se guy_dpago, vermelho se entregue sem guy_dpago */
 export function getGDPagoAlert(
   dtEntregue: string | null | undefined,
-  dtGuyDpago: string | null | undefined
+  dtGuyDpago: string | null | undefined,
+  guyDespesa: number | null | undefined
 ): AlertLevel {
+  if (guyDespesa == null || guyDespesa <= 1) return "none";
   if (isDateFilled(dtGuyDpago)) return "success";
   if (isDateFilled(dtEntregue)) return "danger";
   return "none";

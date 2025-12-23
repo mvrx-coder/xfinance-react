@@ -70,3 +70,23 @@ export {
   type UsePerformanceOptions,
   type UsePerformanceReturn,
 } from "./use-performance";
+
+// Investments (Aportes)
+export {
+  useInvestments,
+  useInvestmentFilters,
+  useInvestmentKPIs,
+  useInvestmentHighlights,
+  useInvestmentAllocation,
+  useInvestmentList,
+  useDeleteInvestment,
+  type InvestmentFilters,
+  type FiltersResponse as InvestmentFiltersResponse,
+  type KPIsResponse as InvestmentKPIsResponse,
+  type HighlightsResponse,
+  type AllocationItem,
+  type InvestmentsResponse,
+  type InvestmentItem,
+  type UseInvestmentsOptions,
+  type UseInvestmentsReturn,
+} from "./use-investments";

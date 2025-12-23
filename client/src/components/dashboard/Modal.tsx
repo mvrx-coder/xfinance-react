@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ModalProps {
@@ -125,8 +125,8 @@ export function Modal({
             {/* Header */}
             <div className="flex items-start justify-between px-6 py-5 border-b border-white/10 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
+                  <img src="/logo1.png" alt="Logo" className="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <h2

@@ -56,6 +56,15 @@ export default function Login() {
       <div className="login-content">
         <div className="login-hero">
           <div className="login-hero-card">
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/logo.png" 
+                alt="xFinance Logo" 
+                className="h-20 w-auto object-contain"
+              />
+            </div>
+            
             <span className="login-eyebrow">
               PLANEJAMENTO &bull; PERFORMANCE &bull; PREVISIBILIDADE
             </span>
