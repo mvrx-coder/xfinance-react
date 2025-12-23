@@ -415,7 +415,7 @@ export function DataGrid({
                           <TableCell className=" text-xs max-w-[140px] truncate">
                             {getLabelById(segurLookup, row.idSegur)}
                           </TableCell>
-                          <TableCell className=" text-xs text-center font-mono">
+                          <TableCell className="text-xs text-center font-mono tabular-nums">
                             {row.loc ?? "-"}
                           </TableCell>
                           <TableCell className=" text-xs">
@@ -441,13 +441,13 @@ export function DataGrid({
                           {/* Grupo 3: Workflow Principal */}
                           {filters.columnGroups.workflow && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtInspecao)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtEntregue)}
                               </TableCell>
-                              <TableCell className=" text-xs text-center font-mono">
+                              <TableCell className="text-xs text-center font-mono tabular-nums">
                                 {row.prazo ?? "-"}
                               </TableCell>
                               
@@ -461,7 +461,7 @@ export function DataGrid({
                           {/* Grupo 4: Recebíveis - Honorários */}
                           {filters.columnGroups.recebiveis && (
                             <>
-                              <TableCell className={`text-xs text-muted-foreground text-center ${index < 4 ? 'border-b-2 border-warning/50' : ''}`}>
+                              <TableCell className={`text-xs text-muted-foreground text-center tabular-nums ${index < 4 ? 'border-b-2 border-warning/50' : ''}`}>
                                 <div className="flex items-center justify-center gap-1.5">
                                   {formatDate(row.dtAcerto)}
                                   
@@ -474,13 +474,13 @@ export function DataGrid({
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtEnvio)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtPago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-success">
+                              <TableCell className="text-xs text-right font-mono font-semibold text-success tabular-nums">
                                 {formatCurrency(row.honorario)}
                               </TableCell>
                               
@@ -490,13 +490,13 @@ export function DataGrid({
                               </TableCell>
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtDenvio)}
                               </TableCell>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtDpago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-emerald-400">
+                              <TableCell className="text-xs text-right font-mono font-semibold text-emerald-400 tabular-nums">
                                 {formatCurrency(row.despesa)}
                               </TableCell>
                               
@@ -510,10 +510,10 @@ export function DataGrid({
                           {/* Grupo 6: Pagamentos Colaborador */}
                           {filters.columnGroups.pagamentos && (
                             <>
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtGuyPago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
+                              <TableCell className="text-xs text-right font-mono font-semibold text-warning tabular-nums">
                                 {formatCurrency(row.guyHonorario)}
                               </TableCell>
                               
@@ -522,10 +522,10 @@ export function DataGrid({
                                 <div className="w-[1px] h-full bg-warning/30" />
                               </TableCell>
                               
-                              <TableCell className=" text-xs text-muted-foreground text-center">
+                              <TableCell className="text-xs text-muted-foreground text-center tabular-nums">
                                 {formatDate(row.dtGuyDpago)}
                               </TableCell>
-                              <TableCell className=" text-xs text-right font-mono font-semibold text-warning">
+                              <TableCell className="text-xs text-right font-mono font-semibold text-warning tabular-nums">
                                 {formatCurrency(row.guyDespesa)}
                               </TableCell>
                               
