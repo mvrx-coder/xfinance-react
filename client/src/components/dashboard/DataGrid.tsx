@@ -26,7 +26,7 @@ import {
   Receipt,
   CreditCard,
   FileText,
-  Sparkles,
+  Zap,
   DollarSign,
   AlertCircle,
 } from "lucide-react";
@@ -391,7 +391,7 @@ export function DataGrid({
                           {/* Grupo 1: Ação */}
                           <TableCell className="leading-tight">
                             <button
-                              className={`p-1 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
+                              className={`action-center-trigger p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedInspection(row);
@@ -399,7 +399,7 @@ export function DataGrid({
                               }}
                               data-testid={`badge-action-${row.idPrinc || index}`}
                             >
-                              <Sparkles className="w-3.5 h-3.5" />
+                              <Zap className="w-3.5 h-3.5" />
                             </button>
                           </TableCell>
                           
