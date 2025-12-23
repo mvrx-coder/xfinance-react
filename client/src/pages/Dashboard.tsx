@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
 import { StatusBar } from "@/components/dashboard/StatusBar";
-import { ToastContainer, type Toast } from "@/components/dashboard/ToastContainer";
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
 import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
@@ -32,8 +32,6 @@ export default function Dashboard() {
   const [statusMessages, setStatusMessages] = useState<
     Array<{ id: string; type: "success" | "error" | "warning" | "info"; message: string }>
   >([]);
-
-  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const [modals, setModals] = useState({
     newRecord: false,
@@ -99,28 +97,16 @@ export default function Dashboard() {
     }
   }, [inspectionsError, setLocation]);
 
-  const addToast = useCallback((toast: Omit<Toast, "id">) => {
-    const id = `toast-${Date.now()}`;
-    setToasts((prev) => [...prev, { ...toast, id }]);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
   const dismissStatus = useCallback((id: string) => {
     setStatusMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
   const handleSearch = useCallback(() => {
     refetchInspections();
-    addToast({
-      type: "info",
-      title: "Buscando...",
-      message: "Atualizando dados do grid",
-      duration: 3000,
+    toast.info("Buscando...", {
+      description: "Atualizando dados do grid",
     });
-  }, [refetchInspections, addToast]);
+  }, [refetchInspections]);
 
   const handleOpenModal = useCallback((modal: keyof typeof modals) => {
     setModals((prev) => ({ ...prev, [modal]: true }));
@@ -131,43 +117,31 @@ export default function Dashboard() {
   }, []);
 
   const handleLogout = useCallback(async () => {
-    addToast({
-      type: "warning",
-      title: "Logout",
-      message: "Você será desconectado...",
-      duration: 2000,
+    toast.warning("Logout", {
+      description: "Você será desconectado...",
     });
     
     await logout();
     localStorage.removeItem("xfinance_user");
     setLocation("/login");
-  }, [addToast, setLocation]);
+  }, [setLocation]);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
-    addToast({
-      type: "info",
-      title: "Registro selecionado",
-      message: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
-      duration: 3000,
+    toast.info("Registro selecionado", {
+      description: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
     });
-  }, [addToast]);
+  }, []);
 
   const handleNewRecordSuccess = useCallback(() => {
     handleCloseModal("newRecord");
     refetchInspections();
-    addToast({
-      type: "success",
-      title: "Sucesso!",
-      message: "Novo registro criado com sucesso",
-      duration: 4000,
+    toast.success("Sucesso!", {
+      description: "Novo registro criado com sucesso",
     });
-  }, [handleCloseModal, refetchInspections, addToast]);
+  }, [handleCloseModal, refetchInspections]);
 
   return (
     <div className="flex flex-col h-screen bg-background" data-testid="dashboard">
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-
       {/* Top Bar */}
       <TopBar
         userName={currentUser?.short_nome || currentUser?.nick || currentUser?.nome || "Usuário"}
