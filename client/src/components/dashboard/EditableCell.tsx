@@ -137,7 +137,7 @@ export function EditableCell({
 
   return (
     <span
-      onClick={(e) => {
+      onDoubleClick={(e) => {
         e.stopPropagation();
         startEdit();
       }}
@@ -146,7 +146,7 @@ export function EditableCell({
         "hover:bg-primary/10 hover:text-primary transition-colors rounded",
         className
       )}
-      title="Clique para editar"
+      title="Duplo clique para editar"
     >
       {display}
     </span>

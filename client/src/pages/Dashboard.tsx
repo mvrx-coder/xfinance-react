@@ -170,7 +170,7 @@ export default function Dashboard() {
 
       {/* Top Bar */}
       <TopBar
-        userName={currentUser?.nome || currentUser?.nick || currentUser?.email || "Usuário"}
+        userName={currentUser?.short_nome || currentUser?.nick || currentUser?.nome || "Usuário"}
         kpis={kpis}
         filters={filters}
         onFiltersChange={setFilters}

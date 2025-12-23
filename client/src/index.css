@@ -554,17 +554,17 @@
   gap: 12px !important;
 }
 
-/* Info Toast - Cyan */
+/* Info Toast - Lilás */
 [data-sonner-toast][data-type="info"] {
-  background: linear-gradient(135deg, rgba(0, 188, 212, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
-  border: 1px solid rgba(0, 188, 212, 0.4) !important;
+  background: linear-gradient(135deg, rgba(206, 98, 217, 0.15) 0%, rgba(10, 10, 31, 0.92) 100%) !important;
+  border: 1px solid rgba(206, 98, 217, 0.4) !important;
   box-shadow: 
-    0 0 30px rgba(0, 188, 212, 0.15),
+    0 0 30px rgba(206, 98, 217, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
 [data-sonner-toast][data-type="info"] [data-icon] {
-  color: #00BCD4 !important;
+  color: #CE62D9 !important;
 }
 
 /* Success Toast - Emerald */

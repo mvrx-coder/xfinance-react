@@ -121,7 +121,8 @@ export function AlertCell({
   return (
     <div
       className={cn("flex items-center justify-between gap-1.5 w-full h-full px-2 py-1 cursor-pointer hover:bg-white/[0.05]", borderClass)}
-      onClick={() => setIsEditing(true)}
+      onDoubleClick={() => setIsEditing(true)}
+      title="Duplo clique para editar"
     >
       <span className={cn("truncate text-xs", className)}>{displayValue}</span>
       {showDot && <span className={cn("w-2 h-2 rounded-full flex-shrink-0", dotClass)} />}
