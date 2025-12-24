@@ -516,18 +516,72 @@
     background: rgba(206, 98, 217, 0.08) !important;
   }
 
-  /* Deep gradient background for visual depth - STRONG VISIBILITY */
+  /* ===== LAYERED DEPTH SYSTEM - 3 TIERS ===== */
+  
+  /* Tier 1: Background Canvas - Multi-zone gradient with vignette */
   .bg-depth-gradient {
     background: 
-      radial-gradient(ellipse 100% 80% at 50% -20%, rgba(206, 98, 217, 0.25) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 60% at 90% 100%, rgba(0, 188, 212, 0.18) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 50% at 5% 70%, rgba(124, 58, 237, 0.15) 0%, transparent 45%),
+      /* Cyan vignette bottom-right */
+      radial-gradient(ellipse 70% 50% at 95% 95%, rgba(0, 188, 212, 0.12) 0%, transparent 60%),
+      /* Magenta vignette top-left */
+      radial-gradient(ellipse 60% 40% at 5% 5%, rgba(206, 98, 217, 0.08) 0%, transparent 50%),
+      /* Violet accent center-left */
+      radial-gradient(ellipse 50% 60% at 10% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 40%),
+      /* Main vertical gradient - darker edges, mid-tone core */
       linear-gradient(180deg, 
-        hsl(240 60% 4%) 0%,
-        hsl(240 55% 6%) 20%,
-        hsl(240 48% 9%) 50%,
-        hsl(240 40% 16%) 100%
+        #070717 0%,
+        #0C0C24 15%,
+        #111133 40%,
+        #0E0E28 70%,
+        #080820 100%
       ) !important;
+  }
+  
+  /* Tier 2: Shell Surfaces - Toolbar, KPIs, Grid Container */
+  .shell-toolbar {
+    background: rgba(28, 28, 60, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  
+  .shell-kpi {
+    background: rgba(26, 26, 58, 0.75);
+    backdrop-filter: blur(8px);
+  }
+  
+  .shell-grid {
+    background: rgba(21, 21, 48, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  
+  /* Tier 3: Grid Row Treatments - Zebra Striping */
+  .grid-row-even {
+    background: transparent;
+  }
+  
+  .grid-row-even:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  
+  .grid-row-odd {
+    background: rgba(255, 255, 255, 0.025);
+  }
+  
+  .grid-row-odd:hover {
+    background: rgba(255, 255, 255, 0.045);
+  }
+  
+  /* Cadence separator - every 4th row (Stripe-inspired) */
+  .grid-row-cadence {
+    border-bottom: 1px solid rgba(206, 98, 217, 0.12) !important;
+  }
+  
+  /* Grid header with distinct backdrop */
+  .grid-header-shell {
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* Elevated container with distinct visual separation */

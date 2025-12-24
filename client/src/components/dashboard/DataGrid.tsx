@@ -204,12 +204,12 @@ export function DataGrid({
       transition={{ duration: 0.4, delay: 0.2 }}
       className="flex-1 mx-3 mb-3"
     >
-      <Card className="h-full container-elevated shadow-2xl overflow-hidden">
+      <Card className="h-full shell-grid rounded-xl shadow-2xl overflow-hidden">
         {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-[calc(100vh-180px)]">
             <Table fullWidth={false} className="min-w-[1600px] table-fixed">
-              <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
+              <TableHeader className="sticky top-0 z-50 grid-header-shell">
                 <TableRow className="header-separator">
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] bg-card relative">
@@ -382,6 +382,8 @@ export function DataGrid({
                       const isHovered = hoveredRow === index;
                       const isSelected = selectedRowIndex === index;
                       const showPulse = isHovered || isSelected;
+                      const isOddRow = index % 2 === 1;
+                      const isCadenceRow = (index + 1) % 4 === 0;
                       
                       return (
                       <TableRow
@@ -389,9 +391,7 @@ export function DataGrid({
                         className={`h-[24px] border-b cursor-pointer transition-all duration-200 group
                           ${isSelected 
                             ? `bg-gradient-to-r ${getStatusGradient(row.meta)} border-primary/40 selected-row-glow` 
-                            : isHovered 
-                              ? `bg-gradient-to-r ${getStatusGradient(row.meta)} border-white/5` 
-                              : "border-white/5 hover:bg-white/[0.02]"
+                            : `${isOddRow ? 'grid-row-odd' : 'grid-row-even'} ${isCadenceRow ? 'grid-row-cadence' : ''} border-white/5`
                           }
                         `}
                         onClick={() => {
