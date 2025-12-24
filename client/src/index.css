@@ -577,19 +577,24 @@
     border-bottom: 1px solid rgba(206, 98, 217, 0.12) !important;
   }
   
-  /* Grid header with Frost Glass effect */
+  /* Grid header with Premium Crystal effect */
   .grid-header-shell {
     background: linear-gradient(
       180deg,
-      rgba(30, 30, 65, 0.75) 0%,
-      rgba(20, 20, 50, 0.85) 100%
+      rgba(40, 40, 80, 0.6) 0%,
+      rgba(20, 20, 50, 0.8) 100%
     );
-    backdrop-filter: blur(16px) saturate(180%);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px) saturate(200%);
+    border-top: 1px solid rgba(206, 98, 217, 0.15);
+    border-bottom: 1px solid rgba(0, 188, 212, 0.1);
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 4px 12px rgba(0, 0, 0, 0.25);
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  
+  .grid-header-shell th {
+    height: 40px;
   }
 
   /* Elevated container with distinct visual separation */
