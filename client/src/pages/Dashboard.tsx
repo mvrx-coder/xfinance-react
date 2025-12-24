@@ -43,6 +43,10 @@ export default function Dashboard() {
 
   // Carregar usuário atual
   useEffect(() => {
+    // TEMP: Mock user para trabalho visual
+    const mockUser: UserData = { id: 1, nome: "Marcus Vinicius", email: "mvrxxx@gmail.com", perfil: "admin" };
+    setCurrentUser(mockUser);
+    
     // Primeiro tenta do localStorage (cache)
     const cachedUser = localStorage.getItem("xfinance_user");
     if (cachedUser) {
@@ -54,11 +58,8 @@ export default function Dashboard() {
       if (user) {
         setCurrentUser(user);
         localStorage.setItem("xfinance_user", JSON.stringify(user));
-      } else {
-        // Não autenticado - redireciona para login
-        localStorage.removeItem("xfinance_user");
-        setLocation("/login");
       }
+      // TEMP: Não redireciona para login durante trabalho visual
     });
   }, [setLocation]);
 

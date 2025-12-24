@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import logoMvrx from "@assets/logo_1766218677246.png";
+
 import {
   Search,
   Plus,
@@ -169,9 +169,9 @@ export function TopBar({
         {/* Logo MVRX - Clean, no frame */}
         <div className="flex items-center justify-center h-[88px] px-2">
           <img 
-            src={logoMvrx} 
+            src="/logo.png" 
             alt="MVRX Logo" 
-            className="h-12 w-auto object-contain"
+            className="h-14 w-auto object-contain"
             data-testid="img-logo"
           />
         </div>
@@ -179,7 +179,7 @@ export function TopBar({
         {/* Welcome Panel */}
         <div className="flex flex-col justify-center gap-1 h-[88px] px-4 py-2 rounded-xl glass border border-white/10">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
+            <img src="/logo1.png" alt="Logo" className="w-5 h-5 object-contain" />
             <span className="text-base font-semibold">Bora, {userName}!!! Vascoooo!</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
