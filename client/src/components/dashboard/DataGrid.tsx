@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
@@ -26,8 +25,10 @@ import {
   Receipt,
   CreditCard,
   FileText,
-  Sparkles,
+  Zap,
   FilterX,
+  Check,
+  X,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -60,6 +61,7 @@ interface DataGridProps {
   isLoading?: boolean;
   onRowClick?: (inspection: Inspection) => void;
   onRefresh?: () => void;
+  userRole?: string | null;
 }
 
 function formatCurrency(value: number | null | undefined): string {
@@ -82,10 +84,13 @@ function formatDate(dateStr: string | null | undefined): string {
   return dateStr;
 }
 
-function getMetaLabel(meta: number | null | undefined): string {
-  if (meta === 1) return "Sim";
-  if (meta === 0) return "Não";
-  return "-";
+// Ícone de Meta: check verde (1) ou X vermelho (0)
+function MetaIcon({ meta }: { meta: number | null | undefined }) {
+  if (meta === 1) {
+    return <Check className="w-4 h-4 text-green-500" strokeWidth={3} />;
+  }
+  // Qualquer valor diferente de 1 é 0
+  return <X className="w-4 h-4 text-red-500" strokeWidth={3} />;
 }
 
 function getStatusColor(status: number | string | null | undefined): string {
@@ -116,6 +121,55 @@ function getStatusGradient(status: number | string | null | undefined): string {
   if (lowerStatus === "não" || lowerStatus === "nao" || lowerStatus === "pendente")
     return "from-destructive/10 to-transparent";
   return "from-warning/10 to-transparent";
+}
+
+// Pílula visual de marcador (para exibir tooltips, etc.)
+function markerPill(level: number | null | undefined, label?: string) {
+  const lvl = typeof level === "number" ? level : 0;
+  if (!lvl) return null;
+  const base = "px-1.5 py-0.5 rounded-full text-[10px] font-semibold border shadow-sm";
+  const color =
+    lvl === 1
+      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
+      : lvl === 2
+      ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+      : "bg-red-500/15 text-red-400 border-red-500/30";
+  return <span className={`${base} ${color}`}>{label || ""}</span>;
+}
+
+// Classe de cápsula envolvente baseada no nível do marcador
+function markerWrapClass(level: number | null | undefined) {
+  const lvl = typeof level === "number" ? level : 0;
+  if (!lvl) return "";
+  return (
+    "inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full border " +
+    (lvl === 1
+      ? "bg-cyan-500/12 border-cyan-500/30"
+      : lvl === 2
+      ? "bg-amber-500/12 border-amber-500/30"
+      : "bg-red-500/12 border-red-500/30")
+  );
+}
+
+// Verifica se uma data está preenchida (não vazia, não "-")
+function isFilled(v: string | null | undefined): boolean {
+  const s = (v || "").trim();
+  return s !== "" && s !== "-";
+}
+
+// Determina as classes de cor do ícone de ação (Zap) baseado no status da linha
+function getActionClasses(row: Inspection): string {
+  const pago = isFilled(row.dtPago);
+  const dpagoFilled = isFilled(row.dtDpago);
+  const despesasZero = typeof row.despesa === "number" && row.despesa === 0;
+  const entregue = isFilled(row.dtEntregue);
+  if (pago && (dpagoFilled || despesasZero)) {
+    return "text-primary border-primary";
+  }
+  if (entregue && !pago) {
+    return "text-success border-success";
+  }
+  return "text-foreground border-white/20";
 }
 
 function SkeletonRow({ filters }: { filters: FilterState }) {
@@ -204,8 +258,10 @@ export function DataGrid({
   isLoading = false,
   onRowClick,
   onRefresh,
+  userRole,
 }: DataGridProps) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
   const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
@@ -265,14 +321,14 @@ export function DataGrid({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="flex-1 mx-3 mb-3"
+      className="flex-1 mx-3 mb-3 mt-2.5"
     >
-      <Card className="h-full glass-card border-white/10 shadow-2xl overflow-hidden">
+      <Card className="h-full shell-grid border-white/10 shadow-2xl overflow-hidden">
         {/* Grid Content - Headers stick on scroll */}
         <CardContent className="p-0 flex-1 overflow-hidden">
           <ScrollArea className="h-[calc(100vh-180px)]">
             <Table className="w-auto min-w-max">
-              <TableHeader className="sticky top-0 z-50 bg-card backdrop-blur-xl">
+              <TableHeader className="sticky top-0 z-50 grid-header-shell">
                 <TableRow className="border-b border-white/10">
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
@@ -495,13 +551,25 @@ export function DataGrid({
                   ) : (
                     paginatedRows.map((tableRow, index) => {
                       const row = tableRow.original;
+                      const isHovered = hoveredRow === index;
+                      const isSelected = selectedRowIndex === index;
+                      const showPulse = isHovered || isSelected;
+                      const isOddRow = index % 2 === 1;
+                      const isCadenceRow = (index + 1) % 4 === 0;
+                      
                       return (
                       <TableRow
                         key={row.idPrinc || index}
-                        className={`border-b border-white/5 cursor-pointer transition-all duration-200 group
-                          ${hoveredRow === index ? `bg-gradient-to-r ${getStatusGradient(row.meta)}` : "hover:bg-white/[0.02]"}
+                        className={`cursor-pointer transition-all duration-200 group
+                          ${isSelected 
+                            ? `bg-gradient-to-r ${getStatusGradient(row.meta)} border-primary/40 selected-row-glow` 
+                            : `${isOddRow ? 'grid-row-odd' : 'grid-row-even'} ${isCadenceRow ? 'grid-row-cadence' : 'border-b border-white/5'}`
+                          }
                         `}
-                        onClick={() => onRowClick?.(row)}
+                        onClick={() => {
+                          setSelectedRowIndex(index);
+                          onRowClick?.(row);
+                        }}
                         onMouseEnter={() => setHoveredRow(index)}
                         onMouseLeave={() => setHoveredRow(null)}
                         data-testid={`row-inspection-${row.idPrinc || index}`}
@@ -509,15 +577,22 @@ export function DataGrid({
                           {/* Grupo 1: Ação */}
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
                             <button
-                              className={`p-1 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 border ${getStatusColor(row.meta)} bg-transparent hover:shadow-lg hover:shadow-primary/20`}
+                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedInspection(row);
-                                setIsActionCenterOpen(true);
+                                if (userRole === "admin" || userRole === "BackOffice") {
+                                  setSelectedInspection(row);
+                                  setSelectedRowIndex(index);
+                                  setIsActionCenterOpen(true);
+                                } else {
+                                  toast.error("Sem permissão", {
+                                    description: "Ações disponíveis apenas para Admin e BackOffice",
+                                  });
+                                }
                               }}
                               data-testid={`badge-action-${row.idPrinc || index}`}
                             >
-                              <Sparkles className="w-3.5 h-3.5" />
+                              <Zap className="w-3.5 h-3.5" />
                             </button>
                           </TableCell>
                           
@@ -538,7 +613,9 @@ export function DataGrid({
                             </span>
                           </TableCell>
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
-                            {row.loc ?? "-"}
+                            <span className={`${markerWrapClass(row.stateLoc)}`}>
+                              {row.loc ?? "-"}
+                            </span>
                           </TableCell>
                           <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
                             <span className="block w-full px-2 py-1 truncate">
@@ -550,13 +627,8 @@ export function DataGrid({
                               {row.guy || "-"}
                             </span>
                           </TableCell>
-                          <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] font-semibold ${getStatusColor(row.meta)}`}
-                            >
-                              {getMetaLabel(row.meta)}
-                            </Badge>
+                          <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight text-center">
+                            <MetaIcon meta={row.meta} />
                           </TableCell>
                           
                           {/* Separador */}
@@ -614,24 +686,28 @@ export function DataGrid({
                                 />
                               </TableCell>
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
-                                  value={row.dtEnvio}
-                                  displayValue={formatDate(row.dtEnvio)}
-                                  field="dt_envio"
-                                  idPrinc={row.idPrinc}
-                                  type="date"
-                                  onSave={handleCellEdit}
-                                />
+                                <div className={`${markerWrapClass(row.stateDtEnvio)} mx-auto`}>
+                                  <EditableCell
+                                    value={row.dtEnvio}
+                                    displayValue={formatDate(row.dtEnvio)}
+                                    field="dt_envio"
+                                    idPrinc={row.idPrinc}
+                                    type="date"
+                                    onSave={handleCellEdit}
+                                  />
+                                </div>
                               </TableCell>
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
-                                <EditableCell
-                                  value={row.dtPago}
-                                  displayValue={formatDate(row.dtPago)}
-                                  field="dt_pago"
-                                  idPrinc={row.idPrinc}
-                                  type="date"
-                                  onSave={handleCellEdit}
-                                />
+                                <div className={`${markerWrapClass(row.stateDtPago)} mx-auto`}>
+                                  <EditableCell
+                                    value={row.dtPago}
+                                    displayValue={formatDate(row.dtPago)}
+                                    field="dt_pago"
+                                    idPrinc={row.idPrinc}
+                                    type="date"
+                                    onSave={handleCellEdit}
+                                  />
+                                </div>
                               </TableCell>
                               <TableCell className="w-[90px] min-w-[90px] max-w-[90px] text-xs p-0">
                                 <EditableCell
@@ -652,15 +728,17 @@ export function DataGrid({
                               
                               {/* Grupo 5: Recebíveis - Despesas */}
                               <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
-                                <AlertCell
-                                  value={row.dtDenvio}
-                                  displayValue={formatDate(row.dtDenvio)}
-                                  alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago, row.despesa)}
-                                  field="dt_denvio"
-                                  idPrinc={row.idPrinc}
-                                  type="date"
-                                  onSave={handleCellEdit}
-                                />
+                                <div className={`${markerWrapClass(row.stateDtDenvio)} mx-auto`}>
+                                  <AlertCell
+                                    value={row.dtDenvio}
+                                    displayValue={formatDate(row.dtDenvio)}
+                                    alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago, row.despesa)}
+                                    field="dt_denvio"
+                                    idPrinc={row.idPrinc}
+                                    type="date"
+                                    onSave={handleCellEdit}
+                                  />
+                                </div>
                               </TableCell>
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
                                 <EditableCell
@@ -902,6 +980,7 @@ export function DataGrid({
         isOpen={isActionCenterOpen}
         onClose={() => setIsActionCenterOpen(false)}
         onRefresh={onRefresh}
+        userRole={userRole || undefined}
         contrLookup={contrLookup}
         segurLookup={segurLookup}
       />

@@ -141,7 +141,7 @@ export default function Dashboard() {
   }, [handleCloseModal, refetchInspections]);
 
   return (
-    <div className="flex flex-col h-screen bg-background" data-testid="dashboard">
+    <div className="flex flex-col h-screen bg-depth-gradient" data-testid="dashboard">
       {/* Top Bar */}
       <TopBar
         userName={currentUser?.short_nome || currentUser?.nick || currentUser?.nome || "Usuário"}
@@ -167,6 +167,7 @@ export default function Dashboard() {
         isLoading={isLoadingInspections}
         onRowClick={handleRowClick}
         onRefresh={handleSearch}
+        userRole={currentUser?.papel}
       />
 
       {/* Modals */}

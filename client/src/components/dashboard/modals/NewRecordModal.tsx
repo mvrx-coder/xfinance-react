@@ -19,14 +19,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { CreatableCombobox } from "@/components/ui/creatable-combobox";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, 
   Check, 
@@ -39,7 +51,8 @@ import {
   DollarSign,
   FileText,
   Layers,
-  CalendarIcon
+  CalendarIcon,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -53,19 +66,53 @@ import {
   type UserOption,
 } from "@/services/api/lookups";
 
+// Schema com data obrigatória e cidade obrigatória
+// Segurado e Atividade podem ser number (ID existente) ou string (criar novo)
 const newRecordSchema = z.object({
   idContr: z.number().min(1, "Contratante obrigatório"),
-  idSegur: z.number().min(1, "Segurado obrigatório"),
-  idAtivi: z.number().min(1, "Atividade obrigatória"),
+  // Segurado: number = ID existente, string = criar novo
+  idSegur: z.union([
+    z.number().min(1),
+    z.string().min(1, "Segurado obrigatório")
+  ]),
+  // Atividade: number = ID existente, string = criar nova
+  idAtivi: z.union([
+    z.number().min(1),
+    z.string().min(1, "Atividade obrigatória")
+  ]),
   idUserGuy: z.number().min(1, "Inspetor obrigatório"),
-  dtInspecao: z.date().optional(),
+  dtInspecao: z.date({ required_error: "Data obrigatória" }),
   idUf: z.number().min(1, "UF obrigatória"),
-  idCidade: z.number().optional(),
+  idCidade: z.number().min(1, "Cidade obrigatória"),
   honorario: z.number().min(0).optional(),
   variosLocais: z.boolean().optional(),
 });
 
 type NewRecordFormData = z.infer<typeof newRecordSchema>;
+
+// Estado para confirmação de criação de novas entidades
+interface PendingCreation {
+  data: NewRecordFormData;
+  newEntities: string[];
+}
+
+// Tipos para resposta da API
+interface CreateInspectionResponse {
+  success: boolean;
+  id_princ: number;
+  message: string;
+  dirs_created: string[];
+  loc: number;
+}
+
+// Estado do modo multi-local
+interface MultiLocalState {
+  active: boolean;
+  idPrinc: number | null;
+  idContr: number | null;
+  idSegur: number | null;
+  segurNome: string | null;
+}
 
 interface NewRecordModalProps {
   isOpen: boolean;
@@ -83,7 +130,21 @@ const sectionVariants = {
 };
 
 export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalProps) {
-  const [variosLocais, setVariosLocais] = useState(false);
+  const { toast } = useToast();
+  
+  // Estado multi-local
+  const [multiLocal, setMultiLocal] = useState<MultiLocalState>({
+    active: false,
+    idPrinc: null,
+    idContr: null,
+    idSegur: null,
+    segurNome: null,
+  });
+  
+  // Estado para confirmação de criação de novas entidades
+  const [pendingCreation, setPendingCreation] = useState<PendingCreation | null>(null);
+  
+  // Lookups
   const [contrOptions, setContrOptions] = useState<LookupOption[]>([]);
   const [segurOptions, setSegurOptions] = useState<LookupOption[]>([]);
   const [ativiOptions, setAtiviOptions] = useState<LookupOption[]>([]);
@@ -105,8 +166,8 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     resolver: zodResolver(newRecordSchema),
     defaultValues: {
       idContr: 0,
-      idSegur: 0,
-      idAtivi: 0,
+      idSegur: "" as unknown as number | string, // Inicia vazio, aceita number ou string
+      idAtivi: "" as unknown as number | string, // Inicia vazio, aceita number ou string
       idUserGuy: 0,
       dtInspecao: undefined,
       idUf: 0,
@@ -117,7 +178,9 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
   });
 
   const selectedUf = form.watch("idUf");
+  const variosLocais = form.watch("variosLocais");
 
+  // Cascata UF -> Cidade
   useEffect(() => {
     if (selectedUf && selectedUf > 0) {
       fetchCidadeOptions(selectedUf).then(setCidadeOptions);
@@ -127,49 +190,244 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     }
   }, [selectedUf, form]);
 
+  // Mutation para criar inspeção
   const createMutation = useMutation({
-    mutationFn: async (data: NewRecordFormData) => {
-      const payload = {
-        idContr: data.idContr,
-        idSegur: data.idSegur,
-        idAtivi: data.idAtivi,
-        idUserGuy: data.idUserGuy,
-        idUserGuilty: data.idUserGuy,
-        idUf: data.idUf,
-        idCidade: data.idCidade || null,
-        dtInspecao: data.dtInspecao ? format(data.dtInspecao, "dd/MM") : null,
+    mutationFn: async (data: NewRecordFormData): Promise<CreateInspectionResponse> => {
+      // Construir payload diferenciando ID existente de texto para criar
+      const payload: Record<string, unknown> = {
+        id_contr: data.idContr,
+        id_user_guy: data.idUserGuy,
+        dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
+        id_uf: data.idUf,
+        id_cidade: data.idCidade,
         honorario: data.honorario || null,
-        loc: variosLocais ? 1 : null,
-        meta: 0,
-        ms: 0,
       };
+      
+      // Segurado: number = ID existente, string = criar novo
+      if (typeof data.idSegur === "number") {
+        payload.id_segur = data.idSegur;
+      } else {
+        // Limpar prefixo "➕ Criar: " se presente
+        let segurNome = data.idSegur;
+        if (segurNome.startsWith("➕ Criar: ")) {
+          segurNome = segurNome.replace("➕ Criar: ", "").trim();
+        }
+        payload.segur_nome = segurNome;
+      }
+      
+      // Atividade: number = ID existente, string = criar nova
+      if (typeof data.idAtivi === "number") {
+        payload.id_ativi = data.idAtivi;
+      } else {
+        // Limpar prefixo "➕ Criar: " se presente
+        let atividade = data.idAtivi;
+        if (atividade.startsWith("➕ Criar: ")) {
+          atividade = atividade.replace("➕ Criar: ", "").trim();
+        }
+        payload.atividade = atividade;
+      }
+      
       return apiRequest("POST", "/api/inspections", payload);
     },
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/kpis"] });
-      form.reset();
-      onSuccess();
+      
+      // Mostrar toast com diretórios criados
+      const dirsMsg = response.dirs_created.length > 0 
+        ? `📁 ${response.dirs_created.join(" | ")}` 
+        : "";
+      
+      if (variosLocais) {
+        // Modo multi-local: guardar id_princ e manter modal aberto
+        setMultiLocal({
+          active: true,
+          idPrinc: response.id_princ,
+          idContr: variables.idContr,
+          idSegur: variables.idSegur,
+          segurNome: segurOptions.find(s => s.value === variables.idSegur)?.label || null,
+        });
+        
+        // Limpar apenas campos locais
+        form.setValue("idUserGuy", 0);
+        form.setValue("dtInspecao", undefined as any);
+        form.setValue("idUf", 0);
+        form.setValue("idCidade", 0);
+        
+        toast({
+          title: "✅ Primeiro local cadastrado!",
+          description: `${dirsMsg} Insira o próximo local.`,
+        });
+      } else {
+        // Modo normal: fechar modal
+        toast({
+          title: "✅ Registro criado com sucesso!",
+          description: dirsMsg || response.message,
+        });
+        form.reset();
+        onSuccess();
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Erro ao criar registro",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
     },
   });
 
-  const onSubmit = (data: NewRecordFormData) => {
-    createMutation.mutate(data);
+  // Mutation para adicionar local adicional
+  const addLocalMutation = useMutation({
+    mutationFn: async (data: NewRecordFormData): Promise<CreateInspectionResponse> => {
+      const payload = {
+        id_princ: multiLocal.idPrinc,
+        id_user_guy: data.idUserGuy,
+        dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
+        id_uf: data.idUf,
+        id_cidade: data.idCidade,
+      };
+      return apiRequest("POST", "/api/inspections/local-adicional", payload);
+    },
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
+      
+      const dirsMsg = response.dirs_created.length > 0 
+        ? `📁 ${response.dirs_created.join(" | ")}` 
+        : "";
+      
+      // Limpar campos locais para próximo
+      form.setValue("idUserGuy", 0);
+      form.setValue("dtInspecao", undefined as any);
+      form.setValue("idUf", 0);
+      form.setValue("idCidade", 0);
+      
+      toast({
+        title: `✅ Local adicional cadastrado! (Total: ${response.loc} locais)`,
+        description: `${dirsMsg} Insira o próximo local.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Erro ao adicionar local",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Verificar se há novas entidades a serem criadas
+  const checkNewEntities = (data: NewRecordFormData): string[] => {
+    const newEntities: string[] = [];
+    
+    if (typeof data.idSegur === "string") {
+      let nome = data.idSegur;
+      if (nome.startsWith("➕ Criar: ")) {
+        nome = nome.replace("➕ Criar: ", "").trim();
+      }
+      newEntities.push(`Segurado: "${nome}"`);
+    }
+    
+    if (typeof data.idAtivi === "string") {
+      let nome = data.idAtivi;
+      if (nome.startsWith("➕ Criar: ")) {
+        nome = nome.replace("➕ Criar: ", "").trim();
+      }
+      newEntities.push(`Atividade: "${nome}"`);
+    }
+    
+    return newEntities;
   };
+
+  // Executar criação (após confirmação ou se não há novas entidades)
+  const executeCreate = (data: NewRecordFormData) => {
+    if (multiLocal.active && multiLocal.idPrinc) {
+      // Modo multi-local ativo: adicionar local adicional
+      addLocalMutation.mutate(data);
+    } else {
+      // Modo normal ou primeiro local
+      createMutation.mutate(data);
+    }
+  };
+
+  const onSubmit = (data: NewRecordFormData) => {
+    const newEntities = checkNewEntities(data);
+    
+    if (newEntities.length > 0) {
+      // Há novas entidades - pedir confirmação
+      setPendingCreation({ data, newEntities });
+    } else {
+      // Sem novas entidades - executar diretamente
+      executeCreate(data);
+    }
+  };
+  
+  // Handler para confirmação de criação
+  const handleConfirmCreate = () => {
+    if (pendingCreation) {
+      executeCreate(pendingCreation.data);
+      setPendingCreation(null);
+    }
+  };
+  
+  // Handler para cancelar criação
+  const handleCancelCreate = () => {
+    setPendingCreation(null);
+  };
+
+  // Handler para checkbox vários locais
+  const handleVariosLocaisChange = (checked: boolean) => {
+    form.setValue("variosLocais", checked);
+    
+    if (!checked && multiLocal.active) {
+      // Usuário desmarcou enquanto estava no modo multi-local
+      // Resetar estado
+      setMultiLocal({
+        active: false,
+        idPrinc: null,
+        idContr: null,
+        idSegur: null,
+        segurNome: null,
+      });
+      setPendingCreation(null);
+      form.reset();
+      toast({
+        title: "ℹ️ Inserção de múltiplos locais encerrada",
+      });
+    }
+  };
+
+  // Handler para fechar modal
+  const handleClose = () => {
+    setMultiLocal({
+      active: false,
+      idPrinc: null,
+      idContr: null,
+      idSegur: null,
+      segurNome: null,
+    });
+    setPendingCreation(null);
+    form.reset();
+    onClose();
+  };
+
+  const isPending = createMutation.isPending || addLocalMutation.isPending;
 
   return (
     <Modal
       id="new-record-modal"
       isOpen={isOpen}
-      onClose={onClose}
-      title="Inserir Novo Trabalho"
-      maxWidth="2xl"
+      onClose={handleClose}
+      title={multiLocal.active 
+        ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}` 
+        : "Inserir Novo Trabalho"
+      }
+      maxWidth="4xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
             variant="outline"
-            onClick={onClose}
-            disabled={createMutation.isPending}
+            onClick={handleClose}
+            disabled={isPending}
             className="gap-2 border-white/15 bg-transparent hover:bg-white/5"
             data-testid="button-cancel-new-record"
           >
@@ -181,14 +439,18 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             <div className="flex items-center gap-2">
               <Checkbox
                 id="varios-locais"
-                checked={variosLocais}
-                onCheckedChange={(checked) => setVariosLocais(checked as boolean)}
+                checked={variosLocais || false}
+                onCheckedChange={handleVariosLocaisChange}
+                disabled={multiLocal.active}
                 className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 data-testid="checkbox-varios-locais"
               />
               <label 
                 htmlFor="varios-locais" 
-                className="text-sm text-muted-foreground cursor-pointer"
+                className={cn(
+                  "text-sm cursor-pointer",
+                  multiLocal.active ? "text-primary font-medium" : "text-muted-foreground"
+                )}
               >
                 Vários locais
               </label>
@@ -196,16 +458,23 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             
             <Button
               onClick={form.handleSubmit(onSubmit)}
-              disabled={createMutation.isPending}
-              className="gap-2 bg-gradient-to-r from-accent/90 to-accent border border-accent/50 text-accent-foreground font-semibold px-6"
+              disabled={isPending}
+              className={cn(
+                "gap-2 font-semibold px-6",
+                multiLocal.active 
+                  ? "bg-gradient-to-r from-blue-500/90 to-blue-600 border border-blue-500/50 text-white"
+                  : "bg-gradient-to-r from-accent/90 to-accent border border-accent/50 text-accent-foreground"
+              )}
               data-testid="button-confirm-new-record"
             >
-              {createMutation.isPending ? (
+              {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
+              ) : multiLocal.active ? (
+                <ArrowRight className="w-4 h-4" />
               ) : (
                 <Check className="w-4 h-4" />
               )}
-              Cadastrar
+              {multiLocal.active ? "Próximo Local" : "Cadastrar"}
             </Button>
           </div>
         </div>
@@ -213,6 +482,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     >
       <Form {...form}>
         <form className="space-y-6">
+          {/* Seção 1: Campos Globais (desabilitados no modo multi-local após primeiro registro) */}
           <motion.div
             custom={0}
             variants={sectionVariants}
@@ -221,7 +491,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             className="form-section"
           >
             <div className="form-section-card">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-6">
                 <FormField
                   control={form.control}
                   name="idContr"
@@ -236,8 +506,9 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           <Select 
                             onValueChange={(val) => field.onChange(parseInt(val))} 
                             value={field.value ? field.value.toString() : ""}
+                            disabled={multiLocal.active}
                           >
-                            <SelectTrigger className="form-select" data-testid="select-player">
+                            <SelectTrigger className="form-select w-full" data-testid="select-player">
                               <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -257,26 +528,23 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idSegur"
                   render={({ field }) => (
-                    <FormItem className="col-span-1">
+                    <FormItem>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <FileText className="w-3.5 h-3.5 text-primary" />
                           Segurado <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select" data-testid="select-segurado">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {segurOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <CreatableCombobox
+                            options={segurOptions}
+                            value={field.value || null}
+                            onChange={field.onChange}
+                            placeholder="Digite ou selecione..."
+                            searchPlaceholder="Buscar segurado..."
+                            emptyMessage="Nenhum segurado encontrado"
+                            disabled={multiLocal.active}
+                            data-testid="select-segurado"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
@@ -295,19 +563,16 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Atividade <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select" data-testid="select-atividade">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ativiOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <CreatableCombobox
+                            options={ativiOptions}
+                            value={field.value || null}
+                            onChange={field.onChange}
+                            placeholder="Digite ou selecione..."
+                            searchPlaceholder="Buscar atividade..."
+                            emptyMessage="Nenhuma atividade encontrada"
+                            disabled={multiLocal.active}
+                            data-testid="select-atividade"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
@@ -315,6 +580,59 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="honorario"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="form-field-wrapper">
+                        <label className="form-label">
+                          <DollarSign className="w-3.5 h-3.5 text-success" />
+                          Honorários
+                        </label>
+                        <FormControl>
+                          <div className="form-currency-wrapper">
+                            <span className="form-currency-prefix">R$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0,00"
+                              className="form-input form-input-currency"
+                              disabled={multiLocal.active}
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              data-testid="input-honorario"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="form-error" />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Seção 2: Campos Locais (habilitados sempre - repetidos por local) */}
+          <motion.div
+            custom={1}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="form-section"
+          >
+            <div className="form-section-card">
+              {multiLocal.active && (
+                <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                  <p className="text-sm text-blue-300">
+                    <strong>Adicionando local #{multiLocal.idPrinc ? "2+" : "1"}</strong> — 
+                    Preencha os dados do novo local e clique em "Próximo Local" ou desmarque "Vários locais" para finalizar.
+                  </p>
+                </div>
+              )}
+              <div className="grid grid-cols-4 gap-6">
                 <FormField
                   control={form.control}
                   name="idUserGuy"
@@ -330,10 +648,10 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             onValueChange={(val) => field.onChange(parseInt(val))} 
                             value={field.value ? field.value.toString() : ""}
                           >
-                            <SelectTrigger className="form-select" data-testid="select-guy">
+                            <SelectTrigger className="form-select w-full" data-testid="select-guy">
                               <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-[300px]">
                               {userOptions.map(opt => (
                                 <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
@@ -345,19 +663,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
-          </motion.div>
 
-          <motion.div
-            custom={1}
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            className="form-section"
-          >
-            <div className="form-section-card">
-              <div className="grid grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="dtInspecao"
@@ -366,7 +672,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Calendar className="w-3.5 h-3.5 text-accent" />
-                          Inspeção <span className="text-destructive">*</span>
+                          Data Inspeção <span className="text-destructive">*</span>
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -420,10 +726,10 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             onValueChange={(val) => field.onChange(parseInt(val))} 
                             value={field.value ? field.value.toString() : ""}
                           >
-                            <SelectTrigger className="form-select" data-testid="select-uf">
+                            <SelectTrigger className="form-select w-full" data-testid="select-uf">
                               <SelectValue placeholder="UF" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-[300px]">
                               {ufOptions.map(opt => (
                                 <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
@@ -440,11 +746,11 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idCidade"
                   render={({ field }) => (
-                    <FormItem className="col-span-1">
+                    <FormItem>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Layers className="w-3.5 h-3.5 text-accent" />
-                          Cidade
+                          Cidade <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
                           <Select 
@@ -452,10 +758,10 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             value={field.value ? field.value.toString() : ""}
                             disabled={!selectedUf || selectedUf === 0}
                           >
-                            <SelectTrigger className="form-select" data-testid="select-cidade">
+                            <SelectTrigger className="form-select w-full" data-testid="select-cidade">
                               <SelectValue placeholder={selectedUf && selectedUf > 0 ? "Selecione..." : "Selecione a UF primeiro..."} />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-[300px]">
                               {cidadeOptions.map(opt => (
                                 <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
                               ))}
@@ -467,42 +773,47 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="honorario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <DollarSign className="w-3.5 h-3.5 text-success" />
-                          Honorários
-                        </label>
-                        <FormControl>
-                          <div className="form-currency-wrapper">
-                            <span className="form-currency-prefix">R$</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0,00"
-                              className="form-input form-input-currency"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                              data-testid="input-honorario"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
               </div>
             </div>
           </motion.div>
         </form>
       </Form>
+      
+      {/* Dialog de confirmação para criar novas entidades */}
+      <AlertDialog open={pendingCreation !== null} onOpenChange={(open) => !open && handleCancelCreate()}>
+        <AlertDialogContent className="bg-card border-white/15">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold">
+              Confirmar criação de novos registros
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Você está prestes a criar os seguintes registros que não existem no sistema:
+              <ul className="mt-3 space-y-1">
+                {pendingCreation?.newEntities.map((entity, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-foreground font-medium">
+                    <span className="text-primary">➕</span> {entity}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4">Deseja continuar?</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={handleCancelCreate}
+              className="border-white/15 bg-transparent hover:bg-white/5"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmCreate}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Sim, criar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Modal>
   );
 }

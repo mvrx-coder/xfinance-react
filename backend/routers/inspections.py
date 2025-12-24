@@ -12,10 +12,14 @@ Endpoints:
 """
 
 import logging
-from typing import Optional
+import re
+from datetime import datetime, date
+from typing import Optional, Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
+from database import get_db
 from dependencies import (
     CurrentUser,
     get_current_user,
@@ -24,6 +28,15 @@ from dependencies import (
 )
 from services.queries.grid import load_grid, count_grid
 from services.queries.column_metadata import get_column_order
+from services.queries.new_inspection import (
+    get_or_create_segur,
+    get_or_create_ativi,
+    insert_new_inspection,
+    insert_demais_local,
+    increment_princ_loc,
+    get_atividade_texto,
+)
+from services.directories import create_directories
 
 logger = logging.getLogger(__name__)
 
@@ -128,31 +141,251 @@ async def get_inspection(
 # POST /api/inspections - Criar inspeção
 # =============================================================================
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+class CreateInspectionRequest(BaseModel):
+    """Request body para criação de nova inspeção."""
+    id_contr: int = Field(..., description="ID do contratante (player)")
+    
+    # Segurado: pode ser ID existente ou texto para criar novo
+    id_segur: Optional[int] = Field(
+        None, description="ID do segurado existente"
+    )
+    segur_nome: Optional[str] = Field(
+        None, description="Nome do segurado (para criar novo)"
+    )
+    
+    # Atividade: pode ser ID existente ou texto para criar nova
+    id_ativi: Optional[int] = Field(
+        None, description="ID da atividade existente"
+    )
+    atividade: Optional[str] = Field(
+        None, description="Texto da atividade (para criar nova)"
+    )
+    
+    id_user_guy: int = Field(..., description="ID do inspetor (guy)")
+    dt_inspecao: str = Field(..., description="Data inspeção (YYYY-MM-DD)")
+    id_uf: int = Field(..., description="ID da UF")
+    id_cidade: int = Field(..., description="ID da cidade")
+    honorario: Optional[float] = Field(None, description="Valor do honorário")
+
+
+class CreateLocalAdicionalRequest(BaseModel):
+    """Request body para criação de local adicional."""
+    id_princ: int = Field(..., description="ID do registro principal")
+    id_user_guy: int = Field(..., description="ID do inspetor (guy)")
+    dt_inspecao: str = Field(..., description="Data da inspeção (YYYY-MM-DD)")
+    id_uf: int = Field(..., description="ID da UF")
+    id_cidade: int = Field(..., description="ID da cidade")
+
+
+class CreateInspectionResponse(BaseModel):
+    """Response da criação de inspeção."""
+    success: bool
+    id_princ: int
+    message: str
+    dirs_created: List[str] = []
+    loc: int = 1
+
+
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateInspectionResponse)
 async def create_inspection(
+    request: CreateInspectionRequest,
     current_user: CurrentUser = Depends(require_admin),
 ):
     """
     Cria nova inspeção.
     
     🔒 ADMIN ONLY: Apenas administradores podem criar inspeções.
+    
+    O segurado e atividade podem ser:
+    - ID existente (id_segur/id_ativi)
+    - Texto para criar novo (segur_nome/atividade)
+    
+    Campos hardcoded:
+    - id_user_guilty = 19
+    - dt_acerto = 1º dia do mês corrente
+    - loc = 1
     """
-    # TODO: Implementar criação
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Endpoint em desenvolvimento"
+    logger.info(
+        "POST /inspections | user=%s | contr=%d | uf=%d | cidade=%d",
+        current_user.email,
+        request.id_contr,
+        request.id_uf,
+        request.id_cidade,
     )
+    
+    try:
+        # Resolver segurado (ID existente ou criar novo)
+        if request.id_segur:
+            id_segur = request.id_segur
+        elif request.segur_nome:
+            # Limpar prefixo "➕ Criar: " se presente
+            segur_nome = request.segur_nome
+            if segur_nome.startswith("➕ Criar: "):
+                segur_nome = segur_nome.replace("➕ Criar: ", "").strip()
+            id_segur = get_or_create_segur(segur_nome)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Segurado obrigatório (id_segur ou segur_nome)"
+            )
+        
+        # Resolver atividade (ID existente ou criar nova)
+        atividade_texto = None
+        if request.id_ativi:
+            id_ativi = request.id_ativi
+            atividade_texto = get_atividade_texto(id_ativi)
+        elif request.atividade:
+            # Limpar prefixo "➕ Criar: " se presente
+            atividade = request.atividade
+            if atividade.startswith("➕ Criar: "):
+                atividade = atividade.replace("➕ Criar: ", "").strip()
+            id_ativi = get_or_create_ativi(atividade)
+            atividade_texto = atividade
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Atividade obrigatória (id_ativi ou atividade)"
+            )
+        
+        # Inserir registro
+        id_princ = insert_new_inspection(
+            id_contr=request.id_contr,
+            id_segur=id_segur,
+            id_ativi=id_ativi,
+            id_user_guy=request.id_user_guy,
+            dt_inspecao=request.dt_inspecao,
+            id_uf=request.id_uf,
+            id_cidade=request.id_cidade,
+            honorario=request.honorario,
+            atividade_texto=atividade_texto,
+        )
+        
+        # Criar diretórios
+        dt_acerto = date.today().replace(day=1).strftime("%Y-%m-%d")
+        dir_msg, dirs_created = create_directories(
+            id_contr=request.id_contr,
+            id_segur=id_segur,
+            dt_acerto=dt_acerto,
+            id_uf=request.id_uf,
+            id_cidade=request.id_cidade,
+        )
+        
+        logger.info(
+            "Inspeção criada: id_princ=%d | dirs=%s",
+            id_princ,
+            dirs_created
+        )
+        
+        return CreateInspectionResponse(
+            success=True,
+            id_princ=id_princ,
+            message=f"Registro criado com sucesso! {dir_msg}",
+            dirs_created=dirs_created,
+            loc=1,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Erro ao criar inspeção: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao criar inspeção: {str(e)}"
+        )
+
+
+# =============================================================================
+# POST /api/inspections/local-adicional - Adicionar local
+# =============================================================================
+
+@router.post("/local-adicional", status_code=status.HTTP_201_CREATED, response_model=CreateInspectionResponse)
+async def create_local_adicional(
+    request: CreateLocalAdicionalRequest,
+    current_user: CurrentUser = Depends(require_admin),
+):
+    """
+    Adiciona um local adicional a um registro existente.
+    
+    🔒 ADMIN ONLY: Apenas administradores podem adicionar locais.
+    
+    Este endpoint:
+    1. Insere registro na tabela demais_locais
+    2. Incrementa o campo loc no registro principal
+    3. Cria diretórios para o novo local
+    """
+    logger.info(
+        "POST /inspections/local-adicional | user=%s | princ=%d | uf=%d | cidade=%d",
+        current_user.email,
+        request.id_princ,
+        request.id_uf,
+        request.id_cidade,
+    )
+    
+    try:
+        # Buscar dados do registro principal para diretórios
+        with get_db() as conn:
+            cursor = conn.execute(
+                "SELECT id_contr, id_segur FROM princ WHERE id_princ = ?",
+                (request.id_princ,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Registro principal {request.id_princ} não encontrado"
+                )
+            id_contr, id_segur = row
+        
+        # Inserir local adicional
+        insert_demais_local(
+            id_princ=request.id_princ,
+            dt_inspecao=request.dt_inspecao,
+            id_uf=request.id_uf,
+            id_cidade=request.id_cidade,
+            id_user_guy=request.id_user_guy,
+        )
+        
+        # Incrementar loc
+        new_loc = increment_princ_loc(request.id_princ)
+        
+        # Criar diretórios para o novo local
+        dt_acerto = date.today().replace(day=1).strftime("%Y-%m-%d")
+        dir_msg, dirs_created = create_directories(
+            id_contr=id_contr,
+            id_segur=id_segur,
+            dt_acerto=dt_acerto,
+            id_uf=request.id_uf,
+            id_cidade=request.id_cidade,
+        )
+        
+        logger.info(
+            "Local adicional criado: princ=%d | loc=%d | dirs=%s",
+            request.id_princ,
+            new_loc,
+            dirs_created
+        )
+        
+        return CreateInspectionResponse(
+            success=True,
+            id_princ=request.id_princ,
+            message=f"Local adicional cadastrado! (Total: {new_loc} locais) {dir_msg}",
+            dirs_created=dirs_created,
+            loc=new_loc,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Erro ao criar local adicional: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao criar local adicional: {str(e)}"
+        )
 
 
 # =============================================================================
 # PATCH /api/inspections/{id} - Atualizar inspeção
 # =============================================================================
-
-from pydantic import BaseModel
-from typing import Any, Dict
-from database import get_db
-import re
-from datetime import datetime
 
 class UpdateInspectionRequest(BaseModel):
     field: str

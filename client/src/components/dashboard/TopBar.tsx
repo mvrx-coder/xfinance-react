@@ -85,7 +85,7 @@ const itemVariants = {
 function ExpressKPIPanel({ kpis }: { kpis: KPIs }) {
   return (
     <div
-      className="flex flex-col justify-center h-[88px] px-4 py-2 rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-white/10 backdrop-blur-sm"
+      className="flex flex-col justify-center h-[88px] px-4 py-2 rounded-xl shell-kpi border border-white/10"
       data-testid="panel-express-kpis"
     >
       {/* EXPRESS - Main Value (primary/lilás color like Buscar button) */}
@@ -161,7 +161,7 @@ export function TopBar({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-wrap items-center gap-4 p-4 mx-3 mt-3 rounded-2xl glass-card shadow-xl"
+      className="flex flex-wrap items-center gap-4 p-4 mx-3 mt-3 rounded-2xl shell-toolbar shadow-xl"
       data-testid="topbar"
     >
       {/* Logo + Welcome Section */}

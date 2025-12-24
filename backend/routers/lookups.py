@@ -7,7 +7,7 @@ Endpoints para buscar opções de dropdowns.
 import logging
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
 from database import get_db
@@ -167,10 +167,40 @@ async def get_ufs(
     with get_db() as conn:
         cursor = conn.execute(
             """
-            SELECT id_uf, sigla
+            SELECT id_uf, uf_sigla
             FROM uf
-            ORDER BY sigla
+            ORDER BY uf_sigla
             """
+        )
+        rows = cursor.fetchall()
+    
+    return [
+        LookupOption(value=row[0], label=row[1] or f"#{row[0]}")
+        for row in rows
+    ]
+
+
+# =============================================================================
+# GET /api/lookups/cidades
+# =============================================================================
+
+@router.get("/cidades", response_model=List[LookupOption])
+async def get_cidades(
+    id_uf: int = Query(..., description="ID da UF para filtrar cidades"),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    """
+    Retorna lista de cidades filtradas por UF.
+    """
+    with get_db() as conn:
+        cursor = conn.execute(
+            """
+            SELECT id_cidade, cidade_nome
+            FROM cidade
+            WHERE id_uf = ?
+            ORDER BY cidade_nome
+            """,
+            (id_uf,)
         )
         rows = cursor.fetchall()
     

@@ -669,6 +669,101 @@
 }
 
 /* ========================================
+   VISUAL DEPTH SYSTEM - Layered UI
+   ======================================== */
+
+/* Camada 1: Background Canvas */
+.bg-depth-gradient {
+  background: 
+    /* Vinheta cyan inferior-direita */
+    radial-gradient(ellipse 70% 50% at 95% 95%, rgba(0, 188, 212, 0.12) 0%, transparent 60%),
+    /* Vinheta magenta superior-esquerda */
+    radial-gradient(ellipse 60% 40% at 5% 5%, rgba(206, 98, 217, 0.08) 0%, transparent 50%),
+    /* Acento violeta centro-esquerda */
+    radial-gradient(ellipse 50% 60% at 10% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 40%),
+    /* Gradiente vertical principal */
+    linear-gradient(180deg, 
+      #070717 0%,      /* Topo: quase preto */
+      #0C0C24 15%,     /* Transição escura */
+      #111133 40%,     /* Centro: mid-tone */
+      #0E0E28 70%,     /* Transição */
+      #080820 100%     /* Base: escuro */
+    );
+}
+
+/* Camada 2: Shell Surfaces */
+.shell-toolbar {
+  background: rgba(28, 28, 60, 0.85);  /* #1C1C3C @ 85% */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shell-kpi {
+  background: rgba(26, 26, 58, 0.75);  /* #1A1A3A @ 75% */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.shell-grid {
+  background: rgba(21, 21, 48, 0.9);   /* #151530 @ 90% */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Crystal Glow Header */
+.grid-header-shell {
+  /* Gradiente azul-púrpura semi-transparente */
+  background: linear-gradient(
+    180deg,
+    rgba(50, 50, 100, 0.65) 0%,    /* Topo: Azul-púrpura claro, 65% */
+    rgba(25, 25, 60, 0.8) 100%     /* Base: Azul-escuro, 80% */
+  );
+  
+  /* Efeito de vidro fosco com saturação aumentada */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  
+  /* Bordas coloridas: topo magenta, base cyan */
+  border-top: 2px solid rgba(206, 98, 217, 0.5);     /* Magenta 50% */
+  border-bottom: 2px solid rgba(0, 188, 212, 0.4);   /* Cyan 40% */
+  
+  /* Sistema de sombras multi-camadas */
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.12),   /* Glow interno difuso */
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),    /* Linha brilho topo */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),         /* Sombra interna base */
+    0 0 20px rgba(206, 98, 217, 0.1),           /* Glow externo magenta */
+    0 4px 16px rgba(0, 0, 0, 0.3);              /* Sombra drop */
+  
+  /* Altura aumentada */
+  height: 40px;
+}
+
+/* Camada 3: Grid Row Treatments - Zebra Striping */
+.grid-row-even {
+  background: transparent;
+}
+
+.grid-row-even:hover {
+  background: rgba(255, 255, 255, 0.02);  /* +2% white */
+}
+
+.grid-row-odd {
+  background: rgba(255, 255, 255, 0.025); /* 2.5% white overlay */
+}
+
+.grid-row-odd:hover {
+  background: rgba(255, 255, 255, 0.045); /* +4.5% white */
+}
+
+/* Separador de Cadência (a cada 4 linhas) */
+.grid-row-cadence {
+  border-bottom: 1px solid rgba(206, 98, 217, 0.12) !important;
+}
+
+/* ========================================
    LOGIN PAGE - Premium Glassmorphism Design
    ======================================== */
 
@@ -1245,4 +1340,73 @@
   .form-section-card .grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* =============================================================================
+   ACTION CENTER TRIGGER - Efeito pulsante no ícone Zap
+   ============================================================================= */
+
+@keyframes actionPulseGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 4px rgba(206, 98, 217, 0.4),
+      0 0 8px rgba(206, 98, 217, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 8px rgba(206, 98, 217, 0.6),
+      0 0 16px rgba(206, 98, 217, 0.3),
+      0 0 24px rgba(206, 98, 217, 0.15);
+  }
+}
+
+@keyframes actionRingPulse {
+  0% {
+    box-shadow: 
+      0 0 0 0 rgba(206, 98, 217, 0.4),
+      0 0 4px rgba(206, 98, 217, 0.3);
+  }
+  70% {
+    box-shadow: 
+      0 0 0 6px rgba(206, 98, 217, 0),
+      0 0 8px rgba(206, 98, 217, 0.5);
+  }
+  100% {
+    box-shadow: 
+      0 0 0 0 rgba(206, 98, 217, 0),
+      0 0 4px rgba(206, 98, 217, 0.3);
+  }
+}
+
+.action-center-trigger {
+  animation: actionPulseGlow 2.5s ease-in-out infinite, actionRingPulse 1s ease-out infinite;
+  border-color: rgba(206, 98, 217, 0.6) !important;
+  background: rgba(206, 98, 217, 0.1) !important;
+}
+
+.action-center-trigger:hover {
+  animation: actionPulseGlow 1.5s ease-in-out infinite;
+}
+
+/* =============================================================================
+   SELECTED ROW GLOW - Realce da linha selecionada
+   ============================================================================= */
+
+.selected-row-glow {
+  box-shadow: 
+    inset 3px 0 0 0 #CE62D9,           /* Barra lateral magenta */
+    0 0 12px rgba(206, 98, 217, 0.2);  /* Glow externo suave */
+  background: rgba(206, 98, 217, 0.08) !important;
+  position: relative;
+}
+
+.selected-row-glow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #CE62D9 0%, #7C3AED 100%);
+  opacity: 0.9;
 }

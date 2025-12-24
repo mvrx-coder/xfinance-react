@@ -6,7 +6,7 @@ import { z } from "zod";
 import fetch from "node-fetch";
 
 // Backend FastAPI URL
-const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8001";
+const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8000";
 
 // Proxy manual para FastAPI
 async function proxyToFastAPI(req: Request, res: Response, path?: string) {
