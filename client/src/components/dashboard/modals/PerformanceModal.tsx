@@ -144,86 +144,89 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
         animate="visible"
         className="space-y-6"
       >
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-[rgba(15,15,35,0.6)] border border-white/10">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-              <span className="text-xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-wider">
-                MVRX
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Dinâmica da Empresa</p>
-              <p className="text-xs text-muted-foreground">Performance e Desempenho</p>
-            </div>
+        {/* Toolbar compacta - igual à tela principal */}
+        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 p-4 rounded-xl shell-toolbar">
+          {/* Logo */}
+          <div className="flex items-center justify-center h-[56px] px-2">
+            <img 
+              src="/logo1.png" 
+              alt="MVRX Logo" 
+              className="h-10 w-auto object-contain"
+            />
           </div>
-          
-          <div className="flex flex-wrap items-center gap-4">
+
+          <div className="h-10 w-px bg-white/10" />
+
+          {/* Filtro de Data Base */}
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg glass border border-white/10">
+            <span className="text-xs text-muted-foreground font-medium">Base:</span>
             <RadioGroup 
               value={dateFilter} 
               onValueChange={(v) => setDateFilter(v as typeof dateFilter)}
-              className="flex items-center gap-3"
+              className="flex items-center gap-2"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_envio" id="dt_envio" className="border-destructive text-destructive" />
-                <Label htmlFor="dt_envio" className="text-xs text-muted-foreground cursor-pointer">Envio</Label>
+              <div className="flex items-center space-x-1.5">
+                <RadioGroupItem value="dt_envio" id="dt_envio" className="border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5" />
+                <Label htmlFor="dt_envio" className="text-xs cursor-pointer">Envio</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30" />
-                <Label htmlFor="dt_pago" className="text-xs text-muted-foreground cursor-pointer">Pago</Label>
+              <div className="flex items-center space-x-1.5">
+                <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30 h-3.5 w-3.5" />
+                <Label htmlFor="dt_pago" className="text-xs cursor-pointer">Pago</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30" />
-                <Label htmlFor="dt_acerto" className="text-xs text-muted-foreground cursor-pointer">Acerto</Label>
+              <div className="flex items-center space-x-1.5">
+                <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30 h-3.5 w-3.5" />
+                <Label htmlFor="dt_acerto" className="text-xs cursor-pointer">Acerto</Label>
               </div>
             </RadioGroup>
+          </div>
 
-            <div className="h-6 w-px bg-white/10" />
+          {/* Período */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg glass border border-white/10">
+            <span className="text-xs text-muted-foreground font-medium">Período:</span>
+            <Select 
+              value={anoIni?.toString() ?? "todos"} 
+              onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
+            >
+              <SelectTrigger className="w-20 h-7 text-xs bg-transparent border-white/20">
+                <SelectValue placeholder="Início" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {anosDisponiveis.map((ano) => (
+                  <SelectItem key={ano.value} value={ano.value.toString()}>
+                    {ano.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">a</span>
+            <Select 
+              value={anoFim?.toString() ?? "todos"} 
+              onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
+            >
+              <SelectTrigger className="w-20 h-7 text-xs bg-transparent border-white/20">
+                <SelectValue placeholder="Fim" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {anosDisponiveis.map((ano) => (
+                  <SelectItem key={ano.value} value={ano.value.toString()}>
+                    {ano.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">Período:</span>
-              <Select 
-                value={anoIni?.toString() ?? "todos"} 
-                onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
-              >
-                <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
-                  <SelectValue placeholder="Início" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {anosDisponiveis.map((ano) => (
-                    <SelectItem key={ano.value} value={ano.value.toString()}>
-                      {ano.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select 
-                value={anoFim?.toString() ?? "todos"} 
-                onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
-              >
-                <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
-                  <SelectValue placeholder="Fim" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {anosDisponiveis.map((ano) => (
-                    <SelectItem key={ano.value} value={ano.value.toString()}>
-                      {ano.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="12months" 
-                checked={use12Months}
-                onCheckedChange={(checked) => setUse12Months(checked as boolean)}
-                className="border-white/30"
-              />
-              <Label htmlFor="12months" className="text-xs text-muted-foreground cursor-pointer">MM12</Label>
-            </div>
+          {/* MM12 Toggle */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg glass border border-white/10">
+            <Checkbox 
+              id="12months" 
+              checked={use12Months}
+              onCheckedChange={(checked) => setUse12Months(checked as boolean)}
+              className="border-accent/50 data-[state=checked]:bg-accent data-[state=checked]:border-accent h-4 w-4"
+            />
+            <Label htmlFor="12months" className="text-xs cursor-pointer font-medium">MM12</Label>
           </div>
         </motion.div>
 
