@@ -1474,92 +1474,63 @@
   }
 }
 
-/* Animação contínua que alterna cores a cada ciclo */
-/* 48s total = 3 ciclos x 16s (8s parado + 8s animando) */
+/* Animação contínua: 8s animando (arco-íris) + 8s parado */
+/* 48s total = 3 ciclos x 16s */
 @keyframes chromatic-cycle {
-  /* Ciclo 1: Parado em magenta (0deg) por 8s = 0-16.67% */
-  0%, 16% { 
-    filter: hue-rotate(0deg) brightness(1);
-    transform: scale(1);
-  }
-  /* Animando de magenta para cyan = 16.67-33.33% */
-  20% { 
-    filter: hue-rotate(40deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  24% { 
-    filter: hue-rotate(80deg) brightness(1.15);
-    transform: scale(1.1);
-  }
-  28% { 
-    filter: hue-rotate(100deg) brightness(1.2);
-    transform: scale(1.12);
-  }
-  32% { 
-    filter: hue-rotate(120deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  /* Ciclo 2: Parado em cyan (120deg) por 8s = 33.33-50% */
-  33%, 49% { 
-    filter: hue-rotate(120deg) brightness(1);
-    transform: scale(1);
-  }
-  /* Animando de cyan para verde-limão = 50-66.67% */
-  53% { 
-    filter: hue-rotate(160deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  57% { 
-    filter: hue-rotate(200deg) brightness(1.15);
-    transform: scale(1.1);
-  }
-  61% { 
-    filter: hue-rotate(220deg) brightness(1.2);
-    transform: scale(1.12);
-  }
-  65% { 
-    filter: hue-rotate(240deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  /* Ciclo 3: Parado em verde-limão (240deg) por 8s = 66.67-83.33% */
-  66%, 82% { 
-    filter: hue-rotate(240deg) brightness(1);
-    transform: scale(1);
-  }
-  /* Animando de volta para magenta = 83.33-100% */
-  86% { 
-    filter: hue-rotate(280deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  90% { 
-    filter: hue-rotate(320deg) brightness(1.15);
-    transform: scale(1.1);
-  }
-  94% { 
-    filter: hue-rotate(340deg) brightness(1.2);
-    transform: scale(1.12);
-  }
-  98% { 
-    filter: hue-rotate(360deg) brightness(1.1);
-    transform: scale(1.05);
-  }
-  100% { 
-    filter: hue-rotate(360deg) brightness(1);
-    transform: scale(1);
-  }
+  /* ============ CICLO 1 ============ */
+  /* Animando arco-íris por 8s (0-16.67%) - múltiplas rotações */
+  0% { filter: hue-rotate(0deg) brightness(1.1); transform: scale(1.05); }
+  2% { filter: hue-rotate(90deg) brightness(1.15); transform: scale(1.08); }
+  4% { filter: hue-rotate(180deg) brightness(1.2); transform: scale(1.1); }
+  6% { filter: hue-rotate(270deg) brightness(1.15); transform: scale(1.08); }
+  8% { filter: hue-rotate(360deg) brightness(1.1); transform: scale(1.05); }
+  10% { filter: hue-rotate(450deg) brightness(1.15); transform: scale(1.08); }
+  12% { filter: hue-rotate(540deg) brightness(1.2); transform: scale(1.1); }
+  14% { filter: hue-rotate(630deg) brightness(1.15); transform: scale(1.08); }
+  16% { filter: hue-rotate(720deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em CYAN por 8s (16.67-33.33%) */
+  17%, 33% { filter: hue-rotate(120deg) brightness(1); transform: scale(1); }
+  
+  /* ============ CICLO 2 ============ */
+  /* Animando arco-íris por 8s (33.33-50%) */
+  34% { filter: hue-rotate(120deg) brightness(1.1); transform: scale(1.05); }
+  36% { filter: hue-rotate(210deg) brightness(1.15); transform: scale(1.08); }
+  38% { filter: hue-rotate(300deg) brightness(1.2); transform: scale(1.1); }
+  40% { filter: hue-rotate(390deg) brightness(1.15); transform: scale(1.08); }
+  42% { filter: hue-rotate(480deg) brightness(1.1); transform: scale(1.05); }
+  44% { filter: hue-rotate(570deg) brightness(1.15); transform: scale(1.08); }
+  46% { filter: hue-rotate(660deg) brightness(1.2); transform: scale(1.1); }
+  48% { filter: hue-rotate(750deg) brightness(1.15); transform: scale(1.08); }
+  49% { filter: hue-rotate(840deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em VERDE-LIMÃO por 8s (50-66.67%) */
+  50%, 66% { filter: hue-rotate(240deg) brightness(1); transform: scale(1); }
+  
+  /* ============ CICLO 3 ============ */
+  /* Animando arco-íris por 8s (66.67-83.33%) */
+  67% { filter: hue-rotate(240deg) brightness(1.1); transform: scale(1.05); }
+  69% { filter: hue-rotate(330deg) brightness(1.15); transform: scale(1.08); }
+  71% { filter: hue-rotate(420deg) brightness(1.2); transform: scale(1.1); }
+  73% { filter: hue-rotate(510deg) brightness(1.15); transform: scale(1.08); }
+  75% { filter: hue-rotate(600deg) brightness(1.1); transform: scale(1.05); }
+  77% { filter: hue-rotate(690deg) brightness(1.15); transform: scale(1.08); }
+  79% { filter: hue-rotate(780deg) brightness(1.2); transform: scale(1.1); }
+  81% { filter: hue-rotate(870deg) brightness(1.15); transform: scale(1.08); }
+  82% { filter: hue-rotate(960deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em MAGENTA por 8s (83.33-100%) */
+  83%, 100% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
 }
 
 .chromatic-icon {
-  animation: chromatic-cycle 48s ease-in-out infinite;
+  animation: chromatic-cycle 48s linear infinite;
   color: #CE62D9;
 }
 
 .chromatic-icon-glow {
-  animation: chromatic-cycle 48s ease-in-out infinite;
+  animation: chromatic-cycle 48s linear infinite;
   filter: drop-shadow(0 0 4px currentColor);
 }
 
 .chromatic-sparkle {
-  animation: chromatic-cycle 48s ease-in-out infinite;
+  animation: chromatic-cycle 48s linear infinite;
   color: #CE62D9;
 }
