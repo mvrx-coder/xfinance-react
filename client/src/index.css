@@ -1412,39 +1412,129 @@
 }
 
 /* =============================================================================
-   CHROMATIC ICON - Efeito arco-íris animado
+   CHROMATIC ICON - Efeito arco-íris animado com pausa
+   Ciclo: 11s total (8s parado + 3s animando)
    ============================================================================= */
 
-@keyframes chromatic-shift {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+@keyframes chromatic-burst {
+  /* 0-72% = parado (~8s) */
+  0%, 72% { 
+    filter: hue-rotate(0deg) brightness(1);
+    transform: scale(1);
+  }
+  /* 73-100% = animando (~3s) com rotação completa */
+  76% { 
+    filter: hue-rotate(90deg) brightness(1.15);
+    transform: scale(1.08);
+  }
+  82% { 
+    filter: hue-rotate(180deg) brightness(1.2);
+    transform: scale(1.12);
+  }
+  88% { 
+    filter: hue-rotate(270deg) brightness(1.15);
+    transform: scale(1.08);
+  }
+  94% { 
+    filter: hue-rotate(360deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  /* Para em cor diferente (120deg = verde-cyan) */
+  100% { 
+    filter: hue-rotate(120deg) brightness(1);
+    transform: scale(1);
+  }
 }
 
-@keyframes chromatic-pulse {
-  0%, 100% { 
+@keyframes chromatic-burst-2 {
+  /* Segundo ciclo - começa onde o primeiro parou (120deg) e para em 240deg */
+  0%, 72% { 
+    filter: hue-rotate(120deg) brightness(1);
     transform: scale(1);
-    filter: hue-rotate(0deg) brightness(1);
   }
-  50% { 
+  76% { 
+    filter: hue-rotate(210deg) brightness(1.15);
+    transform: scale(1.08);
+  }
+  82% { 
+    filter: hue-rotate(300deg) brightness(1.2);
+    transform: scale(1.12);
+  }
+  88% { 
+    filter: hue-rotate(390deg) brightness(1.15);
+    transform: scale(1.08);
+  }
+  94% { 
+    filter: hue-rotate(450deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  100% { 
+    filter: hue-rotate(240deg) brightness(1);
+    transform: scale(1);
+  }
+}
+
+/* Animação contínua que alterna cores a cada ciclo */
+@keyframes chromatic-cycle {
+  /* Ciclo 1: Parado em magenta (0deg) por 8s */
+  0%, 24% { 
+    filter: hue-rotate(0deg) brightness(1);
+    transform: scale(1);
+  }
+  /* Animando de magenta para cyan */
+  25%, 27% { 
+    filter: hue-rotate(60deg) brightness(1.15);
     transform: scale(1.1);
-    filter: hue-rotate(180deg) brightness(1.2);
+  }
+  28%, 30% { 
+    filter: hue-rotate(120deg) brightness(1.2);
+    transform: scale(1.12);
+  }
+  /* Ciclo 2: Parado em cyan (120deg) por 8s */
+  31%, 57% { 
+    filter: hue-rotate(120deg) brightness(1);
+    transform: scale(1);
+  }
+  /* Animando de cyan para amarelo */
+  58%, 60% { 
+    filter: hue-rotate(180deg) brightness(1.15);
+    transform: scale(1.1);
+  }
+  61%, 63% { 
+    filter: hue-rotate(240deg) brightness(1.2);
+    transform: scale(1.12);
+  }
+  /* Ciclo 3: Parado em amarelo-verde (240deg) por 8s */
+  64%, 90% { 
+    filter: hue-rotate(240deg) brightness(1);
+    transform: scale(1);
+  }
+  /* Animando de volta para magenta */
+  91%, 93% { 
+    filter: hue-rotate(300deg) brightness(1.15);
+    transform: scale(1.1);
+  }
+  94%, 97% { 
+    filter: hue-rotate(360deg) brightness(1.2);
+    transform: scale(1.12);
+  }
+  100% { 
+    filter: hue-rotate(360deg) brightness(1);
+    transform: scale(1);
   }
 }
 
 .chromatic-icon {
-  animation: chromatic-shift 3s linear infinite;
-  background: linear-gradient(135deg, #CE62D9, #00BCD4, #CE62D9);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  animation: chromatic-cycle 33s ease-in-out infinite;
+  color: #CE62D9;
 }
 
 .chromatic-icon-glow {
-  animation: chromatic-pulse 2s ease-in-out infinite;
+  animation: chromatic-cycle 33s ease-in-out infinite;
   filter: drop-shadow(0 0 4px currentColor);
 }
 
 .chromatic-sparkle {
-  animation: chromatic-shift 2s linear infinite, chromatic-pulse 1.5s ease-in-out infinite;
+  animation: chromatic-cycle 33s ease-in-out infinite;
   color: #CE62D9;
 }
