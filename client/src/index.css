@@ -1475,48 +1475,73 @@
 }
 
 /* Animação contínua que alterna cores a cada ciclo */
+/* 48s total = 3 ciclos x 16s (8s parado + 8s animando) */
 @keyframes chromatic-cycle {
-  /* Ciclo 1: Parado em magenta (0deg) por 8s */
-  0%, 24% { 
+  /* Ciclo 1: Parado em magenta (0deg) por 8s = 0-16.67% */
+  0%, 16% { 
     filter: hue-rotate(0deg) brightness(1);
     transform: scale(1);
   }
-  /* Animando de magenta para cyan */
-  25%, 27% { 
-    filter: hue-rotate(60deg) brightness(1.15);
+  /* Animando de magenta para cyan = 16.67-33.33% */
+  20% { 
+    filter: hue-rotate(40deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  24% { 
+    filter: hue-rotate(80deg) brightness(1.15);
     transform: scale(1.1);
   }
-  28%, 30% { 
-    filter: hue-rotate(120deg) brightness(1.2);
+  28% { 
+    filter: hue-rotate(100deg) brightness(1.2);
     transform: scale(1.12);
   }
-  /* Ciclo 2: Parado em cyan (120deg) por 8s */
-  31%, 57% { 
+  32% { 
+    filter: hue-rotate(120deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  /* Ciclo 2: Parado em cyan (120deg) por 8s = 33.33-50% */
+  33%, 49% { 
     filter: hue-rotate(120deg) brightness(1);
     transform: scale(1);
   }
-  /* Animando de cyan para amarelo */
-  58%, 60% { 
-    filter: hue-rotate(180deg) brightness(1.15);
+  /* Animando de cyan para verde-limão = 50-66.67% */
+  53% { 
+    filter: hue-rotate(160deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  57% { 
+    filter: hue-rotate(200deg) brightness(1.15);
     transform: scale(1.1);
   }
-  61%, 63% { 
-    filter: hue-rotate(240deg) brightness(1.2);
+  61% { 
+    filter: hue-rotate(220deg) brightness(1.2);
     transform: scale(1.12);
   }
-  /* Ciclo 3: Parado em amarelo-verde (240deg) por 8s */
-  64%, 90% { 
+  65% { 
+    filter: hue-rotate(240deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  /* Ciclo 3: Parado em verde-limão (240deg) por 8s = 66.67-83.33% */
+  66%, 82% { 
     filter: hue-rotate(240deg) brightness(1);
     transform: scale(1);
   }
-  /* Animando de volta para magenta */
-  91%, 93% { 
-    filter: hue-rotate(300deg) brightness(1.15);
+  /* Animando de volta para magenta = 83.33-100% */
+  86% { 
+    filter: hue-rotate(280deg) brightness(1.1);
+    transform: scale(1.05);
+  }
+  90% { 
+    filter: hue-rotate(320deg) brightness(1.15);
     transform: scale(1.1);
   }
-  94%, 97% { 
-    filter: hue-rotate(360deg) brightness(1.2);
+  94% { 
+    filter: hue-rotate(340deg) brightness(1.2);
     transform: scale(1.12);
+  }
+  98% { 
+    filter: hue-rotate(360deg) brightness(1.1);
+    transform: scale(1.05);
   }
   100% { 
     filter: hue-rotate(360deg) brightness(1);
@@ -1525,16 +1550,16 @@
 }
 
 .chromatic-icon {
-  animation: chromatic-cycle 33s ease-in-out infinite;
+  animation: chromatic-cycle 48s ease-in-out infinite;
   color: #CE62D9;
 }
 
 .chromatic-icon-glow {
-  animation: chromatic-cycle 33s ease-in-out infinite;
+  animation: chromatic-cycle 48s ease-in-out infinite;
   filter: drop-shadow(0 0 4px currentColor);
 }
 
 .chromatic-sparkle {
-  animation: chromatic-cycle 33s ease-in-out infinite;
+  animation: chromatic-cycle 48s ease-in-out infinite;
   color: #CE62D9;
 }
