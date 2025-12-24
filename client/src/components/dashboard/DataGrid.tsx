@@ -334,7 +334,9 @@ export function DataGrid({
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
-                    <span className="text-xs font-bold text-primary tracking-wider">#</span>
+                    <div className="flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 chromatic-sparkle" />
+                    </div>
                   </TableHead>
                   
                   {/* Separador */}
@@ -525,10 +527,7 @@ export function DataGrid({
                     </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card text-center">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <Sparkles className="w-4 h-4 chromatic-sparkle" />
-                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
-                    </div>
+                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
