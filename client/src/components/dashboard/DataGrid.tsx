@@ -29,6 +29,7 @@ import {
   FilterX,
   Check,
   X,
+  Sparkles,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -524,7 +525,10 @@ export function DataGrid({
                     </FilterableHeader>
                   </TableHead>
                   <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card text-center">
-                    <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Sparkles className="w-4 h-4 chromatic-sparkle" />
+                      <span className="text-xs font-bold text-muted-foreground tracking-wider">Ações</span>
+                    </div>
                   </TableHead>
                 </TableRow>
               </TableHeader>

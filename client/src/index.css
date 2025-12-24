@@ -1410,3 +1410,41 @@
   background: linear-gradient(180deg, #CE62D9 0%, #7C3AED 100%);
   opacity: 0.9;
 }
+
+/* =============================================================================
+   CHROMATIC ICON - Efeito arco-íris animado
+   ============================================================================= */
+
+@keyframes chromatic-shift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes chromatic-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% { 
+    transform: scale(1.1);
+    filter: hue-rotate(180deg) brightness(1.2);
+  }
+}
+
+.chromatic-icon {
+  animation: chromatic-shift 3s linear infinite;
+  background: linear-gradient(135deg, #CE62D9, #00BCD4, #CE62D9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.chromatic-icon-glow {
+  animation: chromatic-pulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.chromatic-sparkle {
+  animation: chromatic-shift 2s linear infinite, chromatic-pulse 1.5s ease-in-out infinite;
+  color: #CE62D9;
+}
