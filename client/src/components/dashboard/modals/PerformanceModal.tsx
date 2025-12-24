@@ -17,6 +17,7 @@ import {
   FileText,
   ChevronDown,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 import {
@@ -121,6 +122,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
       title="Performance"
       subtitle="Dinâmica da Empresa - Performance e Desempenho"
       maxWidth="5xl"
+      hideHeader={true}
       footer={
         <div className="flex items-center justify-between w-full gap-4 flex-wrap">
           <Button 
@@ -153,6 +155,14 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
               alt="MVRX Logo" 
               className="h-10 w-auto object-contain"
             />
+          </div>
+
+          <div className="h-10 w-px bg-white/10" />
+
+          {/* Título */}
+          <div className="flex flex-col justify-center">
+            <h2 className="text-base font-bold text-foreground">Performance</h2>
+            <p className="text-xs text-muted-foreground">Dinâmica da Empresa - Performance e Desempenho</p>
           </div>
 
           <div className="h-10 w-px bg-white/10" />
@@ -228,6 +238,20 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
             />
             <Label htmlFor="12months" className="text-xs cursor-pointer font-medium">MM12</Label>
           </div>
+
+          {/* Spacer para empurrar X para direita */}
+          <div className="flex-1" />
+
+          {/* Botão Fechar */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="glass border border-white/10"
+            data-testid="button-close-performance-toolbar"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
