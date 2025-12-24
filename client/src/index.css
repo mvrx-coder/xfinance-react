@@ -577,16 +577,21 @@
     border-bottom: 1px solid rgba(206, 98, 217, 0.12) !important;
   }
   
-  /* Grid header with Neon Edge effect */
+  /* Grid header with Premium Crystal effect - Enhanced */
   .grid-header-shell {
-    background: rgba(18, 18, 45, 0.7);
-    backdrop-filter: blur(24px);
-    border-top: 1px solid rgba(206, 98, 217, 0.25);
-    border-bottom: 1px solid rgba(206, 98, 217, 0.08);
+    background: linear-gradient(
+      180deg,
+      rgba(40, 40, 80, 0.6) 0%,
+      rgba(20, 20, 50, 0.8) 100%
+    );
+    backdrop-filter: blur(20px) saturate(200%);
+    border-top: 1px solid rgba(206, 98, 217, 0.35);
+    border-bottom: 1px solid rgba(0, 188, 212, 0.25);
     box-shadow: 
-      0 0 20px rgba(206, 98, 217, 0.1),
-      0 0 40px rgba(206, 98, 217, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 0 12px rgba(206, 98, 217, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.4);
   }
   
   .grid-header-shell th {
