@@ -212,147 +212,147 @@ export function DataGrid({
               <TableHeader className="sticky top-0 z-50 grid-header-shell">
                 <TableRow className="header-separator">
                   {/* Grupo 1: Ação */}
-                  <TableHead className="w-[50px] bg-card relative">
+                  <TableHead className="w-[50px] bg-transparent relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
                     <span className="text-xs font-bold text-primary tracking-wider">#</span>
                   </TableHead>
                   
                   {/* Separador vertical - cor segue o próximo grupo (Identificação/muted) */}
-                  <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-muted" />
+                  <TableHead className="w-[1px] p-0 bg-transparent column-separator column-separator-muted" />
                   
                   {/* Grupo 2: Identificação */}
-                  <TableHead className="w-[90px] bg-card relative">
+                  <TableHead className="w-[90px] bg-transparent relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/50 rounded-b-sm" />
                     <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                       <Briefcase className="w-3 h-3" />
                       Player
                     </span>
                   </TableHead>
-                  <TableHead className="w-[120px] bg-card">
+                  <TableHead className="w-[120px] bg-transparent">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Segurado</span>
                   </TableHead>
-                  <TableHead className="w-[45px] bg-card">
+                  <TableHead className="w-[45px] bg-transparent">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
                   </TableHead>
-                  <TableHead className="w-[60px] bg-card">
+                  <TableHead className="w-[60px] bg-transparent">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
                   </TableHead>
-                  <TableHead className="w-[60px] bg-card">
+                  <TableHead className="w-[60px] bg-transparent">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
                   </TableHead>
-                  <TableHead className="w-[55px] bg-card">
+                  <TableHead className="w-[55px] bg-transparent">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
                   </TableHead>
                   
                   {/* Separador vertical - cor segue o próximo grupo (Workflow/accent) */}
-                  <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-accent" />
+                  <TableHead className="w-[1px] p-0 bg-transparent column-separator column-separator-accent" />
                   
                   {/* Grupo 3: Workflow Principal */}
                   {filters.columnGroups.workflow && (
                     <>
-                      <TableHead className="w-[75px] bg-card relative text-center">
+                      <TableHead className="w-[75px] bg-transparent relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent rounded-b-sm" />
                         <span className="text-xs font-bold text-accent tracking-wider flex items-center justify-center gap-1">
                           <Clock className="w-3 h-3" />
                           Inspeção
                         </span>
                       </TableHead>
-                      <TableHead className="w-[70px] bg-card text-center">
+                      <TableHead className="w-[70px] bg-transparent text-center">
                         <span className="text-xs font-bold text-accent tracking-wider">Entregue</span>
                       </TableHead>
-                      <TableHead className="w-[50px] bg-card">
+                      <TableHead className="w-[50px] bg-transparent">
                         <span className="text-xs font-bold text-accent tracking-wider">Prazo</span>
                       </TableHead>
                       
                       {/* Separador vertical - cor segue o próximo grupo (Recebíveis/success) */}
-                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-success" />
+                      <TableHead className="w-[1px] p-0 bg-transparent column-separator column-separator-success" />
                     </>
                   )}
                   
                   {/* Grupo 4: Recebíveis - Honorários */}
                   {filters.columnGroups.recebiveis && (
                     <>
-                      <TableHead className="w-[60px] bg-card relative text-center">
+                      <TableHead className="w-[60px] bg-transparent relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-success rounded-b-sm" />
                         <span className="text-xs font-bold text-success tracking-wider flex items-center justify-center gap-1">
                           <Wallet className="w-3 h-3" />
                           Acerto
                         </span>
                       </TableHead>
-                      <TableHead className="w-[55px] bg-card text-center">
+                      <TableHead className="w-[55px] bg-transparent text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Envio</span>
                       </TableHead>
-                      <TableHead className="w-[55px] bg-card text-center">
+                      <TableHead className="w-[55px] bg-transparent text-center">
                         <span className="text-xs font-bold text-success tracking-wider">Pago</span>
                       </TableHead>
-                      <TableHead className="w-[85px] bg-card text-right">
+                      <TableHead className="w-[85px] bg-transparent text-right">
                         <span className="text-xs font-bold text-success tracking-wider">Honorários</span>
                       </TableHead>
                       
                       {/* Separador vertical - cor segue o próximo grupo (Despesas/emerald) */}
-                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-emerald" />
+                      <TableHead className="w-[1px] p-0 bg-transparent column-separator column-separator-emerald" />
                       
                       {/* Grupo 5: Recebíveis - Despesas */}
-                      <TableHead className="w-[60px] bg-card relative text-center">
+                      <TableHead className="w-[60px] bg-transparent relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400 rounded-b-sm" />
                         <span className="text-xs font-bold text-emerald-400 tracking-wider flex items-center justify-center gap-1">
                           <Receipt className="w-3 h-3" />
                           DEnvio
                         </span>
                       </TableHead>
-                      <TableHead className="w-[55px] bg-card text-center">
+                      <TableHead className="w-[55px] bg-transparent text-center">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">DPago</span>
                       </TableHead>
-                      <TableHead className="w-[75px] bg-card text-right">
+                      <TableHead className="w-[75px] bg-transparent text-right">
                         <span className="text-xs font-bold text-emerald-400 tracking-wider">Despesas</span>
                       </TableHead>
                       
                       {/* Separador vertical - cor segue o próximo grupo (Pagamentos/warning) */}
-                      <TableHead className="w-[1px] p-0 bg-card column-separator column-separator-warning" />
+                      <TableHead className="w-[1px] p-0 bg-transparent column-separator column-separator-warning" />
                     </>
                   )}
                   
                   {/* Grupo 6: Pagamentos Colaborador */}
                   {filters.columnGroups.pagamentos && (
                     <>
-                      <TableHead className="w-[55px] bg-card relative text-center">
+                      <TableHead className="w-[55px] bg-transparent relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
                         <span className="text-xs font-bold text-warning tracking-wider flex items-center justify-center gap-1">
                           <CreditCard className="w-3 h-3" />
                           GPago
                         </span>
                       </TableHead>
-                      <TableHead className="w-[90px] bg-card text-right">
+                      <TableHead className="w-[90px] bg-transparent text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GHonorários</span>
                       </TableHead>
                       
                       {/* Separador vertical - GDPago é separador de grupo */}
-                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card column-separator column-separator-warning" />
+                      <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-transparent column-separator column-separator-warning" />
                       
-                      <TableHead className="w-[60px] bg-card relative text-center">
+                      <TableHead className="w-[60px] bg-transparent relative text-center">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-warning rounded-b-sm" />
                         <span className="text-xs font-bold text-warning tracking-wider">GDPago</span>
                       </TableHead>
-                      <TableHead className="w-[85px] bg-card text-right">
+                      <TableHead className="w-[85px] bg-transparent text-right">
                         <span className="text-xs font-bold text-warning tracking-wider">GDespesas</span>
                       </TableHead>
                       
                       {/* Separador */}
-                      <TableHead className="w-[1px] p-0 bg-card">
+                      <TableHead className="w-[1px] p-0 bg-transparent">
                         <div className="w-[1px] h-full bg-warning/40" />
                       </TableHead>
                     </>
                   )}
                   
                   {/* Grupo 7: Contexto */}
-                  <TableHead className="w-[120px] bg-card relative">
+                  <TableHead className="w-[120px] bg-transparent relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-foreground/30 rounded-b-sm" />
                     <span className="text-xs font-bold text-muted-foreground tracking-wider flex items-center gap-1">
                       <FileText className="w-3 h-3" />
                       Atividade
                     </span>
                   </TableHead>
-                  <TableHead className="w-[70px] bg-card text-center">
+                  <TableHead className="w-[70px] bg-transparent text-center">
                     <span className="text-xs font-bold text-muted-foreground tracking-wider">Observação</span>
                   </TableHead>
                 </TableRow>

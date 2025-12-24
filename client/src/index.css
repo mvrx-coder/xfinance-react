@@ -577,11 +577,19 @@
     border-bottom: 1px solid rgba(206, 98, 217, 0.12) !important;
   }
   
-  /* Grid header with distinct backdrop */
+  /* Grid header with Frost Glass effect */
   .grid-header-shell {
-    background: rgba(15, 15, 35, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(
+      180deg,
+      rgba(30, 30, 65, 0.75) 0%,
+      rgba(20, 20, 50, 0.85) 100%
+    );
+    backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 4px 12px rgba(0, 0, 0, 0.25);
   }
 
   /* Elevated container with distinct visual separation */
