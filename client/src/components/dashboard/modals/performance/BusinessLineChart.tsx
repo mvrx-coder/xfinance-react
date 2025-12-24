@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { mockBusinessData, formatCurrency } from "./data";
+import { formatCurrency } from "./data";
+import type { BusinessResponse } from "@/hooks";
 
 interface BusinessLineChartProps {
-  data: typeof mockBusinessData;
+  data: BusinessResponse;
 }
 
 export function BusinessLineChart({ data }: BusinessLineChartProps) {
@@ -15,19 +16,34 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   
-  const allValues = data.series.flatMap(s => s.data);
-  const maxValue = Math.max(...allValues);
-  const minValue = 0;
+  // Calcular valores seguros
+  const { allValues, maxValue, gridLines } = useMemo(() => {
+    const values = data.series?.flatMap(s => s.data) ?? [];
+    const max = values.length > 0 ? Math.max(...values) : 100;
+    // Grid lines dinâmico baseado no max
+    const step = Math.ceil(max / 4);
+    const lines = [0, step, step * 2, step * 3, step * 4].filter(v => v <= max * 1.1);
+    return { allValues: values, maxValue: max || 100, gridLines: lines };
+  }, [data.series]);
   
-  const xScale = (index: number) => padding.left + (index / (data.months.length - 1)) * chartWidth;
+  const minValue = 0;
+  const monthsCount = data.months?.length || 12;
+  
+  const xScale = (index: number) => padding.left + (index / (monthsCount - 1)) * chartWidth;
   const yScale = (value: number) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
-
-  const gridLines = [0, 100, 200, 300];
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  if (!data.series || data.series.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Nenhum dado disponível
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

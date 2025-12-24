@@ -5,124 +5,91 @@ import type {
   AcaoResult,
   UserOption,
   MarkerOption,
-  MarkerType
+  MarkerLevelOption,
 } from "@/types/acoes";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "/api";
+// Usar URL relativa - o Vite proxy redireciona para o backend
+const BASE_URL = "";
 
 export async function encaminhar(input: EncaminharInput): Promise<AcaoResult> {
-  try {
-    const response = await fetch(`${BASE_URL}/acoes/encaminhar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    
-    if (!response.ok) {
-      return { success: false, message: "Erro ao encaminhar inspeções" };
-    }
-    
-    return await response.json();
-  } catch {
-    console.log("[Stub] Encaminhar:", input.ids_princ.length, "registros para usuário", input.id_user_destino);
-    return { 
-      success: true, 
-      updated: input.ids_princ.length,
-      message: `${input.ids_princ.length} inspeção(ões) encaminhada(s) com sucesso`
-    };
+  const response = await fetch(`${BASE_URL}/api/acoes/encaminhar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    return { success: false, message: error.detail || "Erro ao encaminhar inspeções" };
   }
+  
+  return await response.json();
 }
 
 export async function marcar(input: MarcadorInput): Promise<AcaoResult> {
-  try {
-    const response = await fetch(`${BASE_URL}/acoes/marcar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    
-    if (!response.ok) {
-      return { success: false, message: "Erro ao aplicar marcador" };
-    }
-    
-    return await response.json();
-  } catch {
-    console.log("[Stub] Marcar:", input.ids_princ.length, "registros como", input.marker_type);
-    return { 
-      success: true, 
-      updated: input.ids_princ.length,
-      message: `Marcador ${input.marker_type} ${input.value ? 'aplicado' : 'removido'} em ${input.ids_princ.length} inspeção(ões)`
-    };
+  const response = await fetch(`${BASE_URL}/api/acoes/marcar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    return { success: false, message: error.detail || "Erro ao aplicar marcador" };
   }
+  
+  return await response.json();
 }
 
 export async function excluir(input: ExcluirInput): Promise<AcaoResult> {
-  try {
-    const response = await fetch(`${BASE_URL}/acoes/excluir`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    
-    if (!response.ok) {
-      return { success: false, message: "Erro ao excluir inspeções" };
-    }
-    
-    return await response.json();
-  } catch {
-    console.log("[Stub] Excluir:", input.ids_princ.length, "registros");
-    return { 
-      success: true, 
-      deleted: input.ids_princ.length,
-      message: `${input.ids_princ.length} inspeção(ões) excluída(s) com sucesso`
-    };
+  const response = await fetch(`${BASE_URL}/api/acoes/excluir`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    return { success: false, message: error.detail || "Erro ao excluir inspeções" };
   }
+  
+  return await response.json();
 }
 
 export async function limparFiltros(): Promise<{ success: boolean }> {
-  try {
-    const response = await fetch(`${BASE_URL}/grid/filtros/limpar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    
-    if (!response.ok) {
-      return { success: false };
-    }
-    
-    return await response.json();
-  } catch {
-    console.log("[Stub] Limpar filtros");
-    return { success: true };
-  }
+  // Limpar filtros é feito localmente no frontend por enquanto
+  return { success: true };
 }
 
 export async function fetchUsersOptions(): Promise<UserOption[]> {
-  try {
-    const response = await fetch(`${BASE_URL}/lookups/users`);
-    
-    if (!response.ok) {
-      throw new Error("Failed to fetch users");
-    }
-    
-    return await response.json();
-  } catch {
-    return [
-      { value: 1, label: "MVR", papel: "admin", ativo: true },
-      { value: 2, label: "AAS", papel: "inspetor", ativo: true },
-      { value: 3, label: "HEA", papel: "inspetor", ativo: true },
-      { value: 4, label: "RES", papel: "inspetor", ativo: true },
-      { value: 5, label: "ALS", papel: "inspetor", ativo: true },
-      { value: 6, label: "LVS", papel: "inspetor", ativo: true },
-    ];
+  const response = await fetch(`${BASE_URL}/api/lookups/users`, {
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    throw new Error("Failed to fetch users");
   }
+  
+  return await response.json();
 }
 
 export function getMarkerTypes(): MarkerOption[] {
   return [
-    { type: "urgente" as MarkerType, label: "Urgente", color: "red" },
-    { type: "pendente" as MarkerType, label: "Pendente", color: "yellow" },
-    { type: "auditoria" as MarkerType, label: "Auditoria", color: "blue" },
-    { type: "followup" as MarkerType, label: "Follow-up", color: "purple" },
+    { type: "state_loc", label: "LOC", field: "Localização" },
+    { type: "state_dt_envio", label: "Envio", field: "Data de Envio" },
+    { type: "state_dt_denvio", label: "D.Envio", field: "Data D.Envio" },
+    { type: "state_dt_pago", label: "Pago", field: "Data Pago" },
+  ];
+}
+
+export function getMarkerLevels(): MarkerLevelOption[] {
+  return [
+    { level: 0, label: "Sem marcador", color: "gray" },
+    { level: 1, label: "Azul", color: "blue" },
+    { level: 2, label: "Amarelo", color: "yellow" },
+    { level: 3, label: "Vermelho", color: "red" },
   ];
 }

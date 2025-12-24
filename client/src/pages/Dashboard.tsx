@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
@@ -9,10 +10,14 @@ import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
 import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Inspection, FilterState, KPIs } from "@shared/schema";
+import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
+import { logout, getCurrentUser, type UserData } from "@/services/api/auth";
+import type { FilterState, KPIs, Inspection } from "@shared/schema";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  
   const [filters, setFilters] = useState<FilterState>({
     player: false,
     myJob: false,
@@ -36,13 +41,61 @@ export default function Dashboard() {
     guyPay: false,
   });
 
-  const { data: inspections = [], isLoading: isLoadingInspections, refetch: refetchInspections } = useQuery<Inspection[]>({
-    queryKey: ["/api/inspections"],
+  // Carregar usuário atual
+  useEffect(() => {
+    // Primeiro tenta do localStorage (cache)
+    const cachedUser = localStorage.getItem("xfinance_user");
+    if (cachedUser) {
+      setCurrentUser(JSON.parse(cachedUser));
+    }
+    
+    // Depois valida com o backend
+    getCurrentUser().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem("xfinance_user", JSON.stringify(user));
+      } else {
+        // Não autenticado - redireciona para login
+        localStorage.removeItem("xfinance_user");
+        setLocation("/login");
+      }
+    });
+  }, [setLocation]);
+
+  // Montar opções de busca baseadas nos filtros
+  const fetchOptions: FetchOptions = {
+    order: filters.player ? "player" : "normal",
+    limit: filters.dbLimit ? 800 : undefined,
+    myJob: filters.myJob,
+  };
+
+  // Buscar inspeções da API real
+  const { 
+    data: inspectionsResponse, 
+    isLoading: isLoadingInspections, 
+    refetch: refetchInspections,
+    error: inspectionsError
+  } = useQuery<InspectionsResponse>({
+    queryKey: ["inspections", fetchOptions],
+    queryFn: () => fetchInspections(fetchOptions),
+    enabled: !!currentUser, // Só busca se usuário estiver logado
+    retry: false,
   });
 
-  const { data: kpis = { express: 0, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 } } = useQuery<KPIs>({
-    queryKey: ["/api/kpis"],
-  });
+  // Extrair dados do response
+  const inspections = inspectionsResponse?.data || [];
+  const totalRecords = inspectionsResponse?.total || 0;
+
+  // KPIs (ainda mock - será implementado depois)
+  const kpis: KPIs = { express: totalRecords, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 };
+
+  // Redirecionar para login se não autenticado
+  useEffect(() => {
+    if (inspectionsError?.message === "Não autenticado") {
+      localStorage.removeItem("xfinance_user");
+      setLocation("/login");
+    }
+  }, [inspectionsError, setLocation]);
 
   const dismissStatus = useCallback((id: string) => {
     setStatusMessages((prev) => prev.filter((m) => m.id !== id));
@@ -52,7 +105,6 @@ export default function Dashboard() {
     refetchInspections();
     toast.info("Buscando...", {
       description: "Atualizando dados do grid",
-      duration: 3000,
     });
   }, [refetchInspections]);
 
@@ -64,17 +116,19 @@ export default function Dashboard() {
     setModals((prev) => ({ ...prev, [modal]: false }));
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     toast.warning("Logout", {
-      description: "Você será desconectado em breve",
-      duration: 3000,
+      description: "Você será desconectado...",
     });
-  }, []);
+    
+    await logout();
+    localStorage.removeItem("xfinance_user");
+    setLocation("/login");
+  }, [setLocation]);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
     toast.info("Registro selecionado", {
-      description: `ID: ${inspection.idPrinc}`,
-      duration: 3000,
+      description: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
     });
   }, []);
 
@@ -83,15 +137,14 @@ export default function Dashboard() {
     refetchInspections();
     toast.success("Sucesso!", {
       description: "Novo registro criado com sucesso",
-      duration: 4000,
     });
   }, [handleCloseModal, refetchInspections]);
 
   return (
-    <div className="flex flex-col h-screen bg-background bg-depth-gradient" data-testid="dashboard">
+    <div className="flex flex-col h-screen bg-depth-gradient" data-testid="dashboard">
       {/* Top Bar */}
       <TopBar
-        userName="Marcus Vinicius"
+        userName={currentUser?.short_nome || currentUser?.nick || currentUser?.nome || "Usuário"}
         kpis={kpis}
         filters={filters}
         onFiltersChange={setFilters}
@@ -107,16 +160,15 @@ export default function Dashboard() {
       {/* Status Bar */}
       <StatusBar messages={statusMessages} onDismiss={dismissStatus} />
 
-      {/* Main Grid - with spacing to show background gradient */}
-      <div className="flex-1 px-4 pb-4 pt-3 overflow-hidden">
-        <DataGrid
-          data={inspections}
-          filters={filters}
-          isLoading={isLoadingInspections}
-          onRowClick={handleRowClick}
-          onRefresh={handleSearch}
-        />
-      </div>
+      {/* Main Grid */}
+      <DataGrid
+        data={inspections}
+        filters={filters}
+        isLoading={isLoadingInspections}
+        onRowClick={handleRowClick}
+        onRefresh={handleSearch}
+        userRole={currentUser?.papel}
+      />
 
       {/* Modals */}
       <NewRecordModal

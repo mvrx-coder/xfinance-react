@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import { Modal } from "../Modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,7 @@ import {
   X,
   Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 import { type Papel, PAPEIS, isPapelValido } from "@/types/usuario";
 import { createUsuario } from "@/services/api/usuarios";
 

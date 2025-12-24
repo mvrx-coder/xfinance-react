@@ -1,16 +1,37 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { mockOperationalData, yearColors } from "./data";
+import { yearColors } from "./data";
+import type { OperationalItem } from "@/hooks";
 
 interface OperationalBarChartProps {
-  data: typeof mockOperationalData;
+  data: OperationalItem[];
 }
 
 export function OperationalBarChart({ data }: OperationalBarChartProps) {
   const [hoveredPerson, setHoveredPerson] = useState<string | null>(null);
-  const allYears = [2021, 2022, 2023, 2024, 2025];
-  const maxValue = 500000;
+  
+  // Extrair anos únicos dos dados
+  const allYears = useMemo(() => {
+    const yearsSet = new Set<number>();
+    data.forEach(person => person.years.forEach(y => yearsSet.add(y.year)));
+    return Array.from(yearsSet).sort();
+  }, [data]);
+  
+  // Calcular maxValue dinamicamente
+  const maxValue = useMemo(() => {
+    const values = data.flatMap(p => p.years.map(y => y.value));
+    return values.length > 0 ? Math.max(...values) * 1.1 : 500000;
+  }, [data]);
+  
   const barWidth = 16;
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Nenhum dado operacional disponível
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -19,7 +40,7 @@ export function OperationalBarChart({ data }: OperationalBarChartProps) {
           <div key={year} className="flex items-center gap-2">
             <div 
               className="w-3 h-3 rounded-sm"
-              style={{ backgroundColor: yearColors[year] }}
+              style={{ backgroundColor: yearColors[year] || '#888' }}
             />
             <span className="text-xs text-muted-foreground">{year}</span>
           </div>
@@ -55,8 +76,8 @@ export function OperationalBarChart({ data }: OperationalBarChartProps) {
                     <div 
                       className="absolute inset-0 rounded-t-md transition-all duration-300"
                       style={{ 
-                        background: `linear-gradient(180deg, ${yearColors[year]} 0%, ${yearColors[year]}80 100%)`,
-                        boxShadow: isHovered ? `0 0 15px ${yearColors[year]}40` : 'none',
+                        background: `linear-gradient(180deg, ${yearColors[year] || '#888'} 0%, ${yearColors[year] || '#888'}80 100%)`,
+                        boxShadow: isHovered ? `0 0 15px ${yearColors[year] || '#888'}40` : 'none',
                         transform: isHovered ? 'scaleX(1.1)' : 'scaleX(1)',
                       }}
                     />

@@ -58,7 +58,28 @@ export const insertInspectionSchema = createInsertSchema(inspections).omit({
 });
 
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
-export type Inspection = typeof inspections.$inferSelect;
+
+// Tipo base do Drizzle
+type InspectionBase = typeof inspections.$inferSelect;
+
+// Tipo estendido com campos de exibição (do JOIN)
+export interface Inspection extends InspectionBase {
+  // Campos de exibição (populados via JOIN no backend)
+  player?: string | null;      // contr.player
+  segurado?: string | null;    // segur.segur_nome
+  guilty?: string | null;      // user.nick (guilty)
+  guy?: string | null;         // user.nick (guy)
+  // Marcadores de alerta (do tempstate) - valores 0-3
+  stateLoc?: number | null;       // Marcador LOC
+  stateDtEnvio?: number | null;   // Marcador Envio
+  stateDtDenvio?: number | null;  // Marcador D.Envio
+  stateDtPago?: number | null;    // Marcador Pago
+  // Status calculados (para cores condicionais)
+  dtGuyPagoStatus?: string | null;   // "past", "today", ""
+  dtGuyDpagoStatus?: string | null;  // "past", "today", ""
+  dtDpagoStatus?: string | null;     // "past", "today", ""
+  deliveryStatus?: string | null;    // "highlight", ""
+}
 
 // KPIs type for Express totals (aligned with SQLite xFinance original)
 export interface KPIs {

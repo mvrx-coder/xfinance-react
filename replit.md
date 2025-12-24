@@ -22,27 +22,7 @@ The frontend follows a component-based architecture with:
 - Page components in `client/src/pages/`
 - Reusable UI primitives in `client/src/components/ui/`
 - Dashboard-specific components in `client/src/components/dashboard/`
-- Modal components in `client/src/components/dashboard/modals/`
 - Custom hooks in `client/src/hooks/`
-
-### Performance Module Structure
-The PerformanceModal has been refactored into a modular structure:
-- `modals/performance/data.ts` - Centralized mock data, types, animation variants, and utility functions
-- `modals/performance/KPICard.tsx` - Reusable KPI card component
-- `modals/performance/PremiumTabs.tsx` - Tab navigation component
-- `modals/performance/MarketShareChart.tsx` - Horizontal bar chart for market share
-- `modals/performance/BusinessLineChart.tsx` - Multi-year line chart with hover interactions
-- `modals/performance/OperationalBarChart.tsx` - Grouped bar chart by person/year
-- `modals/performance/DetailsGrid.tsx` - Paginated table grid for player details
-
-### Investments Module Structure
-The InvestmentsModal has been refactored into a modular structure:
-- `modals/investments/data.ts` - Centralized mock data, formatters, and animation variants
-- `modals/investments/KPICard.tsx` - Reusable KPI card component with gradient backgrounds
-- `modals/investments/HighlightCard.tsx` - Card for top winner/loser/largest position
-- `modals/investments/AllocationLegend.tsx` - Interactive legend for donut chart
-- `modals/investments/PremiumDonutChart.tsx` - Interactive animated donut chart
-- `modals/investments/PortfolioGrid.tsx` - Paginated portfolio table with investment details
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
@@ -69,26 +49,6 @@ The application implements a comprehensive dark theme with:
 - Design tokens defined in `client/src/index.css`
 - Tailwind configuration extended in `tailwind.config.ts`
 - Color palette: Deep purple backgrounds (#0A0A1F, #1A1A3A), magenta primary (#CE62D9), cyan accent (#00BCD4)
-
-### Visual Depth System (3 Tiers)
-Inspired by Linear, Stripe, Notion and Figma dashboards:
-
-1. **Background Tier** (`bg-depth-gradient`):
-   - Multi-zone vertical gradient (#070717 → #111133 → #080820)
-   - Cyan vignette bottom-right, magenta vignette top-left
-
-2. **Shell Tier** (translucent surfaces with backdrop-blur):
-   - `shell-toolbar`: rgba(28, 28, 60, 0.85) - TopBar
-   - `shell-kpi`: rgba(26, 26, 58, 0.75) - KPI panels
-   - `shell-grid`: rgba(21, 21, 48, 0.9) - DataGrid container
-   - `grid-header-shell`: rgba(15, 15, 35, 0.95) - Grid header
-
-3. **Grid Tier** (zebra striping + cadence):
-   - `grid-row-even`: transparent background
-   - `grid-row-odd`: 2.5% white overlay
-   - `grid-row-cadence`: magenta separator every 4 rows (Stripe-inspired)
-   - Row hover states preserve zebra contrast
-   - Selected rows show status gradient + glow effect
 
 ### Key Data Models
 - **Users**: Authentication with username/password, roles

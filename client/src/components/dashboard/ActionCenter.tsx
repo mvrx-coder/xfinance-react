@@ -46,7 +46,8 @@ import {
   marcar, 
   limparFiltros,
   fetchUsersOptions,
-  getMarkerTypes 
+  getMarkerTypes,
+  getMarkerLevels
 } from "@/services/api/acoes";
 import { getLabelById, type LookupOption } from "@/services/api/lookups";
 
@@ -56,6 +57,7 @@ interface ActionCenterProps {
   onClose: () => void;
   onClearFilters?: () => void;
   onRefresh?: () => void;
+  userRole?: string;
   contrLookup: LookupOption[];
   segurLookup: LookupOption[];
 }
@@ -75,6 +77,7 @@ export function ActionCenter({
   onClose,
   onClearFilters,
   onRefresh,
+  userRole,
   contrLookup,
   segurLookup,
 }: ActionCenterProps) {
@@ -84,13 +87,16 @@ export function ActionCenter({
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [observacao, setObservacao] = useState("");
-  const [markers, setMarkers] = useState<Record<MarkerType, boolean>>({
-    urgente: false,
-    pendente: false,
-    auditoria: false,
-    followup: false,
+  const [markers, setMarkers] = useState<Record<MarkerType, number>>({
+    state_loc: 0,
+    state_dt_envio: 0,
+    state_dt_denvio: 0,
+    state_dt_pago: 0,
   });
   const [showClearFiltersConfirm, setShowClearFiltersConfirm] = useState(false);
+  const canDelete = userRole === "admin";
+  const canForward = userRole === "admin" || userRole === "BackOffice";
+  const canMark = canForward;
 
   useEffect(() => {
     if (isOpen) {
@@ -157,23 +163,24 @@ export function ActionCenter({
     }
   };
 
-  const handleMarcar = async (markerType: MarkerType, value: boolean) => {
+  const handleMarcar = async (markerType: MarkerType, level: number) => {
     if (!idPrinc) return;
-    setMarkers(prev => ({ ...prev, [markerType]: value }));
+    setMarkers(prev => ({ ...prev, [markerType]: level }));
     try {
       const result = await marcar({ 
         ids_princ: [idPrinc], 
         marker_type: markerType,
-        value 
+        value: level
       });
       if (result.success) {
         toast({
-          title: value ? "Marcador aplicado" : "Marcador removido",
+          title: level > 0 ? "Marcador aplicado" : "Marcador removido",
           description: result.message,
         });
+        onRefresh?.();
       }
     } catch {
-      setMarkers(prev => ({ ...prev, [markerType]: !value }));
+      setMarkers(prev => ({ ...prev, [markerType]: prev[markerType] }));
     }
   };
 
@@ -194,6 +201,7 @@ export function ActionCenter({
   };
 
   const markerTypes = getMarkerTypes();
+  const markerLevels = getMarkerLevels();
 
   return (
     <>
@@ -230,6 +238,7 @@ export function ActionCenter({
                 <Button
                   className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.red} ${activePanel === 'excluir' ? 'bg-red-500/20' : ''}`}
                   variant="outline"
+                  disabled={!canDelete}
                   onClick={() => setActivePanel(activePanel === 'excluir' ? null : 'excluir')}
                   data-testid="action-delete-inspection"
                 >
@@ -288,6 +297,7 @@ export function ActionCenter({
                 <Button
                   className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.orange} ${activePanel === 'encaminhar' ? 'bg-orange-500/20' : ''}`}
                   variant="outline"
+                  disabled={!canForward}
                   onClick={() => setActivePanel(activePanel === 'encaminhar' ? null : 'encaminhar')}
                   data-testid="action-forward-inspection"
                 >
@@ -351,6 +361,7 @@ export function ActionCenter({
                 <Button
                   className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.yellow} ${activePanel === 'marcadores' ? 'bg-yellow-500/20' : ''}`}
                   variant="outline"
+                  disabled={!canMark}
                   onClick={() => setActivePanel(activePanel === 'marcadores' ? null : 'marcadores')}
                   data-testid="action-alert-marker"
                 >
@@ -366,15 +377,25 @@ export function ActionCenter({
                       className="mt-3 p-4 rounded-xl bg-slate-900/80 border border-yellow-500/30 space-y-3"
                     >
                       {markerTypes.map(marker => (
-                        <div key={marker.type} className="flex items-center justify-between">
-                          <span className={`text-sm font-medium text-${marker.color}-400`}>
+                        <div key={marker.type} className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-medium text-yellow-400">
                             {marker.label}
                           </span>
-                          <Switch
-                            checked={markers[marker.type]}
-                            onCheckedChange={(checked) => handleMarcar(marker.type, checked)}
-                            data-testid={`switch-marker-${marker.type}`}
-                          />
+                          <Select
+                            value={String(markers[marker.type])}
+                            onValueChange={(val) => handleMarcar(marker.type, parseInt(val, 10))}
+                          >
+                            <SelectTrigger className="w-[160px] bg-slate-800/50 border-white/10" data-testid={`select-marker-${marker.type}`}>
+                              <SelectValue placeholder="Selecione nível" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {markerLevels.map(opt => (
+                                <SelectItem key={opt.level} value={String(opt.level)}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       ))}
                     </motion.div>

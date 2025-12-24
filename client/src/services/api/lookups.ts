@@ -1,3 +1,10 @@
+/**
+ * API de Lookups - xFinance
+ * 
+ * Busca opções para dropdowns do sistema.
+ * Conecta aos endpoints reais do backend FastAPI.
+ */
+
 export interface LookupOption {
   value: number;
   label: string;
@@ -8,125 +15,121 @@ export interface UserOption extends LookupOption {
   ativo: boolean;
 }
 
-const mockUfs: LookupOption[] = [
-  { value: 1, label: "AC" }, { value: 2, label: "AL" }, { value: 3, label: "AM" },
-  { value: 4, label: "AP" }, { value: 5, label: "BA" }, { value: 6, label: "CE" },
-  { value: 7, label: "DF" }, { value: 8, label: "ES" }, { value: 9, label: "GO" },
-  { value: 10, label: "MA" }, { value: 11, label: "MG" }, { value: 12, label: "MS" },
-  { value: 13, label: "MT" }, { value: 14, label: "PA" }, { value: 15, label: "PB" },
-  { value: 16, label: "PE" }, { value: 17, label: "PI" }, { value: 18, label: "PR" },
-  { value: 19, label: "RJ" }, { value: 20, label: "RN" }, { value: 21, label: "RO" },
-  { value: 22, label: "RR" }, { value: 23, label: "RS" }, { value: 24, label: "SC" },
-  { value: 25, label: "SE" }, { value: 26, label: "SP" }, { value: 27, label: "TO" },
-];
-
-const mockCidades: Record<number, LookupOption[]> = {
-  11: [ // MG
-    { value: 1, label: "Belo Horizonte" },
-    { value: 2, label: "Uberlândia" },
-    { value: 3, label: "Contagem" },
-    { value: 4, label: "Juiz de Fora" },
-  ],
-  26: [ // SP
-    { value: 5, label: "São Paulo" },
-    { value: 6, label: "Campinas" },
-    { value: 7, label: "Santos" },
-    { value: 8, label: "Ribeirão Preto" },
-  ],
-  19: [ // RJ
-    { value: 9, label: "Rio de Janeiro" },
-    { value: 10, label: "Niterói" },
-    { value: 11, label: "Petrópolis" },
-  ],
-};
-
-const mockContratantes: LookupOption[] = [
-  { value: 1, label: "Aon" },
-  { value: 2, label: "Swiss Re" },
-  { value: 3, label: "Howden" },
-  { value: 4, label: "Inter" },
-  { value: 5, label: "Free Job" },
-  { value: 6, label: "Marsh" },
-  { value: 7, label: "Lockton" },
-  { value: 8, label: "IRB" },
-  { value: 9, label: "Gallagher" },
-];
-
-const mockSegurados: LookupOption[] = [
-  { value: 1, label: "Nexa" },
-  { value: 2, label: "CLIR 2 CD" },
-  { value: 3, label: "CLO CD" },
-  { value: 4, label: "DeMilIus" },
-  { value: 5, label: "RAJLOG" },
-  { value: 6, label: "SAVOY" },
-  { value: 7, label: "Caramuru" },
-  { value: 8, label: "CEDRO Min..." },
-  { value: 9, label: "Vallourec" },
-  { value: 10, label: "Maracanã" },
-  { value: 11, label: "Top Paper" },
-  { value: 12, label: "Lwart" },
-  { value: 13, label: "CPFL PCHs" },
-  { value: 14, label: "Belo Alimen..." },
-  { value: 15, label: "Mosaic" },
-  { value: 16, label: "ENGEPACK" },
-  { value: 17, label: "Cia Muller C..." },
-  { value: 18, label: "COMEXIM" },
-  { value: 19, label: "Echoenergí..." },
-];
-
-const mockAtividades: LookupOption[] = [
-  { value: 1, label: "Mineradora" },
-  { value: 2, label: "CD" },
-  { value: 3, label: "Falação, Confe" },
-  { value: 4, label: "Biodiesel" },
-  { value: 5, label: "Mineração, Be..." },
-  { value: 6, label: "GO" },
-  { value: 7, label: "Papel" },
-  { value: 8, label: "Química, Óleo" },
-  { value: 9, label: "Hidro Usina, Pn" },
-  { value: 10, label: "Alimentos, Fria" },
-  { value: 11, label: "Terminal, Velcu" },
-  { value: 12, label: "Fertilizantes" },
-  { value: 13, label: "Grãos, Café" },
-  { value: 14, label: "Fotovoltaica" },
-  { value: 15, label: "Subesta..." },
-];
-
-const mockUsers: UserOption[] = [
-  { value: 1, label: "MVR", papel: "analista", ativo: true },
-  { value: 2, label: "AAS", papel: "analista", ativo: true },
-  { value: 3, label: "HEA", papel: "analista", ativo: true },
-  { value: 4, label: "RES", papel: "auditor", ativo: true },
-  { value: 5, label: "ALS", papel: "analista", ativo: true },
-  { value: 6, label: "LVS", papel: "analista", ativo: true },
-  { value: 7, label: "ARR", papel: "analista", ativo: true },
-];
+// =============================================================================
+// UFs
+// =============================================================================
 
 export async function fetchUfOptions(): Promise<LookupOption[]> {
-  return mockUfs;
+  try {
+    const response = await fetch("/api/lookups/ufs", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar UFs");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar UFs:", error);
+    return [];
+  }
 }
+
+// =============================================================================
+// Cidades (filtradas por UF)
+// =============================================================================
 
 export async function fetchCidadeOptions(idUf: number): Promise<LookupOption[]> {
-  return mockCidades[idUf] || [];
+  if (!idUf) return [];
+  
+  try {
+    const response = await fetch(`/api/lookups/cidades?id_uf=${idUf}`, {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error(`Erro ao buscar cidades`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Erro ao buscar cidades da UF ${idUf}:`, error);
+    return [];
+  }
 }
+
+// =============================================================================
+// Contratantes (Players)
+// =============================================================================
 
 export async function fetchContrOptions(): Promise<LookupOption[]> {
-  return mockContratantes;
+  try {
+    const response = await fetch("/api/lookups/contratantes", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar contratantes");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar contratantes:", error);
+    return [];
+  }
 }
+
+// =============================================================================
+// Segurados
+// =============================================================================
 
 export async function fetchSegurOptions(): Promise<LookupOption[]> {
-  return mockSegurados;
+  try {
+    const response = await fetch("/api/lookups/segurados", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar segurados");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar segurados:", error);
+    return [];
+  }
 }
+
+// =============================================================================
+// Atividades
+// =============================================================================
 
 export async function fetchAtiviOptions(): Promise<LookupOption[]> {
-  return mockAtividades;
+  try {
+    const response = await fetch("/api/lookups/atividades", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar atividades");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar atividades:", error);
+    return [];
+  }
 }
+
+// =============================================================================
+// Usuários
+// =============================================================================
 
 export async function fetchUsersOptions(): Promise<UserOption[]> {
-  return mockUsers;
+  try {
+    const response = await fetch("/api/lookups/users", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar usuários");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    return [];
+  }
 }
 
-export function getLabelById(options: LookupOption[], id: number | null | undefined): string {
+// =============================================================================
+// Helpers
+// =============================================================================
+
+/**
+ * Busca o label de uma opção pelo ID.
+ */
+export function getLabelById(
+  options: LookupOption[], 
+  id: number | null | undefined
+): string {
   if (id === null || id === undefined) return "-";
   const option = options.find(o => o.value === id);
   return option?.label || "-";

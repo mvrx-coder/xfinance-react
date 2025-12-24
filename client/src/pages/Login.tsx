@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { login } from "@/services/api/auth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -8,6 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isFirstAccess, setIsFirstAccess] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,11 +17,23 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsLoading(false);
-    setLocation("/");
+    try {
+      const response = await login({ email, password });
+      
+      if (response.success) {
+        // Salvar dados do usuário no localStorage para acesso rápido
+        if (response.user) {
+          localStorage.setItem("xfinance_user", JSON.stringify(response.user));
+        }
+        setLocation("/");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSetNewPassword = async (e: React.FormEvent) => {
@@ -42,6 +56,15 @@ export default function Login() {
       <div className="login-content">
         <div className="login-hero">
           <div className="login-hero-card">
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/logo.png" 
+                alt="xFinance Logo" 
+                className="h-20 w-auto object-contain"
+              />
+            </div>
+            
             <span className="login-eyebrow">
               PLANEJAMENTO &bull; PERFORMANCE &bull; PREVISIBILIDADE
             </span>
@@ -114,6 +137,12 @@ export default function Login() {
             
             {!isFirstAccess ? (
               <form onSubmit={handleLogin} className="login-form">
+                {error && (
+                  <div className="login-error">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{error}</span>
+                  </div>
+                )}
                 <div className="login-input-group">
                   <input
                     type="email"
