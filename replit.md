@@ -70,6 +70,26 @@ The application implements a comprehensive dark theme with:
 - Tailwind configuration extended in `tailwind.config.ts`
 - Color palette: Deep purple backgrounds (#0A0A1F, #1A1A3A), magenta primary (#CE62D9), cyan accent (#00BCD4)
 
+### Visual Depth System (3 Tiers)
+Inspired by Linear, Stripe, Notion and Figma dashboards:
+
+1. **Background Tier** (`bg-depth-gradient`):
+   - Multi-zone vertical gradient (#070717 → #111133 → #080820)
+   - Cyan vignette bottom-right, magenta vignette top-left
+
+2. **Shell Tier** (translucent surfaces with backdrop-blur):
+   - `shell-toolbar`: rgba(28, 28, 60, 0.85) - TopBar
+   - `shell-kpi`: rgba(26, 26, 58, 0.75) - KPI panels
+   - `shell-grid`: rgba(21, 21, 48, 0.9) - DataGrid container
+   - `grid-header-shell`: rgba(15, 15, 35, 0.95) - Grid header
+
+3. **Grid Tier** (zebra striping + cadence):
+   - `grid-row-even`: transparent background
+   - `grid-row-odd`: 2.5% white overlay
+   - `grid-row-cadence`: magenta separator every 4 rows (Stripe-inspired)
+   - Row hover states preserve zebra contrast
+   - Selected rows show status gradient + glow effect
+
 ### Key Data Models
 - **Users**: Authentication with username/password, roles
 - **Inspections**: Core entity with workflow status, financial data (honorarios, despesas), payment tracking, and multiple category flags
