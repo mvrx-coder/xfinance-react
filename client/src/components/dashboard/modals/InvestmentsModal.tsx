@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Modal } from "../Modal";
-import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { 
@@ -17,8 +16,6 @@ import {
   DollarSign, 
   Trophy,
   Target,
-  PieChart,
-  Layers,
   Wallet,
   Loader2,
   Filter
@@ -111,7 +108,7 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
       onClose={onClose}
       title="Gestão de Aportes"
       subtitle="Acompanhe seus investimentos e alocação de carteira"
-      maxWidth="4xl"
+      maxWidth="6xl"
       footer={
         <div className="flex items-center justify-between w-full gap-4 flex-wrap">
           {/* Filters */}
@@ -189,9 +186,11 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
           animate="visible"
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Top Section: KPIs + Highlights + Chart with Legend */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-6">
+            {/* Left Column: KPIs and Highlights */}
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <KPICard
                   icon={Wallet}
                   label="Patrimônio Total"
@@ -263,107 +262,50 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                   </div>
                 )}
               </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Layers className="w-4 h-4 text-accent" />
-                  <h3 className="text-sm font-semibold text-foreground">Detalhes da Alocação</h3>
-                </div>
-                <Card className="glass border-white/10 bg-[rgba(15,15,35,0.6)]">
-                  <CardContent className="p-4">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-32">
-                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : chartData.length === 0 ? (
-                      <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                        Nenhuma alocação encontrada
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                        <div className="font-medium text-muted-foreground border-b border-white/10 pb-2">Grupo</div>
-                        <div className="font-medium text-muted-foreground border-b border-white/10 pb-2 text-right">Valores (R$)</div>
-                        {chartData.map((item) => (
-                          <motion.div
-                            key={item.id}
-                            className="contents"
-                            onMouseEnter={() => setHoveredSegment(item.id)}
-                            onMouseLeave={() => setHoveredSegment(null)}
-                          >
-                            <div 
-                              className={`py-1.5 transition-colors cursor-pointer flex items-center gap-2 ${
-                                hoveredSegment === item.id ? "text-foreground" : "text-muted-foreground"
-                              }`}
-                            >
-                              <div 
-                                className="w-2 h-2 rounded-full" 
-                                style={{ backgroundColor: item.color }}
-                              />
-                              {item.name}
-                            </div>
-                            <div 
-                              className={`py-1.5 text-right font-mono transition-colors cursor-pointer ${
-                                hoveredSegment === item.id ? "text-foreground font-medium" : "text-muted-foreground"
-                              }`}
-                            >
-                              {formatCurrency(item.value)}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
             </div>
 
+            {/* Right Column: Legend + Chart side by side */}
             <motion.div 
               variants={itemVariants}
-              className="flex flex-col"
+              className="flex items-center gap-6"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <PieChart className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Alocação</h3>
-              </div>
-              <Card className="glass border-white/10 bg-[rgba(15,15,35,0.6)] flex-1">
-                <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-                  {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : chartData.length === 0 ? (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
-                      Sem dados para exibir gráfico
-                    </div>
-                  ) : (
-                    <>
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-full blur-3xl scale-150" />
-                        <PremiumDonutChart
-                          data={chartData}
-                          size={280}
-                          strokeWidth={42}
-                          hoveredSegment={hoveredSegment}
-                          onHover={setHoveredSegment}
-                        />
-                      </div>
-                      
-                      <motion.div 
-                        className="w-full mt-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.8 }}
-                      >
-                        <AllocationLegend
-                          data={chartData}
-                          hoveredSegment={hoveredSegment}
-                          onHover={setHoveredSegment}
-                        />
-                      </motion.div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
+              {isLoading ? (
+                <div className="flex items-center justify-center w-full h-64">
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : chartData.length === 0 ? (
+                <div className="flex items-center justify-center w-full h-64 text-muted-foreground text-sm">
+                  Sem dados para exibir gráfico
+                </div>
+              ) : (
+                <>
+                  {/* Legend on the left */}
+                  <motion.div 
+                    className="w-64 shrink-0"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <AllocationLegend
+                      data={chartData}
+                      hoveredSegment={hoveredSegment}
+                      onHover={setHoveredSegment}
+                    />
+                  </motion.div>
+                  
+                  {/* Chart on the right */}
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-full blur-3xl scale-150" />
+                    <PremiumDonutChart
+                      data={chartData}
+                      size={260}
+                      strokeWidth={40}
+                      hoveredSegment={hoveredSegment}
+                      onHover={setHoveredSegment}
+                    />
+                  </div>
+                </>
+              )}
             </motion.div>
           </div>
 
