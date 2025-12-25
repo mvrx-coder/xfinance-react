@@ -10,6 +10,7 @@ import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
 import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
+import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
 import { logout, getCurrentUser, type UserData } from "@/services/api/auth";
 import type { FilterState, KPIs, Inspection } from "@shared/schema";
@@ -39,6 +40,7 @@ export default function Dashboard() {
     investments: false,
     financial: false,
     guyPay: false,
+    expenses: false,
   });
 
   // Carregar usuário atual
@@ -155,6 +157,7 @@ export default function Dashboard() {
         onOpenInvestments={() => handleOpenModal("investments")}
         onOpenFinancial={() => handleOpenModal("financial")}
         onOpenGuyPay={() => handleOpenModal("guyPay")}
+        onOpenExpenses={() => handleOpenModal("expenses")}
         onLogout={handleLogout}
       />
 
@@ -196,6 +199,11 @@ export default function Dashboard() {
       <GuyPayModal
         isOpen={modals.guyPay}
         onClose={() => handleCloseModal("guyPay")}
+      />
+
+      <ExpensesModal
+        isOpen={modals.expenses}
+        onClose={() => handleCloseModal("expenses")}
       />
     </div>
   );
