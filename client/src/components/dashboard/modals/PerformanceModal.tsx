@@ -146,112 +146,104 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
         animate="visible"
         className="space-y-6"
       >
-        {/* Toolbar compacta - tudo em uma linha */}
-        <motion.div variants={itemVariants} className="flex items-center gap-3 p-3 rounded-xl shell-toolbar overflow-x-auto">
-          {/* Logo */}
+        {/* Toolbar em duas linhas */}
+        <motion.div variants={itemVariants} className="flex items-stretch gap-4 p-4 rounded-xl shell-toolbar">
+          {/* Logo - altura para duas linhas */}
           <div className="flex items-center justify-center shrink-0">
             <img 
               src="/logo1.png" 
               alt="MVRX Logo" 
-              className="h-9 w-auto object-contain"
+              className="h-12 w-auto object-contain"
             />
           </div>
 
-          <div className="h-8 w-px bg-white/10 shrink-0" />
-
-          {/* Título */}
-          <div className="flex flex-col justify-center shrink-0">
-            <h2 className="text-sm font-bold text-foreground leading-tight">Performance</h2>
-            <p className="text-[10px] text-muted-foreground leading-tight">Dinâmica da Empresa - Performance e Desempenho</p>
-          </div>
-
-          <div className="h-8 w-px bg-white/10 shrink-0" />
-
-          {/* Filtro de Data Base */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-muted-foreground font-medium">Base:</span>
-            <RadioGroup 
-              value={dateFilter} 
-              onValueChange={(v) => setDateFilter(v as typeof dateFilter)}
-              className="flex items-center gap-3"
-            >
-              <div className="flex items-center space-x-1">
-                <RadioGroupItem value="dt_envio" id="dt_envio" className="border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3 w-3" />
-                <Label htmlFor="dt_envio" className="text-xs cursor-pointer">Envio</Label>
+          {/* Conteúdo em duas linhas */}
+          <div className="flex flex-col justify-center gap-2 flex-1">
+            {/* Linha 1: Performance | Base */}
+            <div className="flex items-center gap-4">
+              <h2 className="text-base font-bold text-foreground">Performance</h2>
+              <div className="h-5 w-px bg-white/20" />
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Base:</span>
+                <RadioGroup 
+                  value={dateFilter} 
+                  onValueChange={(v) => setDateFilter(v as typeof dateFilter)}
+                  className="flex items-center gap-4"
+                >
+                  <div className="flex items-center space-x-1.5">
+                    <RadioGroupItem value="dt_envio" id="dt_envio" className="border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5" />
+                    <Label htmlFor="dt_envio" className="text-sm cursor-pointer">Envio</Label>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30 h-3.5 w-3.5" />
+                    <Label htmlFor="dt_pago" className="text-sm cursor-pointer">Pago</Label>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30 h-3.5 w-3.5" />
+                    <Label htmlFor="dt_acerto" className="text-sm cursor-pointer">Acerto</Label>
+                  </div>
+                </RadioGroup>
               </div>
-              <div className="flex items-center space-x-1">
-                <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30 h-3 w-3" />
-                <Label htmlFor="dt_pago" className="text-xs cursor-pointer">Pago</Label>
+            </div>
+
+            {/* Linha 2: Subtítulo | Período + MM12 */}
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-muted-foreground">Dinâmica da Empresa - Performance e Desempenho</p>
+              <div className="h-5 w-px bg-white/20" />
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Período:</span>
+                <Select 
+                  value={anoIni?.toString() ?? "todos"} 
+                  onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
+                >
+                  <SelectTrigger className="w-[80px] h-7 text-sm bg-white/5 border-white/20">
+                    <SelectValue placeholder="Início" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {anosDisponiveis.map((ano) => (
+                      <SelectItem key={ano.value} value={ano.value.toString()}>
+                        {ano.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground">a</span>
+                <Select 
+                  value={anoFim?.toString() ?? "todos"} 
+                  onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
+                >
+                  <SelectTrigger className="w-[80px] h-7 text-sm bg-white/5 border-white/20">
+                    <SelectValue placeholder="Fim" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {anosDisponiveis.map((ano) => (
+                      <SelectItem key={ano.value} value={ano.value.toString()}>
+                        {ano.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2 ml-2 px-3 py-1.5 rounded-md border border-white/20 bg-white/5">
+                  <Checkbox 
+                    id="12months" 
+                    checked={use12Months}
+                    onCheckedChange={(checked) => setUse12Months(checked as boolean)}
+                    className="border-white/30 data-[state=checked]:bg-accent data-[state=checked]:border-accent h-4 w-4"
+                  />
+                  <Label htmlFor="12months" className="text-sm cursor-pointer">MM12</Label>
+                </div>
               </div>
-              <div className="flex items-center space-x-1">
-                <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30 h-3 w-3" />
-                <Label htmlFor="dt_acerto" className="text-xs cursor-pointer">Acerto</Label>
-              </div>
-            </RadioGroup>
+            </div>
           </div>
-
-          <div className="h-8 w-px bg-white/10 shrink-0" />
-
-          {/* Período */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-muted-foreground font-medium">Período:</span>
-            <Select 
-              value={anoIni?.toString() ?? "todos"} 
-              onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
-            >
-              <SelectTrigger className="w-[70px] h-6 text-xs bg-white/5 border-white/20">
-                <SelectValue placeholder="Início" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {anosDisponiveis.map((ano) => (
-                  <SelectItem key={ano.value} value={ano.value.toString()}>
-                    {ano.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-muted-foreground">a</span>
-            <Select 
-              value={anoFim?.toString() ?? "todos"} 
-              onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
-            >
-              <SelectTrigger className="w-[70px] h-6 text-xs bg-white/5 border-white/20">
-                <SelectValue placeholder="Fim" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {anosDisponiveis.map((ano) => (
-                  <SelectItem key={ano.value} value={ano.value.toString()}>
-                    {ano.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="h-8 w-px bg-white/10 shrink-0" />
-
-          {/* MM12 Toggle */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Checkbox 
-              id="12months" 
-              checked={use12Months}
-              onCheckedChange={(checked) => setUse12Months(checked as boolean)}
-              className="border-accent/50 data-[state=checked]:bg-accent data-[state=checked]:border-accent h-3.5 w-3.5"
-            />
-            <Label htmlFor="12months" className="text-xs cursor-pointer font-medium">MM12</Label>
-          </div>
-
-          {/* Spacer para empurrar X para direita */}
-          <div className="flex-1 min-w-4" />
 
           {/* Botão Fechar */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="shrink-0 h-8 w-8"
+            className="shrink-0 self-start"
             data-testid="button-close-performance-toolbar"
           >
             <X className="w-4 h-4" />
