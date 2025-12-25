@@ -45,6 +45,7 @@ import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
 import { ColumnFilter } from "./ColumnFilter";
+import { StatusTooltip, getActionColorClass } from "./StatusTooltip";
 import {
   getInspecaoAlert,
   getAcertoAlert,
@@ -152,26 +153,6 @@ function markerWrapClass(level: number | null | undefined) {
   );
 }
 
-// Verifica se uma data está preenchida (não vazia, não "-")
-function isFilled(v: string | null | undefined): boolean {
-  const s = (v || "").trim();
-  return s !== "" && s !== "-";
-}
-
-// Determina as classes de cor do ícone de ação (Zap) baseado no status da linha
-function getActionClasses(row: Inspection): string {
-  const pago = isFilled(row.dtPago);
-  const dpagoFilled = isFilled(row.dtDpago);
-  const despesasZero = typeof row.despesa === "number" && row.despesa === 0;
-  const entregue = isFilled(row.dtEntregue);
-  if (pago && (dpagoFilled || despesasZero)) {
-    return "text-primary border-primary";
-  }
-  if (entregue && !pago) {
-    return "text-success border-success";
-  }
-  return "text-foreground border-white/20";
-}
 
 function SkeletonRow({ filters }: { filters: FilterState }) {
   return (
@@ -579,24 +560,26 @@ export function DataGrid({
                       >
                           {/* Grupo 1: Ação */}
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
-                            <button
-                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (userRole === "admin" || userRole === "BackOffice") {
-                                  setSelectedInspection(row);
-                                  setSelectedRowIndex(index);
-                                  setIsActionCenterOpen(true);
-                                } else {
-                                  toast.error("Sem permissão", {
-                                    description: "Ações disponíveis apenas para Admin e BackOffice",
-                                  });
-                                }
-                              }}
-                              data-testid={`badge-action-${row.idPrinc || index}`}
-                            >
-                              <Zap className="w-3.5 h-3.5" />
-                            </button>
+                            <StatusTooltip row={row}>
+                              <button
+                                className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionColorClass(row)} ${showPulse ? "action-center-trigger" : ""}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (userRole === "admin" || userRole === "BackOffice") {
+                                    setSelectedInspection(row);
+                                    setSelectedRowIndex(index);
+                                    setIsActionCenterOpen(true);
+                                  } else {
+                                    toast.error("Sem permissão", {
+                                      description: "Ações disponíveis apenas para Admin e BackOffice",
+                                    });
+                                  }
+                                }}
+                                data-testid={`badge-action-${row.idPrinc || index}`}
+                              >
+                                <Zap className="w-3.5 h-3.5" />
+                              </button>
+                            </StatusTooltip>
                           </TableCell>
                           
                           {/* Separador */}
