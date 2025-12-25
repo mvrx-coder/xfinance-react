@@ -20,6 +20,54 @@ interface StatusInfo {
   description: string;
 }
 
+const STATUS_LEGEND: StatusInfo[] = [
+  {
+    level: 1,
+    color: "#CE62D9",
+    bgColor: "rgba(206, 98, 217, 0.15)",
+    borderColor: "rgba(206, 98, 217, 0.4)",
+    icon: CheckCircle2,
+    title: "Concluída",
+    description: "Pagamento e despesas finalizados"
+  },
+  {
+    level: 2,
+    color: "#EF4444",
+    bgColor: "rgba(239, 68, 68, 0.15)",
+    borderColor: "rgba(239, 68, 68, 0.4)",
+    icon: Wallet,
+    title: "Aguardando Pagamento",
+    description: "Fatura enviada"
+  },
+  {
+    level: 3,
+    color: "#10B981",
+    bgColor: "rgba(16, 185, 129, 0.15)",
+    borderColor: "rgba(16, 185, 129, 0.4)",
+    icon: Send,
+    title: "Aguardando Cobrança",
+    description: "Laudo entregue"
+  },
+  {
+    level: 4,
+    color: "#F59E0B",
+    bgColor: "rgba(245, 158, 11, 0.15)",
+    borderColor: "rgba(245, 158, 11, 0.4)",
+    icon: Clock,
+    title: "Em Andamento",
+    description: "Aguardando entrega"
+  },
+  {
+    level: 5,
+    color: "#9CA3AF",
+    bgColor: "rgba(156, 163, 175, 0.15)",
+    borderColor: "rgba(156, 163, 175, 0.4)",
+    icon: FileText,
+    title: "Pendente",
+    description: "Não realizada"
+  }
+];
+
 function isFilled(v: string | null | undefined): boolean {
   const s = (v || "").trim();
   return s !== "" && s !== "-";
@@ -50,63 +98,11 @@ export function getStatusInfo(row: Inspection): StatusInfo {
     inspecaoFutura = dtInsp >= today;
   }
 
-  if (pago && (dpagoFilled || despesasZero)) {
-    return {
-      level: 1,
-      color: "#CE62D9",
-      bgColor: "rgba(206, 98, 217, 0.15)",
-      borderColor: "rgba(206, 98, 217, 0.4)",
-      icon: CheckCircle2,
-      title: "Concluída",
-      description: "Pagamento e despesas finalizados"
-    };
-  }
-
-  if (envio && !pago) {
-    return {
-      level: 2,
-      color: "#EF4444",
-      bgColor: "rgba(239, 68, 68, 0.15)",
-      borderColor: "rgba(239, 68, 68, 0.4)",
-      icon: Wallet,
-      title: "Aguardando Pagamento",
-      description: "Fatura enviada, pendente recebimento"
-    };
-  }
-
-  if (entregue && !envio) {
-    return {
-      level: 3,
-      color: "#10B981",
-      bgColor: "rgba(16, 185, 129, 0.15)",
-      borderColor: "rgba(16, 185, 129, 0.4)",
-      icon: Send,
-      title: "Aguardando Cobrança",
-      description: "Laudo entregue, pendente faturamento"
-    };
-  }
-
-  if (inspecaoFutura && !entregue) {
-    return {
-      level: 4,
-      color: "#F59E0B",
-      bgColor: "rgba(245, 158, 11, 0.15)",
-      borderColor: "rgba(245, 158, 11, 0.4)",
-      icon: Clock,
-      title: "Em Andamento",
-      description: "Inspeção agendada, aguardando entrega"
-    };
-  }
-
-  return {
-    level: 5,
-    color: "hsl(var(--foreground))",
-    bgColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    icon: FileText,
-    title: "Pendente",
-    description: "Inspeção ainda não realizada"
-  };
+  if (pago && (dpagoFilled || despesasZero)) return STATUS_LEGEND[0];
+  if (envio && !pago) return STATUS_LEGEND[1];
+  if (entregue && !envio) return STATUS_LEGEND[2];
+  if (inspecaoFutura && !entregue) return STATUS_LEGEND[3];
+  return STATUS_LEGEND[4];
 }
 
 export function getActionColorClass(row: Inspection): string {
@@ -120,19 +116,16 @@ export function getActionColorClass(row: Inspection): string {
   }
 }
 
-interface StatusTooltipProps {
-  row: Inspection;
+interface StatusLegendTooltipProps {
   children: React.ReactNode;
 }
 
-export function StatusTooltip({ row, children }: StatusTooltipProps) {
+export function StatusLegendTooltip({ children }: StatusLegendTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const info = getStatusInfo(row);
-  const Icon = info.icon;
 
   return (
     <div 
-      className="relative inline-flex"
+      className="relative inline-flex cursor-help"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -141,54 +134,66 @@ export function StatusTooltip({ row, children }: StatusTooltipProps) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            initial={{ opacity: 0, y: -4, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+            exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-[100] pointer-events-none"
+            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-[100]"
           >
             <div 
-              className="relative backdrop-blur-xl rounded-lg overflow-hidden shadow-2xl"
+              className="relative backdrop-blur-xl rounded-xl overflow-hidden shadow-2xl"
               style={{
-                background: "rgba(10, 10, 31, 0.95)",
-                border: `1px solid ${info.borderColor}`,
-                minWidth: "200px"
+                background: "rgba(10, 10, 31, 0.98)",
+                border: "1px solid rgba(206, 98, 217, 0.3)",
+                minWidth: "240px"
               }}
             >
-              <div 
-                className="absolute left-0 top-0 bottom-0 w-1"
-                style={{ background: info.color }}
-              />
+              <div className="px-4 py-3 border-b border-white/10">
+                <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+                  Legenda de Status
+                </h4>
+              </div>
               
-              <div className="p-3 pl-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <div 
-                    className="p-1.5 rounded-md"
-                    style={{ background: info.bgColor }}
-                  >
-                    <Icon 
-                      className="w-3.5 h-3.5" 
-                      style={{ color: info.color }}
-                    />
-                  </div>
-                  <span 
-                    className="text-sm font-semibold"
-                    style={{ color: info.color }}
-                  >
-                    {info.title}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {info.description}
-                </p>
+              <div className="p-3 space-y-2">
+                {STATUS_LEGEND.map((status) => {
+                  const Icon = status.icon;
+                  return (
+                    <div 
+                      key={status.level}
+                      className="flex items-center gap-3 p-2 rounded-lg transition-colors"
+                      style={{ background: status.bgColor }}
+                    >
+                      <div 
+                        className="p-1.5 rounded-md shrink-0"
+                        style={{ background: `${status.color}20` }}
+                      >
+                        <Icon 
+                          className="w-3.5 h-3.5" 
+                          style={{ color: status.color }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span 
+                          className="text-xs font-semibold block"
+                          style={{ color: status.color }}
+                        >
+                          {status.title}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {status.description}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div 
-                className="absolute -left-[6px] top-1/2 -translate-y-1/2 w-3 h-3 rotate-45"
+                className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-3 h-3 rotate-45"
                 style={{
-                  background: "rgba(10, 10, 31, 0.95)",
-                  borderLeft: `1px solid ${info.borderColor}`,
-                  borderBottom: `1px solid ${info.borderColor}`,
+                  background: "rgba(10, 10, 31, 0.98)",
+                  borderTop: "1px solid rgba(206, 98, 217, 0.3)",
+                  borderLeft: "1px solid rgba(206, 98, 217, 0.3)",
                 }}
               />
             </div>

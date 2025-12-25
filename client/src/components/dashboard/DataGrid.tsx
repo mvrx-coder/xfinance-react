@@ -45,7 +45,7 @@ import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
 import { ColumnFilter } from "./ColumnFilter";
-import { StatusTooltip, getActionColorClass } from "./StatusTooltip";
+import { StatusLegendTooltip, getActionColorClass } from "./StatusTooltip";
 import {
   getInspecaoAlert,
   getAcertoAlert,
@@ -316,7 +316,9 @@ export function DataGrid({
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
                     <div className="flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 chromatic-sparkle" />
+                      <StatusLegendTooltip>
+                        <Sparkles className="w-4 h-4 chromatic-sparkle" />
+                      </StatusLegendTooltip>
                     </div>
                   </TableHead>
                   
@@ -560,26 +562,24 @@ export function DataGrid({
                       >
                           {/* Grupo 1: Ação */}
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
-                            <StatusTooltip row={row}>
-                              <button
-                                className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionColorClass(row)} ${showPulse ? "action-center-trigger" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (userRole === "admin" || userRole === "BackOffice") {
-                                    setSelectedInspection(row);
-                                    setSelectedRowIndex(index);
-                                    setIsActionCenterOpen(true);
-                                  } else {
-                                    toast.error("Sem permissão", {
-                                      description: "Ações disponíveis apenas para Admin e BackOffice",
-                                    });
-                                  }
-                                }}
-                                data-testid={`badge-action-${row.idPrinc || index}`}
-                              >
-                                <Zap className="w-3.5 h-3.5" />
-                              </button>
-                            </StatusTooltip>
+                            <button
+                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionColorClass(row)} ${showPulse ? "action-center-trigger" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (userRole === "admin" || userRole === "BackOffice") {
+                                  setSelectedInspection(row);
+                                  setSelectedRowIndex(index);
+                                  setIsActionCenterOpen(true);
+                                } else {
+                                  toast.error("Sem permissão", {
+                                    description: "Ações disponíveis apenas para Admin e BackOffice",
+                                  });
+                                }
+                              }}
+                              data-testid={`badge-action-${row.idPrinc || index}`}
+                            >
+                              <Zap className="w-3.5 h-3.5" />
+                            </button>
                           </TableCell>
                           
                           {/* Separador */}
