@@ -186,11 +186,11 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
           animate="visible"
           className="space-y-6"
         >
-          {/* Top Section: KPIs + Highlights + Chart with Legend */}
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-6">
-            {/* Left Column: KPIs and Highlights */}
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Top Section: KPIs (2x2) + Chart | Highlights below */}
+          <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6">
+            {/* Left Column: KPIs 2x2 grid */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <KPICard
                   icon={Wallet}
                   label="Patrimônio Total"
@@ -226,6 +226,7 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                 />
               </div>
 
+              {/* Destaques below KPIs */}
               <motion.div variants={itemVariants}>
                 <div className="flex items-center gap-2 mb-3">
                   <Trophy className="w-4 h-4 text-amber-400" />
@@ -236,7 +237,7 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                     <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
                     <HighlightCard
                       title="Top Winner"
                       name={highlights.winner?.nome ?? "-"}
@@ -264,10 +265,10 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
               </motion.div>
             </div>
 
-            {/* Right Column: Legend + Chart side by side */}
+            {/* Right Column: Chart + Legend */}
             <motion.div 
               variants={itemVariants}
-              className="flex items-center gap-6"
+              className="flex items-center justify-center gap-8"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center w-full h-64">
@@ -279,10 +280,22 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                 </div>
               ) : (
                 <>
-                  {/* Legend on the left */}
+                  {/* Chart - most important */}
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-full blur-3xl scale-150" />
+                    <PremiumDonutChart
+                      data={chartData}
+                      size={300}
+                      strokeWidth={45}
+                      hoveredSegment={hoveredSegment}
+                      onHover={setHoveredSegment}
+                    />
+                  </div>
+                  
+                  {/* Legend on the right */}
                   <motion.div 
-                    className="w-64 shrink-0"
-                    initial={{ opacity: 0, x: -20 }}
+                    className="w-56 shrink-0"
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 }}
                   >
@@ -292,18 +305,6 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                       onHover={setHoveredSegment}
                     />
                   </motion.div>
-                  
-                  {/* Chart on the right */}
-                  <div className="relative shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-full blur-3xl scale-150" />
-                    <PremiumDonutChart
-                      data={chartData}
-                      size={260}
-                      strokeWidth={40}
-                      hoveredSegment={hoveredSegment}
-                      onHover={setHoveredSegment}
-                    />
-                  </div>
                 </>
               )}
             </motion.div>
