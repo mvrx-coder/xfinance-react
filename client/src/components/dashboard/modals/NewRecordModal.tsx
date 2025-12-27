@@ -416,7 +416,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
         ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}` 
         : "Inserir Novo Trabalho"
       }
-      maxWidth="5xl"
+      maxWidth="6xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
