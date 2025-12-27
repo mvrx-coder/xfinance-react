@@ -416,7 +416,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
         ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}` 
         : "Inserir Novo Trabalho"
       }
-      maxWidth="6xl"
+      maxWidth="5xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
@@ -502,12 +502,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             className="form-section"
           >
             <div className="form-section-card">
-              <div className="flex flex-wrap gap-6">
+              <div className="grid grid-cols-12 gap-4">
                 <FormField
                   control={form.control}
                   name="idContr"
                   render={({ field }) => (
-                    <FormItem style={{ width: "180px" }}>
+                    <FormItem className="col-span-2">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Building2 className="w-3.5 h-3.5 text-primary" />
@@ -533,7 +533,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idSegur"
                   render={({ field }) => (
-                    <FormItem style={{ width: "260px" }}>
+                    <FormItem className="col-span-4">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <FileText className="w-3.5 h-3.5 text-primary" />
@@ -561,7 +561,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idAtivi"
                   render={({ field }) => (
-                    <FormItem style={{ width: "260px" }}>
+                    <FormItem className="col-span-4">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Briefcase className="w-3.5 h-3.5 text-primary" />
@@ -589,7 +589,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="honorario"
                   render={({ field }) => (
-                    <FormItem style={{ width: "180px" }}>
+                    <FormItem className="col-span-2">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <DollarSign className="w-3.5 h-3.5 text-success" />
@@ -637,12 +637,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   </p>
                 </div>
               )}
-              <div className="flex flex-wrap gap-6">
+              <div className="grid grid-cols-12 gap-4">
                 <FormField
                   control={form.control}
                   name="idUserGuy"
                   render={({ field }) => (
-                    <FormItem style={{ width: "160px" }}>
+                    <FormItem className="col-span-2">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <User className="w-3.5 h-3.5 text-primary" />
@@ -667,7 +667,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="dtInspecao"
                   render={({ field }) => (
-                    <FormItem style={{ width: "160px" }}>
+                    <FormItem className="col-span-2">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Calendar className="w-3.5 h-3.5 text-accent" />
@@ -686,9 +686,9 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
                                 {field.value ? (
-                                  format(field.value, "dd/MM", { locale: ptBR })
+                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
                                 ) : (
-                                  <span>...</span>
+                                  <span>Selecione...</span>
                                 )}
                               </Button>
                             </FormControl>
@@ -714,7 +714,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idUf"
                   render={({ field }) => (
-                    <FormItem style={{ width: "90px" }}>
+                    <FormItem className="col-span-2">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -725,7 +725,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={ufOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder="..."
+                            placeholder="Buscar..."
                             data-testid="select-uf"
                           />
                         </FormControl>
@@ -739,7 +739,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idCidade"
                   render={({ field }) => (
-                    <FormItem style={{ width: "470px" }}>
+                    <FormItem className="col-span-6">
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Layers className="w-3.5 h-3.5 text-accent" />
@@ -750,7 +750,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={cidadeOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder={selectedUf && selectedUf > 0 ? "Buscar cidade..." : "Selecione UF..."}
+                            placeholder={selectedUf && selectedUf > 0 ? "Buscar cidade..." : "Selecione UF primeiro..."}
                             disabled={!selectedUf || selectedUf === 0}
                             data-testid="select-cidade"
                           />
