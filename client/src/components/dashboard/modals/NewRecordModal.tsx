@@ -416,7 +416,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
         ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}` 
         : "Inserir Novo Trabalho"
       }
-      maxWidth="4xl"
+      maxWidth="5xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
@@ -507,7 +507,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idContr"
                   render={({ field }) => (
-                    <FormItem style={{ width: "200px" }}>
+                    <FormItem style={{ width: "180px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Building2 className="w-3.5 h-3.5 text-primary" />
@@ -533,7 +533,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idSegur"
                   render={({ field }) => (
-                    <FormItem style={{ width: "300px" }}>
+                    <FormItem style={{ width: "260px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <FileText className="w-3.5 h-3.5 text-primary" />
@@ -561,7 +561,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idAtivi"
                   render={({ field }) => (
-                    <FormItem style={{ width: "300px" }}>
+                    <FormItem style={{ width: "260px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Briefcase className="w-3.5 h-3.5 text-primary" />
@@ -667,7 +667,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="dtInspecao"
                   render={({ field }) => (
-                    <FormItem style={{ width: "180px" }}>
+                    <FormItem style={{ width: "160px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Calendar className="w-3.5 h-3.5 text-accent" />
@@ -714,7 +714,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idUf"
                   render={({ field }) => (
-                    <FormItem style={{ width: "160px" }}>
+                    <FormItem style={{ width: "90px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -739,7 +739,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idCidade"
                   render={({ field }) => (
-                    <FormItem style={{ width: "480px" }}>
+                    <FormItem style={{ width: "470px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Layers className="w-3.5 h-3.5 text-accent" />
