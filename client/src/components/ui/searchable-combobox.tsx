@@ -1,5 +1,5 @@
-import { useState, Fragment } from "react";
-import { Combobox, ComboboxInput, ComboboxButton, ComboboxOptions, ComboboxOption } from "@headlessui/react";
+import { useState, Fragment, useRef } from "react";
+import { Combobox, ComboboxInput, ComboboxButton, ComboboxOptions, ComboboxOption, Portal } from "@headlessui/react";
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +78,7 @@ export function SearchableCombobox({
       value={typeof value === "number" ? value : null}
       onChange={handleSelect}
       disabled={disabled}
+      immediate
     >
       <div className="relative">
         <ComboboxInput
@@ -101,11 +102,12 @@ export function SearchableCombobox({
 
       <ComboboxOptions
         anchor="bottom start"
+        portal={true}
         className={cn(
-          "z-50 mt-1 max-h-60 w-[var(--input-width)] overflow-auto rounded-lg p-1",
+          "!z-[9999] mt-1 max-h-60 w-[var(--input-width)] overflow-auto rounded-lg p-1",
           "bg-card/95 backdrop-blur-md border border-white/15",
           "shadow-xl shadow-black/20",
-          "empty:hidden"
+          "[--anchor-gap:4px]"
         )}
       >
         {filtered.length === 0 && !showCreateOption && (
