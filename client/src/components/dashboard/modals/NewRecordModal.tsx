@@ -11,13 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +29,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { CreatableCombobox } from "@/components/ui/creatable-combobox";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -503,20 +496,14 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Player <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
+                          <SearchableCombobox
+                            options={contrOptions}
+                            value={field.value || null}
+                            onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
+                            placeholder="Buscar player..."
                             disabled={multiLocal.active}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-player">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {contrOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            data-testid="select-player"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
@@ -535,13 +522,13 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Segurado <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <CreatableCombobox
+                          <SearchableCombobox
                             options={segurOptions}
                             value={field.value || null}
                             onChange={field.onChange}
-                            placeholder="Digite ou selecione..."
-                            searchPlaceholder="Buscar segurado..."
+                            placeholder="Buscar segurado..."
                             emptyMessage="Nenhum segurado encontrado"
+                            allowCreate={true}
                             disabled={multiLocal.active}
                             data-testid="select-segurado"
                           />
@@ -563,13 +550,13 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Atividade <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <CreatableCombobox
+                          <SearchableCombobox
                             options={ativiOptions}
                             value={field.value || null}
                             onChange={field.onChange}
-                            placeholder="Digite ou selecione..."
-                            searchPlaceholder="Buscar atividade..."
+                            placeholder="Buscar atividade..."
                             emptyMessage="Nenhuma atividade encontrada"
+                            allowCreate={true}
                             disabled={multiLocal.active}
                             data-testid="select-atividade"
                           />
@@ -644,19 +631,13 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Inspetor (Guy) <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-guy">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {userOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <SearchableCombobox
+                            options={userOptions}
+                            value={field.value || null}
+                            onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
+                            placeholder="Buscar inspetor..."
+                            data-testid="select-guy"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
@@ -722,19 +703,13 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           UF <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-uf">
-                              <SelectValue placeholder="UF" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {ufOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <SearchableCombobox
+                            options={ufOptions}
+                            value={field.value || null}
+                            onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
+                            placeholder="Buscar UF..."
+                            data-testid="select-uf"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>
@@ -753,20 +728,14 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           Cidade <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
+                          <SearchableCombobox
+                            options={cidadeOptions}
+                            value={field.value || null}
+                            onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
+                            placeholder={selectedUf && selectedUf > 0 ? "Buscar cidade..." : "Selecione a UF primeiro..."}
                             disabled={!selectedUf || selectedUf === 0}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-cidade">
-                              <SelectValue placeholder={selectedUf && selectedUf > 0 ? "Selecione..." : "Selecione a UF primeiro..."} />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {cidadeOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            data-testid="select-cidade"
+                          />
                         </FormControl>
                         <FormMessage className="form-error" />
                       </div>

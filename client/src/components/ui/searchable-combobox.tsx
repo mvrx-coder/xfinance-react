@@ -13,19 +13,21 @@ interface SearchableComboboxProps {
   value: number | string | null;
   onChange: (value: number | string) => void;
   placeholder?: string;
-  searchPlaceholder?: string;
+  emptyMessage?: string;
   disabled?: boolean;
   allowCreate?: boolean;
   className?: string;
   "data-testid"?: string;
 }
 
+const CREATE_PREFIX = "➕ Criar: ";
+
 export function SearchableCombobox({
   options,
   value,
   onChange,
   placeholder = "Selecione...",
-  searchPlaceholder,
+  emptyMessage = "Nenhum resultado encontrado",
   disabled = false,
   allowCreate = false,
   className,
@@ -45,7 +47,10 @@ export function SearchableCombobox({
 
   const displayValue = () => {
     if (typeof value === "string" && value.trim()) {
-      return value.startsWith("+ Criar: ") ? value : `+ Criar: ${value}`;
+      if (value.startsWith(CREATE_PREFIX)) {
+        return value;
+      }
+      return `${CREATE_PREFIX}${value}`;
     }
     return selectedOption?.label ?? "";
   };
@@ -53,22 +58,24 @@ export function SearchableCombobox({
   const showCreateOption = allowCreate && query.trim() !== "" && 
     !options.some((opt) => opt.label.toLowerCase() === query.toLowerCase().trim());
 
-  const handleCreateNew = () => {
-    if (query.trim()) {
-      onChange(query.trim());
+  const handleSelect = (val: number | string | null) => {
+    if (val === null) {
       setQuery("");
+      return;
     }
+
+    if (typeof val === "number") {
+      onChange(val);
+    } else if (allowCreate && typeof val === "string") {
+      onChange(val);
+    }
+    setQuery("");
   };
 
   return (
     <Combobox
-      value={value}
-      onChange={(val) => {
-        if (val !== null) {
-          onChange(val);
-        }
-        setQuery("");
-      }}
+      value={typeof value === "number" ? value : null}
+      onChange={handleSelect}
       disabled={disabled}
     >
       <div className="relative">
@@ -81,7 +88,7 @@ export function SearchableCombobox({
             "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
-          placeholder={searchPlaceholder || placeholder}
+          placeholder={placeholder}
           displayValue={displayValue}
           onChange={(e) => setQuery(e.target.value)}
           data-testid={testId}
@@ -102,7 +109,7 @@ export function SearchableCombobox({
       >
         {filtered.length === 0 && !showCreateOption && (
           <div className="px-3 py-2 text-sm text-muted-foreground">
-            Nenhum resultado encontrado
+            {emptyMessage}
           </div>
         )}
 
@@ -118,7 +125,6 @@ export function SearchableCombobox({
                   "text-primary",
                   focus && "bg-primary/20"
                 )}
-                onClick={handleCreateNew}
               >
                 <Plus className="h-4 w-4" />
                 <span>Criar: <strong>{query.trim()}</strong></span>
