@@ -78,6 +78,7 @@ const newRecordSchema = z.object({
   idUf: z.number().min(1, "UF obrigatória"),
   idCidade: z.number().min(1, "Cidade obrigatória"),
   honorario: z.number().min(0).optional(),
+  meta: z.boolean().optional(),
   variosLocais: z.boolean().optional(),
 });
 
@@ -166,6 +167,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
       idUf: 0,
       idCidade: 0,
       honorario: 0,
+      meta: true,
       variosLocais: false,
     },
   });
@@ -431,6 +433,22 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Checkbox
+                id="meta"
+                checked={form.watch("meta") || false}
+                onCheckedChange={(checked) => form.setValue("meta", !!checked)}
+                className="border-white/20 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                data-testid="checkbox-meta"
+              />
+              <label 
+                htmlFor="meta" 
+                className="text-sm cursor-pointer text-muted-foreground"
+              >
+                Meta
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
                 id="varios-locais"
                 checked={variosLocais || false}
                 onCheckedChange={handleVariosLocaisChange}
@@ -484,12 +502,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             className="form-section"
           >
             <div className="form-section-card">
-              <div className="grid grid-cols-4 gap-6">
+              <div className="flex flex-wrap gap-6">
                 <FormField
                   control={form.control}
                   name="idContr"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "100px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Building2 className="w-3.5 h-3.5 text-primary" />
@@ -500,7 +518,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={contrOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder="Buscar player..."
+                            placeholder="Buscar..."
                             disabled={multiLocal.active}
                             data-testid="select-player"
                           />
@@ -515,7 +533,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idSegur"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "150px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <FileText className="w-3.5 h-3.5 text-primary" />
@@ -526,7 +544,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={segurOptions}
                             value={field.value || null}
                             onChange={field.onChange}
-                            placeholder="Buscar segurado..."
+                            placeholder="Buscar..."
                             emptyMessage="Nenhum segurado encontrado"
                             allowCreate={true}
                             disabled={multiLocal.active}
@@ -543,7 +561,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idAtivi"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "150px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Briefcase className="w-3.5 h-3.5 text-primary" />
@@ -554,7 +572,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={ativiOptions}
                             value={field.value || null}
                             onChange={field.onChange}
-                            placeholder="Buscar atividade..."
+                            placeholder="Buscar..."
                             emptyMessage="Nenhuma atividade encontrada"
                             allowCreate={true}
                             disabled={multiLocal.active}
@@ -571,7 +589,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="honorario"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "90px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <DollarSign className="w-3.5 h-3.5 text-success" />
@@ -619,23 +637,23 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   </p>
                 </div>
               )}
-              <div className="grid grid-cols-4 gap-6">
+              <div className="flex flex-wrap gap-6">
                 <FormField
                   control={form.control}
                   name="idUserGuy"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "80px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <User className="w-3.5 h-3.5 text-primary" />
-                          Inspetor (Guy) <span className="text-destructive">*</span>
+                          Guy <span className="text-destructive">*</span>
                         </label>
                         <FormControl>
                           <SearchableCombobox
                             options={userOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder="Buscar inspetor..."
+                            placeholder="Buscar..."
                             data-testid="select-guy"
                           />
                         </FormControl>
@@ -649,11 +667,11 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="dtInspecao"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "90px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Calendar className="w-3.5 h-3.5 text-accent" />
-                          Data Inspeção <span className="text-destructive">*</span>
+                          Data <span className="text-destructive">*</span>
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -668,9 +686,9 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
                                 {field.value ? (
-                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                  format(field.value, "dd/MM", { locale: ptBR })
                                 ) : (
-                                  <span>Selecione...</span>
+                                  <span>...</span>
                                 )}
                               </Button>
                             </FormControl>
@@ -696,7 +714,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idUf"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "80px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -707,7 +725,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={ufOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder="Buscar UF..."
+                            placeholder="..."
                             data-testid="select-uf"
                           />
                         </FormControl>
@@ -721,7 +739,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                   control={form.control}
                   name="idCidade"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ width: "240px" }}>
                       <div className="form-field-wrapper">
                         <label className="form-label">
                           <Layers className="w-3.5 h-3.5 text-accent" />
@@ -732,7 +750,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             options={cidadeOptions}
                             value={field.value || null}
                             onChange={(val) => field.onChange(typeof val === 'number' ? val : parseInt(val as string))}
-                            placeholder={selectedUf && selectedUf > 0 ? "Buscar cidade..." : "Selecione a UF primeiro..."}
+                            placeholder={selectedUf && selectedUf > 0 ? "Buscar cidade..." : "Selecione UF..."}
                             disabled={!selectedUf || selectedUf === 0}
                             data-testid="select-cidade"
                           />
