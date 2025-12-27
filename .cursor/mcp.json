@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "xFinanceDB": {
+      "command": "mcp-sqlite",
+      "args": [
+        "E:/MVRX/Financeiro/xFinance_3.0/x_db/xFinanceDB.db"
+      ]
+    },
+    "git": {
+      "command": "mcp-server-git",
+      "args": [
+        "--repository",
+        "E:/MVRX/Financeiro/xFinance_3.0/x_finan"
+      ]
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Visao Geral
 
-O sistema de indicadores de status foi implementado para fornecer feedback visual imediato sobre o estado de cada inspecao no DataGrid. Utiliza um sistema de 5 niveis de cores com prioridade hierarquica, onde cada cor representa um estagio especifico do fluxo de trabalho.
+O sistema de indicadores de status foi implementado para fornecer feedback visual imediato sobre o estado de cada inspecao no DataGrid. Utiliza um sistema de **6 niveis de cores** com prioridade hierarquica, onde cada cor representa um estagio especifico do fluxo de trabalho.
 
 ---
 
@@ -14,6 +14,7 @@ O sistema de indicadores de status foi implementado para fornecer feedback visua
 |---------|--------|
 | `client/src/components/dashboard/StatusTooltip.tsx` | Componente principal com logica de cores e tooltip |
 | `client/src/components/dashboard/DataGrid.tsx` | Grid que utiliza o sistema de cores |
+| `backend/services/queries/grid.py` | Logica de ordenacao por grupos de workflow |
 
 ### Funcoes Exportadas
 
@@ -27,7 +28,7 @@ StatusLegendTooltip({ children })             // Componente tooltip com legenda
 
 ## Sistema de Cores (Hierarquia de Prioridade)
 
-### Nivel 1 - Concluida (Magenta)
+### Nivel 1 - Concluida (Magenta/Lilas Vibrante)
 
 | Propriedade | Valor |
 |-------------|-------|
@@ -36,12 +37,39 @@ StatusLegendTooltip({ children })             // Componente tooltip com legenda
 | **Borda** | `rgba(206, 98, 217, 0.4)` |
 | **Icone** | `CheckCircle2` (Lucide) |
 | **Titulo** | "Concluido!!" |
-| **Descricao** | "Processo finalizado" |
+| **Descricao** | "Tudo quitado" |
 | **Classe Tailwind** | `text-primary` |
+
+**Condicao Logica (DEFINITIVA):**
+```typescript
+dtPago preenchido
+E NAO tem pendencias:
+  - (despesa === 0 OU dtDpago preenchido)
+  - E (guyHonorario === 0 OU dtGuyPago preenchido)
+  - E (guyDespesa === 0 OU dtGuyDpago preenchido)
+```
+
+---
+
+### Nivel 0 - Pre-Final (Lilas Claro) - NOVO!
+
+| Propriedade | Valor |
+|-------------|-------|
+| **Cor Principal** | `#A78BFA` |
+| **Background** | `rgba(167, 139, 250, 0.15)` |
+| **Borda** | `rgba(167, 139, 250, 0.4)` |
+| **Icone** | `CircleDot` (Lucide) |
+| **Titulo** | "Pre-Final" |
+| **Descricao** | "Falta guy ou despesas" |
+| **Classe Tailwind** | `text-violet-400` |
 
 **Condicao Logica:**
 ```typescript
-dtPago preenchido E (dtDpago preenchido OU despesa === 0)
+dtPago preenchido
+E tem pendencias:
+  - (despesa > 0 E dtDpago NAO preenchido)
+  - OU (guyHonorario > 0 E dtGuyPago NAO preenchido)
+  - OU (guyDespesa > 0 E dtGuyDpago NAO preenchido)
 ```
 
 ---
@@ -55,7 +83,7 @@ dtPago preenchido E (dtDpago preenchido OU despesa === 0)
 | **Borda** | `rgba(239, 68, 68, 0.4)` |
 | **Icone** | `Wallet` (Lucide) |
 | **Titulo** | "Aguardando Pagamento" |
-| **Descricao** | "Cobrança enviada" |
+| **Descricao** | "Cobranca enviada" |
 | **Classe Tailwind** | `text-red-500` |
 
 **Condicao Logica:**
@@ -92,13 +120,13 @@ dtEntregue preenchido E dtEnvio NAO preenchido
 | **Background** | `rgba(245, 158, 11, 0.15)` |
 | **Borda** | `rgba(245, 158, 11, 0.4)` |
 | **Icone** | `Clock` (Lucide) |
-| **Titulo** | "Inspeção em confecção" |
-| **Descricao** | "Trabalhem logo!!!" |
+| **Titulo** | "Em Confeccao" |
+| **Descricao** | "Aguardando entrega" |
 | **Classe Tailwind** | `text-amber-500` |
 
 **Condicao Logica:**
 ```typescript
-dtInspecao >= hoje E dtEntregue NAO preenchido
+dtInspecao <= hoje E dtEntregue NAO preenchido
 ```
 
 ---
@@ -107,135 +135,170 @@ dtInspecao >= hoje E dtEntregue NAO preenchido
 
 | Propriedade | Valor |
 |-------------|-------|
-| **Cor Principal** | `#9CA3AF` |
-| **Background** | `rgba(156, 163, 175, 0.15)` |
-| **Borda** | `rgba(156, 163, 175, 0.4)` |
+| **Cor Principal** | `#E0E0FF` |
+| **Background** | `rgba(224, 224, 255, 0.10)` |
+| **Borda** | `rgba(255, 255, 255, 0.2)` |
 | **Icone** | `FileText` (Lucide) |
 | **Titulo** | "Apenas agendado" |
-| **Descricao** | "Nada ainda realizade" |
+| **Descricao** | "Nada ainda realizado" |
 | **Classe Tailwind** | `text-foreground` |
 
 **Condicao Logica:**
 ```typescript
 Nenhuma das condicoes anteriores atendida (fallback)
+// Geralmente: dtInspecao > hoje (agendado para futuro)
+```
+
+---
+
+## Sistema de Ordenacao do Grid
+
+### Grupos de Workflow (ORDER BY)
+
+O grid e ordenado por grupos de workflow, cada um com sua propria logica de ordenacao interna:
+
+| Grupo | Condicao SQL | Ordenacao Interna | Cor Visual |
+|-------|--------------|-------------------|------------|
+| **0** | `ms = 1` (Missao Suspensa) | `dt_inspecao DESC` | - |
+| **1** | `dt_envio IS NULL AND dt_pago IS NULL` | `dt_inspecao ASC` | Laranja/Cinza |
+| **2** | `dt_envio IS NOT NULL AND dt_pago IS NULL` | `prazo DESC` | Vermelho |
+| **3** | `dt_pago IS NOT NULL` + pendencias | `dt_pago DESC` | Lilas Claro |
+| **4** | `dt_pago IS NOT NULL` + sem pendencias | `dt_pago DESC` | Lilas Vibrante |
+
+### Logica de Pendencias (Grupo 3 vs 4)
+
+```sql
+-- Grupo 3: Pre-Final (tem pendencias)
+WHEN p.dt_pago IS NOT NULL AND (
+    (COALESCE(p.despesa, 0) > 0 AND p.dt_dpago IS NULL)
+    OR (COALESCE(p.guy_honorario, 0) > 0 AND p.dt_guy_pago IS NULL)
+    OR (COALESCE(p.guy_despesa, 0) > 0 AND p.dt_guy_dpago IS NULL)
+) THEN 3
+
+-- Grupo 4: Definitivamente Concluido
+WHEN p.dt_pago IS NOT NULL THEN 4
+```
+
+### Detalhamento da Ordenacao
+
+#### Grupo 1 - Em Andamento/Agendado
+
+- **Ordenacao:** `dt_inspecao ASC` (mais antigo primeiro)
+- **Logica:** Inspecoes mais antigas = maior prazo decorrido = mais urgentes
+- **Efeito:** Naturalmente separa "Em Confeccao" (laranja) de "Apenas Agendado" (cinza)
+
+#### Grupo 2 - Vermelho (Cobranca)
+
+- **Ordenacao:** `prazo DESC` (maior tempo de cobranca primeiro)
+- **Logica:** Cobrancas mais antigas aparecem primeiro
+- **Campo prazo:** Calculado como `hoje - dt_envio` para este grupo
+
+#### Grupo 3 - Pre-Final
+
+- **Ordenacao:** `dt_pago DESC` (pagamento mais recente primeiro)
+- **Logica:** Precisa acompanhar para quitar guy/despesas
+
+#### Grupo 4 - Definitivamente Concluido
+
+- **Ordenacao:** `dt_pago DESC` (pagamento mais recente primeiro)
+- **Logica:** Pode "esquecer" - esta 100% finalizado
+
+---
+
+## Calculo do Campo Prazo
+
+O campo `prazo` tem significados diferentes conforme o estagio:
+
+| Estagio | Calculo do Prazo | Gravacao |
+|---------|------------------|----------|
+| **Em andamento** | `hoje - dt_inspecao` | Dinamico (nao grava) |
+| **Cobranca** | `hoje - dt_envio` | Dinamico (nao grava) |
+| **Finalizado** | `dt_entregue - dt_inspecao` | Fixo (grava no DB) |
+
+```typescript
+// Regra de gravacao:
+// Se dt_pago E dt_entregue preenchidos → grava prazo no banco
+if (has_pago && has_entregue) {
+    prazo = dt_entregue - dt_inspecao;
+    GRAVA_NO_BANCO(prazo);
+}
 ```
 
 ---
 
 ## Tooltip de Legenda
 
-### Posicionamento
+### Ordem de Exibicao
 
-- **Localizacao:** Header da coluna "Acoes" no DataGrid
-- **Elemento Trigger:** Icone Sparkles (estrela brilhante)
-- **Direcao:** Abre para baixo, centralizado horizontalmente
-
-### Efeitos Visuais
-
-| Efeito | Valor CSS |
-|--------|-----------|
-| **Backdrop Blur** | `backdrop-blur-xl` |
-| **Background** | `rgba(10, 10, 31, 0.98)` |
-| **Borda** | `1px solid rgba(206, 98, 217, 0.3)` |
-| **Border Radius** | `rounded-xl` (12px) |
-| **Sombra** | `shadow-2xl` |
-| **Largura Minima** | `240px` |
-
-### Animacao (Framer Motion)
-
-```typescript
-// Entrada
-initial: { opacity: 0, y: -4, scale: 0.95 }
-animate: { opacity: 1, y: 0, scale: 1 }
-
-// Saida
-exit: { opacity: 0, y: -4, scale: 0.95 }
-
-// Transicao
-transition: { duration: 0.15, ease: "easeOut" }
+```
+1. [✓] Concluido!!         - Tudo quitado
+2. [◎] Pre-Final           - Falta guy ou despesas
+3. [$] Aguardando Pagamento - Cobranca enviada
+4. [→] Aguardando Cobranca  - Laudo entregue
+5. [⏱] Em Confeccao        - Aguardando entrega
+6. [📄] Apenas Agendado    - Nada ainda realizado
 ```
 
-### Estrutura do Tooltip
+### Estrutura Visual
 
 ```
 ┌─────────────────────────────────────┐
-│  LEGENDA DE STATUS                  │  <- Header com borda inferior
+│  LEGENDA DE STATUS                  │
 ├─────────────────────────────────────┤
-│  [✓] Concluida                      │
-│      Pagamento e despesas...        │
+│  [✓] Concluido!!                    │  <- Lilas Vibrante
+│      Tudo quitado                   │
 │                                     │
-│  [$] Aguardando Pagamento           │
-│      Fatura enviada                 │
+│  [◎] Pre-Final                      │  <- Lilas Claro (NOVO!)
+│      Falta guy ou despesas          │
 │                                     │
-│  [→] Aguardando Cobranca            │
+│  [$] Aguardando Pagamento           │  <- Vermelho
+│      Cobranca enviada               │
+│                                     │
+│  [→] Aguardando Cobranca            │  <- Verde
 │      Laudo entregue                 │
 │                                     │
-│  [⏱] Em Andamento                   │
+│  [⏱] Em Confeccao                   │  <- Laranja
 │      Aguardando entrega             │
 │                                     │
-│  [📄] Pendente                      │
-│      Nao realizada                  │
+│  [📄] Apenas Agendado               │  <- Cinza
+│      Nada ainda realizado           │
 └─────────────────────────────────────┘
-         ▲
-    (Seta apontando para cima)
-```
-
-### Seta Indicadora
-
-```css
-position: absolute
-top: -6px
-left: 50%
-transform: translateX(-50%) rotate(45deg)
-width: 12px
-height: 12px
-background: rgba(10, 10, 31, 0.98)
-border-top: 1px solid rgba(206, 98, 217, 0.3)
-border-left: 1px solid rgba(206, 98, 217, 0.3)
 ```
 
 ---
 
-## Icone de Acao nas Linhas
+## Fluxo de Estados Visual
 
-### Componente Base
-
-- **Icone:** `Zap` (Lucide - raio)
-- **Tamanho:** `w-3.5 h-3.5` (14px x 14px)
-
-### Estilos do Botao
-
-```css
-padding: 6px (p-1.5)
-border-radius: rounded-md
-cursor: pointer
-background: transparent
-
-/* Hover */
-transform: scale(1.1)
-box-shadow: 0 10px 15px -3px rgba(206, 98, 217, 0.2)
-
-/* Transicao */
-transition: all 200ms ease
+```
+                                                        ┌─────────────┐
+                                                        │ Pre-Final   │
+                                                        │ (Lilas Claro)│
+                                                        └──────┬──────┘
+                                                               │ guy/despesas
+                                                               ▼
+[Pendente] ──► [Em Andamento] ──► [Aguardando] ──► [Aguardando] ──► [Concluida]
+   (5)              (4)           Cobranca (3)    Pagamento (2)        (1)
+  Cinza           Laranja           Verde          Vermelho      Lilas Vibrante
 ```
 
-### Classes Dinamicas por Status
+---
 
-| Status | Classe Aplicada |
-|--------|-----------------|
-| Concluida | `text-primary` (#CE62D9) |
-| Aguardando Pagamento | `text-red-500` (#EF4444) |
-| Aguardando Cobranca | `text-emerald-500` (#10B981) |
-| Em Andamento | `text-amber-500` (#F59E0B) |
-| Pendente | `text-foreground` (branco/cinza) |
+## Classes Dinamicas por Status
+
+| Status | Level | Classe Tailwind | Cor Hex |
+|--------|-------|-----------------|---------|
+| Concluida | 1 | `text-primary` | #CE62D9 |
+| Pre-Final | 0 | `text-violet-400` | #A78BFA |
+| Aguardando Pagamento | 2 | `text-red-500` | #EF4444 |
+| Aguardando Cobranca | 3 | `text-emerald-500` | #10B981 |
+| Em Andamento | 4 | `text-amber-500` | #F59E0B |
+| Pendente | 5 | `text-foreground` | #E0E0FF |
 
 ---
 
 ## Logica de Validacao
 
 ### Funcao `isFilled`
-
-Verifica se um campo de texto esta preenchido:
 
 ```typescript
 function isFilled(v: string | null | undefined): boolean {
@@ -244,87 +307,22 @@ function isFilled(v: string | null | undefined): boolean {
 }
 ```
 
-### Funcao `isDateValid`
-
-Verifica se uma string representa uma data valida:
+### Funcao `hasValue`
 
 ```typescript
-function isDateValid(dateStr: string | null | undefined): boolean {
-  if (!dateStr) return false;
-  const s = dateStr.trim();
-  if (s === "" || s === "-") return false;
-  const d = new Date(s);
-  return !isNaN(d.getTime());
+function hasValue(v: number | null | undefined): boolean {
+  return typeof v === "number" && v > 0;
 }
 ```
 
-### Comparacao de Datas
-
-Para verificar se a inspecao esta agendada para hoje ou futuro:
+### Verificacao de Pendencias
 
 ```typescript
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const despesaPendente = hasValue(row.despesa) && !isFilled(row.dtDpago);
+const guyHonorarioPendente = hasValue(row.guyHonorario) && !isFilled(row.dtGuyPago);
+const guyDespesaPendente = hasValue(row.guyDespesa) && !isFilled(row.dtGuyDpago);
 
-const dtInsp = new Date(row.dtInspecao);
-dtInsp.setHours(0, 0, 0, 0);
-
-const inspecaoFutura = dtInsp >= today;
-```
-
----
-
-## Integracao com DataGrid
-
-### Import
-
-```typescript
-import { StatusLegendTooltip, getActionColorClass } from "./StatusTooltip";
-```
-
-### Uso no Header
-
-```tsx
-<TableHead className="w-[50px] bg-card relative">
-  <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
-  <div className="flex items-center justify-center">
-    <StatusLegendTooltip>
-      <Sparkles className="w-4 h-4 chromatic-sparkle" />
-    </StatusLegendTooltip>
-  </div>
-</TableHead>
-```
-
-### Uso nas Linhas
-
-```tsx
-<button
-  className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 
-              hover:scale-110 bg-transparent hover:shadow-lg 
-              hover:shadow-primary/20 ${getActionColorClass(row)}`}
-  onClick={() => openActionCenter(row)}
->
-  <Zap className="w-3.5 h-3.5" />
-</button>
-```
-
----
-
-## Dependencias
-
-| Pacote | Versao | Uso |
-|--------|--------|-----|
-| `framer-motion` | ^11.x | Animacoes do tooltip |
-| `lucide-react` | ^0.x | Icones (Zap, CheckCircle2, Clock, etc.) |
-
----
-
-## Fluxo de Estados Visual
-
-```
-[Pendente] ──► [Em Andamento] ──► [Aguardando Cobranca] ──► [Aguardando Pagamento] ──► [Concluida]
-   (5)              (4)                   (3)                       (2)                    (1)
-  Cinza           Laranja                Verde                   Vermelho               Magenta
+const temPendencias = despesaPendente || guyHonorarioPendente || guyDespesaPendente;
 ```
 
 ---
@@ -336,6 +334,16 @@ import { StatusLegendTooltip, getActionColorClass } from "./StatusTooltip";
 3. **Consistencia:** Mesmas cores usadas no tooltip e nos icones das linhas
 4. **Acessibilidade:** Cores distintas com contraste suficiente no tema escuro
 5. **Performance:** Tooltip unico no header vs. tooltip por linha reduz carga de componentes
+6. **Diferenciacao Clara:** Pre-Final (lilas claro) vs Concluida (lilas vibrante) permite acompanhamento
+
+---
+
+## Dependencias
+
+| Pacote | Versao | Uso |
+|--------|--------|-----|
+| `framer-motion` | ^11.x | Animacoes do tooltip |
+| `lucide-react` | ^0.x | Icones (Zap, CheckCircle2, CircleDot, Clock, etc.) |
 
 ---
 
@@ -345,3 +353,9 @@ import { StatusLegendTooltip, getActionColorClass } from "./StatusTooltip";
 |------|--------|-----------|
 | 2025-12-25 | 1.0 | Implementacao inicial com tooltip por linha |
 | 2025-12-25 | 1.1 | Refatoracao para tooltip unico no header com legenda completa |
+| 2025-12-27 | 2.0 | **MAJOR:** Novo status Pre-Final, nova logica de ordenacao por grupos, consideracao de guy/despesas para status Concluida |
+
+---
+
+*Ultima atualizacao: 27/12/2024*
+*Versao: 2.0*

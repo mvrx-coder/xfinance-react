@@ -260,15 +260,32 @@ def _order_head() -> str:
 
 
 def _order_groups() -> str:
-    """Grupos de ordenação (workflow)."""
+    """
+    Grupos de ordenação (workflow).
+    
+    Grupos:
+    1 = Em andamento/Agendado (dt_envio e dt_pago vazios)
+    2 = Vermelho/Cobrança (dt_envio preenchido, dt_pago vazio)
+    3 = Pré-Final (dt_pago preenchido, mas falta guy/despesas)
+    4 = Definitivamente Concluído (tudo quitado)
+    """
     return """
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE
+                        -- Grupo 1: Em andamento/Agendado
                         WHEN p.dt_envio IS NULL AND p.dt_pago IS NULL THEN 1
+                        -- Grupo 2: Vermelho (cobrança enviada, aguardando pagamento)
                         WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL THEN 2
-                        WHEN p.dt_pago IS NOT NULL THEN 3
-                        ELSE 4
+                        -- Grupo 3: Pré-Final (dt_pago OK, mas falta guy ou despesas)
+                        WHEN p.dt_pago IS NOT NULL AND (
+                            (COALESCE(p.despesa, 0) > 0 AND p.dt_dpago IS NULL)
+                            OR (COALESCE(p.guy_honorario, 0) > 0 AND p.dt_guy_pago IS NULL)
+                            OR (COALESCE(p.guy_despesa, 0) > 0 AND p.dt_guy_dpago IS NULL)
+                        ) THEN 3
+                        -- Grupo 4: Definitivamente Concluído
+                        WHEN p.dt_pago IS NOT NULL THEN 4
+                        ELSE 5
                     END
                 ELSE NULL
             END,
@@ -354,54 +371,37 @@ def get_order_by_clause(modo_ordenacao: str) -> str:
         )
     
     # Modo "normal" (padrão)
+    # Ordenação por grupo:
+    # - Grupo 1 (em andamento/agendado): dt_inspecao ASC (mais antigo primeiro = maior prazo)
+    # - Grupo 2 (vermelho/cobrança): prazo DESC (maior tempo de cobrança primeiro)
+    # - Grupo 3/4 (finalizadas): dt_pago DESC (mais recente primeiro)
     return (
         _order_head()
         + _order_groups()
         + """
-            CASE
-                WHEN COALESCE(p.ms, 0) = 0 THEN
-                CASE
-                    WHEN p.dt_envio IS NULL AND p.dt_pago IS NULL THEN p.prazo
-                ELSE NULL
-                END
-                ELSE NULL
-            END DESC,
-            CASE
-                WHEN COALESCE(p.ms, 0) = 0 THEN
-                CASE
-                    WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL THEN p.dt_envio
-                ELSE NULL
-                END
-                ELSE NULL
-            END ASC,
-            CASE
-                WHEN COALESCE(p.ms, 0) = 0 THEN
-                CASE
-                    WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL THEN (julianday('now') - julianday(p.dt_envio))
-                ELSE NULL
-                END
-                ELSE NULL
-            END DESC,
-            CASE
-                WHEN COALESCE(p.ms, 0) = 0 THEN
-                CASE
-                    WHEN p.dt_pago IS NOT NULL THEN p.dt_pago
-                ELSE NULL
-                END
-                ELSE NULL
-            END DESC,
+            -- Grupo 1: Ordenar por dt_inspecao ASC (mais antigo primeiro)
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE
-                        WHEN p.dt_pago IS NULL THEN COALESCE(s.segur_nome, '')
+                        WHEN p.dt_envio IS NULL AND p.dt_pago IS NULL THEN p.dt_inspecao
                         ELSE NULL
                     END
                 ELSE NULL
-            END,
+            END ASC,
+            -- Grupo 2: Ordenar por prazo DESC (maior tempo de cobrança primeiro)
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE
-                        WHEN p.dt_pago IS NULL THEN p.dt_acerto
+                        WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL THEN p.prazo
+                        ELSE NULL
+                    END
+                ELSE NULL
+            END DESC,
+            -- Grupo 3/4: Ordenar por dt_pago DESC (mais recente primeiro)
+            CASE
+                WHEN COALESCE(p.ms, 0) = 0 THEN
+                    CASE
+                        WHEN p.dt_pago IS NOT NULL THEN p.dt_pago
                         ELSE NULL
                     END
                 ELSE NULL

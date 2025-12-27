@@ -12,7 +12,6 @@ import {
   TrendingUp,
   PieChart,
   Wallet,
-  Puzzle,
   LogOut,
   Calendar,
   Clock,
@@ -38,6 +37,7 @@ interface TopBarProps {
   onOpenInvestments: () => void;
   onOpenFinancial: () => void;
   onOpenGuyPay: () => void;
+  onOpenExpenses: () => void;
   onLogout: () => void;
 }
 
@@ -131,6 +131,7 @@ export function TopBar({
   onOpenInvestments,
   onOpenFinancial,
   onOpenGuyPay,
+  onOpenExpenses,
   onLogout,
 }: TopBarProps) {
   const [currentTime, setCurrentTime] = useState(formatTime());
@@ -368,15 +369,15 @@ export function TopBar({
               Guy Pay
             </Button>
             <Button
-              id="btn-coming-soon"
+              id="btn-expenses"
+              onClick={onOpenExpenses}
               variant="outline"
               size="sm"
-              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500/50 bg-slate-900/60 text-purple-400/50 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/10"
-              disabled
-              data-testid="button-coming-soon"
+              className="gap-1.5 text-sm rounded-xl border-2 border-purple-500 bg-slate-900/60 text-purple-400 backdrop-blur-sm w-[120px] justify-center transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:bg-purple-500/10"
+              data-testid="button-expenses"
             >
-              <Puzzle className="w-4 h-4" />
-              Em breve
+              <Receipt className="w-4 h-4 text-accent" />
+              Despesas
             </Button>
             <Button
               id="btn-logout"

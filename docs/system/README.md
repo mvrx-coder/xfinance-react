@@ -31,6 +31,7 @@ docs/system/
 ├── SIGILO.md              # Regras de permissão
 ├── BOAS_PRATICAS.md       # Padrões de código
 ├── DESIGN_TOKENS.md       # Cores e variáveis CSS
+├── MCP_INTEGRATIONS.md    # Integrações MCP (SQLite, Filesystem, etc.)
 │
 ├── padroes/
 │   └── areas_de_codigo.md # Onde editar
@@ -62,6 +63,9 @@ docs/system/
 - `ARCHITECTURE.md` - Estrutura FastAPI
 - `schema/MAPEAMENTO_CAMPOS.md` - Campos do banco
 
+### Para integrações e automação:
+- `MCP_INTEGRATIONS.md` - Model Context Protocol (SQLite, Filesystem, etc.)
+
 ---
 
 ## ✅ Checklist Rápido
@@ -76,4 +80,4 @@ Antes de editar, confirme:
 
 ---
 
-*Última atualização: 23/12/2024*
+*Última atualização: 27/12/2024*

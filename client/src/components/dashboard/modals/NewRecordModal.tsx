@@ -154,7 +154,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
           ? `Registro #${multiLocal.idPrinc} | Próximo local`
           : "Preencha os dados do novo registro"
       }
-      maxWidth="4xl"
+      maxWidth="5xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
@@ -167,7 +167,22 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             Cancelar
           </Button>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            {/* Checkbox Meta */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="meta"
+                defaultChecked
+                className="border-white/20 data-[state=checked]:bg-success"
+              />
+              <label
+                htmlFor="meta"
+                className="text-sm cursor-pointer select-none text-muted-foreground"
+              >
+                Meta
+              </label>
+            </div>
+            
             {/* Checkbox Vários Locais */}
             <div className="flex items-center gap-2">
               <Checkbox
@@ -225,20 +240,20 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             initial="hidden"
             animate="visible"
           >
-            <div className="grid grid-cols-4 gap-4">
-              {/* Player (Contratante) */}
+            <div className="grid grid-cols-12 gap-4">
+              {/* Player (Contratante) - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idContr"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <ModalFormField label="Player" required>
                       <FormControl>
                         <HeadlessCombobox
                           options={contratantes}
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="Digite para buscar..."
+                          placeholder="Buscar..."
                           disabled={multiLocal.active}
                           loading={loadingContratantes}
                           icon={<Building2 className="w-4 h-4 text-primary" />}
@@ -250,12 +265,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* Segurado (Server Search) */}
+              {/* Segurado (Server Search) - 4 colunas */}
               <FormField
                 control={form.control}
                 name="idSegur"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-4">
                     <ModalFormField label="Segurado" required>
                       <FormControl>
                         <ServerSearchHeadlessCombobox
@@ -273,12 +288,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* Atividade (Server Search) */}
+              {/* Atividade (Server Search) - 4 colunas */}
               <FormField
                 control={form.control}
                 name="idAtivi"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-4">
                     <ModalFormField label="Atividade" required>
                       <FormControl>
                         <ServerSearchHeadlessCombobox
@@ -296,12 +311,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* Honorário */}
+              {/* Honorário - 2 colunas */}
               <FormField
                 control={form.control}
                 name="honorario"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <ModalFormField label="Honorários">
                       <FormControl>
                         <div className="relative">
@@ -314,7 +329,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             step="0.01"
                             min="0"
                             placeholder="0,00"
-                            className="pl-14 text-right"
+                            className="pl-14 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             disabled={multiLocal.active}
                             value={field.value || ""}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
@@ -349,20 +364,20 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               </div>
             )}
             
-            <div className="grid grid-cols-4 gap-4">
-              {/* Inspetor (Guy) */}
+            <div className="grid grid-cols-12 gap-4">
+              {/* Inspetor (Guy) - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idUserGuy"
                 render={({ field }) => (
-                  <FormItem>
-                    <ModalFormField label="Inspetor (Guy)" required>
+                  <FormItem className="col-span-2">
+                    <ModalFormField label="Guy" required>
                       <FormControl>
                         <HeadlessCombobox
                           options={inspetores}
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="Digite para buscar..."
+                          placeholder="Buscar..."
                           loading={loadingInspetores}
                           icon={<User className="w-4 h-4 text-primary" />}
                         />
@@ -373,13 +388,13 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* Data Inspeção */}
+              {/* Data Inspeção - 2 colunas */}
               <FormField
                 control={form.control}
                 name="dtInspecao"
                 render={({ field }) => (
-                  <FormItem>
-                    <ModalFormField label="Data Inspeção" required>
+                  <FormItem className="col-span-2">
+                    <ModalFormField label="Data" required>
                       <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -418,12 +433,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* UF */}
+              {/* UF - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idUf"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <ModalFormField label="UF" required>
                       <FormControl>
                         <HeadlessCombobox
@@ -441,12 +456,12 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
-              {/* Cidade */}
+              {/* Cidade - 6 colunas */}
               <FormField
                 control={form.control}
                 name="idCidade"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-6">
                     <ModalFormField label="Cidade" required>
                       <FormControl>
                         <HeadlessCombobox

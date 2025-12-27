@@ -13,6 +13,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
+  CircleDot,
   Wallet,
   Send,
   Clock,
@@ -26,7 +27,7 @@ import type { Inspection } from "@shared/schema";
 // =============================================================================
 
 export interface StatusInfo {
-  level: 1 | 2 | 3 | 4 | 5;
+  level: 0 | 1 | 2 | 3 | 4 | 5;  // 0 = Pré-Final (novo!)
   name: string;
   title: string;
   description: string;
@@ -93,15 +94,25 @@ function isDateTodayOrPast(dateStr: string | null | undefined): boolean {
 // =============================================================================
 
 const STATUS_DEFINITIONS: Record<number, Omit<StatusInfo, "level">> = {
+  0: {
+    name: "pre_final",
+    title: "Pré-Final",
+    description: "Falta guy ou despesas",
+    colorClass: "text-violet-400",
+    borderClass: "border-violet-400",
+    bgClass: "bg-violet-400/15",
+    icon: CircleDot,
+    hex: "#A78BFA",  // Lilás mais claro
+  },
   1: {
     name: "concluida",
     title: "Concluído!!",
-    description: "Pagamento e despesas quitados",
+    description: "Tudo quitado",
     colorClass: "text-primary",
     borderClass: "border-primary",
     bgClass: "bg-primary/15",
     icon: CheckCircle2,
-    hex: "#CE62D9",
+    hex: "#CE62D9",  // Lilás vibrante
   },
   2: {
     name: "aguardando_pagamento",
@@ -150,36 +161,63 @@ const STATUS_DEFINITIONS: Record<number, Omit<StatusInfo, "level">> = {
 // =============================================================================
 
 /**
+ * Verifica se um valor numérico é maior que zero
+ */
+function hasValue(v: number | null | undefined): boolean {
+  return typeof v === "number" && v > 0;
+}
+
+/**
  * Determina o status de uma inspeção baseado nas datas preenchidas
  * Retorna informações completas incluindo cor, ícone, título e descrição
+ * 
+ * Hierarquia de status:
+ * 1 = Concluído (tudo quitado)
+ * 0 = Pré-Final (dt_pago OK, mas falta guy ou despesas)
+ * 2 = Aguardando Pagamento (vermelho)
+ * 3 = Aguardando Cobrança (verde)
+ * 4 = Em Confecção (laranja)
+ * 5 = Apenas Agendado (cinza)
  */
 export function getStatusInfo(row: Inspection): StatusInfo {
   const pago = isFilled(row.dtPago);
-  const dpagoFilled = isFilled(row.dtDpago);
-  const despesasZero = typeof row.despesa === "number" && row.despesa === 0;
   const envio = isFilled(row.dtEnvio);
   const entregue = isFilled(row.dtEntregue);
   const inspecaoRealizada = isFilled(row.dtInspecao) && isDateTodayOrPast(row.dtInspecao);
   
-  let level: 1 | 2 | 3 | 4 | 5;
-  
-  // Regra 1: 100% concluída (MANDATÓRIA - ignora demais se atendida)
-  if (pago && (dpagoFilled || despesasZero)) {
-    level = 1;
+  // Verificar se está 100% concluída (dt_pago + todas as pendências resolvidas)
+  if (pago) {
+    // Verificar pendências de despesas e guy
+    const despesaPendente = hasValue(row.despesa) && !isFilled(row.dtDpago);
+    const guyHonorarioPendente = hasValue(row.guyHonorario) && !isFilled(row.dtGuyPago);
+    const guyDespesaPendente = hasValue(row.guyDespesa) && !isFilled(row.dtGuyDpago);
+    
+    const temPendencias = despesaPendente || guyHonorarioPendente || guyDespesaPendente;
+    
+    if (temPendencias) {
+      // Pré-Final: honorário pago, mas falta guy ou despesas
+      return { level: 0, ...STATUS_DEFINITIONS[0] };
+    } else {
+      // 100% Concluída
+      return { level: 1, ...STATUS_DEFINITIONS[1] };
+    }
   }
-  // Regra 2: Cobrado, aguardando pagamento
-  else if (envio && !pago) {
+  
+  let level: 0 | 1 | 2 | 3 | 4 | 5;
+  
+  // Regra 2: Cobrado, aguardando pagamento (VERMELHO)
+  if (envio && !pago) {
     level = 2;
   }
-  // Regra 3: Entregue, aguardando cobrança
+  // Regra 3: Entregue, aguardando cobrança (VERDE)
   else if (entregue && !envio) {
     level = 3;
   }
-  // Regra 4: Em andamento, aguardando entrega
+  // Regra 4: Em andamento, aguardando entrega (LARANJA)
   else if (inspecaoRealizada && !entregue) {
     level = 4;
   }
-  // Regra 5: Ainda não realizada
+  // Regra 5: Ainda não realizada (CINZA)
   else {
     level = 5;
   }
@@ -220,7 +258,8 @@ interface StatusLegendTooltipProps {
 export function StatusLegendTooltip({ children }: StatusLegendTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  const statusList = [1, 2, 3, 4, 5] as const;
+  // Ordem de exibição na legenda: Concluída, Pré-Final, Vermelho, Verde, Laranja, Cinza
+  const statusList = [1, 0, 2, 3, 4, 5] as const;
   
   return (
     <div 

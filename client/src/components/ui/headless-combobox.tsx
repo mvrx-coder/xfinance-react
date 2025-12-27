@@ -17,7 +17,6 @@ import {
   ComboboxButton,
   ComboboxOptions,
   ComboboxOption,
-  Transition,
 } from "@headlessui/react";
 import { Check, ChevronDown, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -74,6 +73,7 @@ export function HeadlessCombobox({
       value={selectedOption}
       onChange={(opt) => opt && onChange(opt.value)}
       disabled={disabled}
+      immediate
     >
       <div className="relative">
         {/* Input que é o próprio trigger */}
@@ -106,55 +106,53 @@ export function HeadlessCombobox({
           </ComboboxButton>
         </div>
 
-        {/* Lista de opções */}
-        <Transition
-          as={Fragment}
-          leave="transition ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-          afterLeave={() => setQuery("")}
+        {/* Lista de opções - portal para sobrepor modal */}
+        <ComboboxOptions
+          anchor="bottom start"
+          portal={true}
+          className={cn(
+            "!z-[9999] mt-1 max-h-60 w-[var(--input-width)] overflow-auto rounded-lg p-1",
+            "bg-card/95 backdrop-blur-md border border-white/15",
+            "shadow-xl shadow-black/20",
+            "[--anchor-gap:4px]"
+          )}
         >
-          <ComboboxOptions className="glass-dropdown">
-            {filteredOptions.length === 0 && query !== "" ? (
-              <div className="px-4 py-3 text-sm text-muted-foreground">
-                Nenhum resultado para "{query}"
-              </div>
-            ) : (
-              filteredOptions.map((option) => (
-                <ComboboxOption
-                  key={option.value}
-                  value={option}
-                  className={({ active, selected }) =>
-                    cn(
-                      "relative cursor-pointer select-none py-2.5 pl-10 pr-4 text-sm",
-                      active && "bg-primary/20 text-primary",
-                      selected && "bg-primary/10",
-                      !active && !selected && "text-foreground"
-                    )
-                  }
-                >
-                  {({ selected }) => (
-                    <>
-                      <span
-                        className={cn(
-                          "block truncate",
-                          selected && "font-medium"
-                        )}
-                      >
-                        {option.label}
-                      </span>
-                      {selected && (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary">
-                          <Check className="h-4 w-4" />
-                        </span>
+          {filteredOptions.length === 0 && query !== "" ? (
+            <div className="px-4 py-3 text-sm text-muted-foreground">
+              Nenhum resultado para "{query}"
+            </div>
+          ) : filteredOptions.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-muted-foreground">
+              Digite para buscar...
+            </div>
+          ) : (
+            filteredOptions.map((option) => (
+              <ComboboxOption
+                key={option.value}
+                value={option}
+                as={Fragment}
+              >
+                {({ focus, selected }) => (
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer",
+                      focus && "bg-primary/20 text-primary",
+                      selected && "bg-primary/30"
+                    )}
+                  >
+                    <Check
+                      className={cn(
+                        "h-4 w-4 flex-shrink-0",
+                        selected ? "opacity-100" : "opacity-0"
                       )}
-                    </>
-                  )}
-                </ComboboxOption>
-              ))
-            )}
-          </ComboboxOptions>
-        </Transition>
+                    />
+                    <span className="truncate">{option.label}</span>
+                  </div>
+                )}
+              </ComboboxOption>
+            ))
+          )}
+        </ComboboxOptions>
       </div>
     </Combobox>
   );
@@ -469,6 +467,7 @@ export function ServerSearchHeadlessCombobox({
       value={selectedOption}
       onChange={handleSelect}
       disabled={disabled}
+      immediate
     >
       {({ open }) => {
         // Sincronizar estado open
@@ -510,15 +509,17 @@ export function ServerSearchHeadlessCombobox({
               </ComboboxButton>
             </div>
 
-        {/* Lista de opções */}
-        <Transition
-          as={Fragment}
-          leave="transition ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-          afterLeave={() => setQuery("")}
-        >
-          <ComboboxOptions className="glass-dropdown">
+            {/* Lista de opções - portal para sobrepor modal */}
+            <ComboboxOptions
+              anchor="bottom start"
+              portal={true}
+              className={cn(
+                "!z-[9999] mt-1 max-h-60 w-[var(--input-width)] overflow-auto rounded-lg p-1",
+                "bg-card/95 backdrop-blur-md border border-white/15",
+                "shadow-xl shadow-black/20",
+                "[--anchor-gap:4px]"
+              )}
+            >
             {loading ? (
               <div className="px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -587,8 +588,7 @@ export function ServerSearchHeadlessCombobox({
                 )}
               </>
             )}
-          </ComboboxOptions>
-        </Transition>
+            </ComboboxOptions>
           </div>
         );
       }}
