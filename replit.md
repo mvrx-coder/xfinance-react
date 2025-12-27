@@ -50,6 +50,14 @@ The application implements a comprehensive dark theme with:
 - Tailwind configuration extended in `tailwind.config.ts`
 - Color palette: Deep purple backgrounds (#0A0A1F, #1A1A3A), magenta primary (#CE62D9), cyan accent (#00BCD4)
 
+### Dropdown Components
+- **SearchableCombobox**: Custom component using @headlessui/react for searchable dropdowns with:
+  - Search input directly in the trigger (better UX than search inside dropdown list)
+  - Glassmorphism styling matching the design system
+  - `allowCreate` prop for creatable fields (uses "➕ Criar: " prefix for downstream detection)
+  - `emptyMessage` prop for customizable empty state
+  - Type-safe: numeric values for selections, string values only when allowCreate=true
+
 ### Key Data Models
 - **Users**: Authentication with username/password, roles
 - **Inspections**: Core entity with workflow status, financial data (honorarios, despesas), payment tracking, and multiple category flags
