@@ -74,6 +74,7 @@ export function SearchableCombobox({
 
   return (
     <Combobox
+      as="div"
       value={typeof value === "number" ? value : null}
       onChange={handleSelect}
       disabled={disabled}
