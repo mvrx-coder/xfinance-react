@@ -29,6 +29,7 @@ import {
   FilterX,
   Check,
   X,
+  Sparkles,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -44,6 +45,11 @@ import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
 import { ColumnFilter } from "./ColumnFilter";
+import { 
+  getActionColorClass, 
+  getActionClasses as getStatusActionClasses,
+  StatusLegendTooltip 
+} from "./StatusTooltip";
 import {
   getInspecaoAlert,
   getAcertoAlert,
@@ -76,10 +82,10 @@ function formatCurrency(value: number | null | undefined): string {
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "-";
-  // Formatar de yyyy-mm-dd para dd/mm/yy
+  // Formatar de yyyy-mm-dd para dd/mm (visual apenas - ordenação usa valor original)
   const parts = dateStr.split("-");
   if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(2)}`;
+    return `${parts[2]}/${parts[1]}`;
   }
   return dateStr;
 }
@@ -157,20 +163,8 @@ function isFilled(v: string | null | undefined): boolean {
   return s !== "" && s !== "-";
 }
 
-// Determina as classes de cor do ícone de ação (Zap) baseado no status da linha
-function getActionClasses(row: Inspection): string {
-  const pago = isFilled(row.dtPago);
-  const dpagoFilled = isFilled(row.dtDpago);
-  const despesasZero = typeof row.despesa === "number" && row.despesa === 0;
-  const entregue = isFilled(row.dtEntregue);
-  if (pago && (dpagoFilled || despesasZero)) {
-    return "text-primary border-primary";
-  }
-  if (entregue && !pago) {
-    return "text-success border-success";
-  }
-  return "text-foreground border-white/20";
-}
+// Funções de status agora centralizadas em StatusTooltip.tsx
+// getActionColorClass, getActionClasses, StatusLegendTooltip são importados de lá
 
 function SkeletonRow({ filters }: { filters: FilterState }) {
   return (
@@ -333,7 +327,11 @@ export function DataGrid({
                   {/* Grupo 1: Ação */}
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
-                    <span className="text-xs font-bold text-primary tracking-wider">#</span>
+                    <div className="flex items-center justify-center">
+                      <StatusLegendTooltip>
+                        <Sparkles className="w-4 h-4 chromatic-sparkle cursor-help" />
+                      </StatusLegendTooltip>
+                    </div>
                   </TableHead>
                   
                   {/* Separador */}
@@ -577,7 +575,7 @@ export function DataGrid({
                           {/* Grupo 1: Ação */}
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
                             <button
-                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
+                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getStatusActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (userRole === "admin" || userRole === "BackOffice") {
@@ -601,32 +599,39 @@ export function DataGrid({
                             <div className="w-[1px] h-full bg-primary/30" />
                           </TableCell>
                           
-                          {/* Grupo 2: Identificação */}
-                          <TableCell className="w-[100px] min-w-[100px] max-w-[100px] text-xs font-semibold text-foreground p-0">
-                            <span className="block w-full px-2 py-1 truncate">
-                              {row.player || "-"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="w-[150px] min-w-[150px] max-w-[150px] text-xs p-0">
-                            <span className="block w-full px-2 py-1 truncate">
-                              {row.segurado || "-"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
-                            <span className={`${markerWrapClass(row.stateLoc)}`}>
-                              {row.loc ?? "-"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
-                            <span className="block w-full px-2 py-1 truncate">
-                              {row.guilty || "-"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
-                            <span className="block w-full px-2 py-1 truncate">
-                              {row.guy || "-"}
-                            </span>
-                          </TableCell>
+                          {/* Grupo 2: Identificação - cores de status aplicadas apenas em Player e Segurado */}
+                          {(() => {
+                            const statusColor = getActionColorClass(row);
+                            return (
+                              <>
+                                <TableCell className={`w-[100px] min-w-[100px] max-w-[100px] text-xs font-semibold p-0 ${statusColor}`}>
+                                  <span className="block w-full px-2 py-1 truncate">
+                                    {row.player || "-"}
+                                  </span>
+                                </TableCell>
+                                <TableCell className={`w-[150px] min-w-[150px] max-w-[150px] text-xs p-0 ${statusColor}`}>
+                                  <span className="block w-full px-2 py-1 truncate">
+                                    {row.segurado || "-"}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
+                                  <span className={`${markerWrapClass(row.stateLoc)}`}>
+                                    {row.loc ?? "-"}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
+                                  <span className="block w-full px-2 py-1 truncate">
+                                    {row.guilty || "-"}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs p-0">
+                                  <span className="block w-full px-2 py-1 truncate">
+                                    {row.guy || "-"}
+                                  </span>
+                                </TableCell>
+                              </>
+                            );
+                          })()}
                           <TableCell className="w-[55px] min-w-[55px] max-w-[55px] leading-tight text-center">
                             <MetaIcon meta={row.meta} />
                           </TableCell>

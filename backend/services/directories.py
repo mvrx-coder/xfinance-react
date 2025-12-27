@@ -6,13 +6,18 @@ Cria diretórios no NAS e pasta local de fotos após inserção de nova inspeç�
 
 import logging
 import os
+import socket
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from typing import Tuple, List
 
 from services.queries.new_inspection import get_directory_info
 
 logger = logging.getLogger(__name__)
+
+# Timeout para operações de rede (segundos)
+NETWORK_TIMEOUT = 5
 
 # =============================================================================
 # CONFIGURAÇÃO NAS
@@ -28,6 +33,74 @@ PHOTOS_BASE = r"E:\MVRX\Fotos"
 
 # Cache de autenticação (evita re-autenticação na mesma sessão)
 _nas_authenticated = False
+
+
+# =============================================================================
+# VERIFICAÇÃO DE CONECTIVIDADE
+# =============================================================================
+
+def _is_nas_reachable() -> bool:
+    """
+    Verifica se o NAS está acessível via ping/socket com timeout curto.
+    
+    Returns:
+        bool: True se acessível, False caso contrário
+    """
+    # Extrair IP/hostname do path UNC
+    server = NAS_SERVER.replace("\\", "").strip()
+    if not server:
+        return False
+    
+    try:
+        # Tentar conectar na porta SMB (445) com timeout curto
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(NETWORK_TIMEOUT)
+        result = sock.connect_ex((server, 445))
+        sock.close()
+        
+        if result == 0:
+            logger.debug("NAS acessível: %s", server)
+            return True
+        else:
+            logger.warning("NAS inacessível (porta 445): %s", server)
+            return False
+            
+    except socket.timeout:
+        logger.warning("NAS timeout: %s", server)
+        return False
+    except socket.gaierror:
+        logger.warning("NAS nome não resolvido: %s", server)
+        return False
+    except Exception as e:
+        logger.warning("NAS erro de verificação: %s -> %s", server, e)
+        return False
+
+
+def _create_directory_with_timeout(path: str, timeout: int = 10) -> bool:
+    """
+    Cria diretório com timeout usando thread.
+    
+    Args:
+        path: Caminho do diretório
+        timeout: Timeout em segundos
+        
+    Returns:
+        bool: True se criado, False se falhou
+    """
+    def _make_dirs():
+        os.makedirs(path, exist_ok=True)
+        return True
+    
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_make_dirs)
+            return future.result(timeout=timeout)
+    except FuturesTimeoutError:
+        logger.warning("Timeout ao criar diretório: %s", path)
+        return False
+    except Exception as e:
+        logger.warning("Erro ao criar diretório: %s -> %s", path, e)
+        return False
 
 
 # =============================================================================
@@ -173,28 +246,40 @@ def create_directories(
         created_display = []
         failures = []
         
-        # Garantir autenticação no NAS
-        _ensure_nas_connection()
+        # Verificar se NAS está acessível ANTES de tentar criar diretório
+        nas_reachable = _is_nas_reachable()
         
-        # Criar diretório no NAS
-        try:
-            os.makedirs(target, exist_ok=True)
-            created.append(target)
-            created_display.append(f"NAS: {name_part}")
-            logger.info("NAS criado: %s", target)
-        except Exception as e:
-            failures.append((target, str(e)))
-            logger.warning("ERRO AO CRIAR NAS: %s -> %r", target, e)
+        if nas_reachable:
+            # Garantir autenticação no NAS
+            _ensure_nas_connection()
+            
+            # Criar diretório no NAS com timeout
+            if _create_directory_with_timeout(target, timeout=15):
+                created.append(target)
+                created_display.append(f"NAS: {name_part}")
+                logger.info("NAS criado: %s", target)
+            else:
+                failures.append((target, "Timeout ou erro ao criar"))
+                logger.warning("ERRO AO CRIAR NAS: %s", target)
+        else:
+            # NAS inacessível - pular sem esperar
+            failures.append((target, "NAS inacessível"))
+            logger.warning("NAS INACESSÍVEL - Pulando criação de diretório")
         
-        # Criar diretório de fotos local
-        try:
-            os.makedirs(photos_target, exist_ok=True)
-            created.append(photos_target)
-            created_display.append(f"Fotos: {name_part}")
-            logger.info("FOTOS criado: %s", photos_target)
-        except Exception as e:
-            failures.append((photos_target, str(e)))
-            logger.warning("ERRO AO CRIAR FOTOS: %s -> %r", photos_target, e)
+        # Criar diretório de fotos local (verificar se drive existe)
+        photos_drive = os.path.splitdrive(photos_target)[0]
+        if photos_drive and os.path.exists(photos_drive + "\\"):
+            try:
+                os.makedirs(photos_target, exist_ok=True)
+                created.append(photos_target)
+                created_display.append(f"Fotos: {name_part}")
+                logger.info("FOTOS criado: %s", photos_target)
+            except Exception as e:
+                failures.append((photos_target, str(e)))
+                logger.warning("ERRO AO CRIAR FOTOS: %s -> %r", photos_target, e)
+        else:
+            failures.append((photos_target, f"Drive {photos_drive} não disponível"))
+            logger.warning("FOTOS: Drive %s não disponível - pulando", photos_drive)
         
         # Retornar resultado
         if len(created) == 2:

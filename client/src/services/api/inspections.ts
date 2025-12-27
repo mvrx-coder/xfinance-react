@@ -2,6 +2,8 @@
  * Serviço de Inspeções - xFinance
  * 
  * Integração com backend FastAPI
+ * 
+ * FIX v3.0.1: Datas mantidas em ISO para cálculos corretos de status
  */
 
 import type { Inspection } from "@shared/schema";
@@ -91,6 +93,9 @@ function formatDateDDMM(dateStr: string | null | undefined): string {
  * 
  * IMPORTANTE: Os campos id_contr, id_segur, id_user_guilty, id_user_guy
  * já vêm como TEXTO do JOIN (player, segurado, nick), não são IDs numéricos!
+ * 
+ * NOTA: Datas mantidas em formato ISO (YYYY-MM-DD) para cálculos corretos.
+ * A formatação DD/MM é feita apenas na exibição (DataGrid.tsx).
  */
 function convertToFrontend(raw: InspectionRaw): Inspection {
   return {
@@ -101,20 +106,21 @@ function convertToFrontend(raw: InspectionRaw): Inspection {
     idUserGuilty: null,
     idUserGuy: null,
     meta: raw.meta,
-    // Datas formatadas DD/MM (padrão xFinance)
-    dtInspecao: formatDateDDMM(raw.dt_inspecao),
-    dtEntregue: formatDateDDMM(raw.dt_entregue),
+    // Datas mantidas em formato ISO (YYYY-MM-DD) para cálculos de status
+    // A formatação DD/MM é feita no DataGrid.tsx via formatDate()
+    dtInspecao: raw.dt_inspecao || "",
+    dtEntregue: raw.dt_entregue || "",
     prazo: raw.prazo,
-    dtAcerto: formatDateDDMM(raw.dt_acerto),
-    dtEnvio: formatDateDDMM(raw.dt_envio),
-    dtPago: formatDateDDMM(raw.dt_pago),
+    dtAcerto: raw.dt_acerto || "",
+    dtEnvio: raw.dt_envio || "",
+    dtPago: raw.dt_pago || "",
     honorario: raw.honorario,
-    dtDenvio: formatDateDDMM(raw.dt_denvio),
-    dtDpago: formatDateDDMM(raw.dt_dpago),
+    dtDenvio: raw.dt_denvio || "",
+    dtDpago: raw.dt_dpago || "",
     despesa: raw.despesa,
-    dtGuyPago: formatDateDDMM(raw.dt_guy_pago),
+    dtGuyPago: raw.dt_guy_pago || "",
     guyHonorario: raw.guy_honorario,
-    dtGuyDpago: formatDateDDMM(raw.dt_guy_dpago),
+    dtGuyDpago: raw.dt_guy_dpago || "",
     guyDespesa: raw.guy_despesa,
     atividade: raw.id_ativi || "",
     obs: raw.obs || "",

@@ -1410,3 +1410,121 @@
   background: linear-gradient(180deg, #CE62D9 0%, #7C3AED 100%);
   opacity: 0.9;
 }
+
+/* =============================================================================
+   CHROMATIC ICON - Efeito arco-íris animado com pausa
+   Ciclo: 48s total (8s animando + 8s parado) x 3 cores
+   ============================================================================= */
+
+@keyframes chromatic-cycle {
+  /* ============ CICLO 1 ============ */
+  /* Animando arco-íris por 8s (0-16.67%) - múltiplas rotações */
+  0% { filter: hue-rotate(0deg) brightness(1.1); transform: scale(1.05); }
+  2% { filter: hue-rotate(90deg) brightness(1.15); transform: scale(1.08); }
+  4% { filter: hue-rotate(180deg) brightness(1.2); transform: scale(1.1); }
+  6% { filter: hue-rotate(270deg) brightness(1.15); transform: scale(1.08); }
+  8% { filter: hue-rotate(360deg) brightness(1.1); transform: scale(1.05); }
+  10% { filter: hue-rotate(450deg) brightness(1.15); transform: scale(1.08); }
+  12% { filter: hue-rotate(540deg) brightness(1.2); transform: scale(1.1); }
+  14% { filter: hue-rotate(630deg) brightness(1.15); transform: scale(1.08); }
+  16% { filter: hue-rotate(720deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em CYAN por 8s (16.67-33.33%) */
+  17%, 33% { filter: hue-rotate(120deg) brightness(1); transform: scale(1); }
+  
+  /* ============ CICLO 2 ============ */
+  /* Animando arco-íris por 8s (33.33-50%) */
+  34% { filter: hue-rotate(120deg) brightness(1.1); transform: scale(1.05); }
+  36% { filter: hue-rotate(210deg) brightness(1.15); transform: scale(1.08); }
+  38% { filter: hue-rotate(300deg) brightness(1.2); transform: scale(1.1); }
+  40% { filter: hue-rotate(390deg) brightness(1.15); transform: scale(1.08); }
+  42% { filter: hue-rotate(480deg) brightness(1.1); transform: scale(1.05); }
+  44% { filter: hue-rotate(570deg) brightness(1.15); transform: scale(1.08); }
+  46% { filter: hue-rotate(660deg) brightness(1.2); transform: scale(1.1); }
+  48% { filter: hue-rotate(750deg) brightness(1.15); transform: scale(1.08); }
+  49% { filter: hue-rotate(840deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em VERDE-LIMÃO por 8s (50-66.67%) */
+  50%, 66% { filter: hue-rotate(240deg) brightness(1); transform: scale(1); }
+  
+  /* ============ CICLO 3 ============ */
+  /* Animando arco-íris por 8s (66.67-83.33%) */
+  67% { filter: hue-rotate(240deg) brightness(1.1); transform: scale(1.05); }
+  69% { filter: hue-rotate(330deg) brightness(1.15); transform: scale(1.08); }
+  71% { filter: hue-rotate(420deg) brightness(1.2); transform: scale(1.1); }
+  73% { filter: hue-rotate(510deg) brightness(1.15); transform: scale(1.08); }
+  75% { filter: hue-rotate(600deg) brightness(1.1); transform: scale(1.05); }
+  77% { filter: hue-rotate(690deg) brightness(1.15); transform: scale(1.08); }
+  79% { filter: hue-rotate(780deg) brightness(1.2); transform: scale(1.1); }
+  81% { filter: hue-rotate(870deg) brightness(1.15); transform: scale(1.08); }
+  82% { filter: hue-rotate(960deg) brightness(1.1); transform: scale(1.05); }
+  /* Parado em MAGENTA por 8s (83.33-100%) */
+  83%, 100% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
+}
+
+.chromatic-sparkle {
+  animation: chromatic-cycle 48s linear infinite;
+  color: #CE62D9;
+}
+
+/* ============================================
+   GLASS DROPDOWN - Headless UI Combobox
+   ============================================ */
+.glass-dropdown {
+  position: absolute;
+  z-index: 50;
+  margin-top: 0.25rem;
+  max-height: 15rem;
+  width: 100%;
+  overflow: auto;
+  border-radius: 0.75rem;
+  background: rgba(35, 35, 71, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.glass-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.glass-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.glass-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.glass-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   FEEDBACK VISUAL DE ERRO EM CAMPOS
+   ============================================ */
+.form-field-error input,
+.form-field-error button,
+.form-field-error [data-headlessui-state] {
+  border-color: hsl(var(--destructive)) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Animação shake para erros */
+@keyframes formShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.form-shake {
+  animation: formShake 0.5s ease-in-out;
+}
+
+/* Mensagem de erro mais visível */
+[data-slot="form-message"] {
+  color: hsl(var(--destructive));
+  font-size: 0.75rem;
+  font-weight: 500;
+}

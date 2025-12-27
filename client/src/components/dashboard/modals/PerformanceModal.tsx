@@ -17,6 +17,7 @@ import {
   FileText,
   ChevronDown,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 import {
@@ -121,6 +122,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
       title="Performance"
       subtitle="Dinâmica da Empresa - Performance e Desempenho"
       maxWidth="5xl"
+      hideHeader={true}
       footer={
         <div className="flex items-center justify-between w-full gap-4 flex-wrap">
           <Button 
@@ -144,48 +146,59 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
         animate="visible"
         className="space-y-6"
       >
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-[rgba(15,15,35,0.6)] border border-white/10">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-              <span className="text-xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-wider">
-                MVRX
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Dinâmica da Empresa</p>
-              <p className="text-xs text-muted-foreground">Performance e Desempenho</p>
-            </div>
+        {/* Toolbar em duas linhas */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 p-4 rounded-xl shell-toolbar">
+          {/* Logo - altura harmonizada com duas linhas */}
+          <div className="flex items-center justify-center shrink-0">
+            <img 
+              src="/logo1.png" 
+              alt="MVRX Logo" 
+              className="h-14 w-auto object-contain"
+            />
           </div>
-          
-          <div className="flex flex-wrap items-center gap-4">
-            <RadioGroup 
-              value={dateFilter} 
-              onValueChange={(v) => setDateFilter(v as typeof dateFilter)}
-              className="flex items-center gap-3"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_envio" id="dt_envio" className="border-destructive text-destructive" />
-                <Label htmlFor="dt_envio" className="text-xs text-muted-foreground cursor-pointer">Envio</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30" />
-                <Label htmlFor="dt_pago" className="text-xs text-muted-foreground cursor-pointer">Pago</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30" />
-                <Label htmlFor="dt_acerto" className="text-xs text-muted-foreground cursor-pointer">Acerto</Label>
-              </div>
-            </RadioGroup>
 
-            <div className="h-6 w-px bg-white/10" />
+          {/* Títulos em duas linhas */}
+          <div className="flex flex-col justify-center shrink-0">
+            <h2 className="text-base font-bold text-foreground leading-tight">Performance</h2>
+            <p className="text-sm text-muted-foreground leading-tight">Dinâmica da Empresa - Performance e Desempenho</p>
+          </div>
 
+          {/* Separador vertical único */}
+          <div className="self-stretch w-px bg-white/20 shrink-0" />
+
+          {/* Mecanismos de busca em duas linhas */}
+          <div className="flex flex-col justify-center gap-2 flex-1">
+            {/* Linha 1: Base */}
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">Período:</span>
+              <span className="text-sm text-muted-foreground">Base:</span>
+              <RadioGroup 
+                value={dateFilter} 
+                onValueChange={(v) => setDateFilter(v as typeof dateFilter)}
+                className="flex items-center gap-4"
+              >
+                <div className="flex items-center space-x-1.5">
+                  <RadioGroupItem value="dt_envio" id="dt_envio" className="border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5" />
+                  <Label htmlFor="dt_envio" className="text-sm cursor-pointer">Envio</Label>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <RadioGroupItem value="dt_pago" id="dt_pago" className="border-white/30 h-3.5 w-3.5" />
+                  <Label htmlFor="dt_pago" className="text-sm cursor-pointer">Pago</Label>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <RadioGroupItem value="dt_acerto" id="dt_acerto" className="border-white/30 h-3.5 w-3.5" />
+                  <Label htmlFor="dt_acerto" className="text-sm cursor-pointer">Acerto</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Linha 2: Período + MM12 */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Período:</span>
               <Select 
                 value={anoIni?.toString() ?? "todos"} 
                 onValueChange={(v) => setAnoIni(v === "todos" ? undefined : parseInt(v))}
               >
-                <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
+                <SelectTrigger className="w-[80px] h-7 text-sm bg-white/5 border-white/20">
                   <SelectValue placeholder="Início" />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,11 +210,12 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                   ))}
                 </SelectContent>
               </Select>
+              <span className="text-sm text-muted-foreground">a</span>
               <Select 
                 value={anoFim?.toString() ?? "todos"} 
                 onValueChange={(v) => setAnoFim(v === "todos" ? undefined : parseInt(v))}
               >
-                <SelectTrigger className="w-24 h-8 text-xs bg-transparent border-white/20">
+                <SelectTrigger className="w-[80px] h-7 text-sm bg-white/5 border-white/20">
                   <SelectValue placeholder="Fim" />
                 </SelectTrigger>
                 <SelectContent>
@@ -213,18 +227,28 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="12months" 
-                checked={use12Months}
-                onCheckedChange={(checked) => setUse12Months(checked as boolean)}
-                className="border-white/30"
-              />
-              <Label htmlFor="12months" className="text-xs text-muted-foreground cursor-pointer">MM12</Label>
+              <div className="flex items-center gap-2 ml-2 px-3 py-1.5 rounded-md border border-white/20 bg-white/5">
+                <Checkbox 
+                  id="12months" 
+                  checked={use12Months}
+                  onCheckedChange={(checked) => setUse12Months(checked as boolean)}
+                  className="border-white/30 data-[state=checked]:bg-accent data-[state=checked]:border-accent h-4 w-4"
+                />
+                <Label htmlFor="12months" className="text-sm cursor-pointer">MM12</Label>
+              </div>
             </div>
           </div>
+
+          {/* Botão Fechar */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="shrink-0"
+            data-testid="button-close-performance-toolbar"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">

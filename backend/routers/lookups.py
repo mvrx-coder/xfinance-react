@@ -73,6 +73,46 @@ async def get_users(
 
 
 # =============================================================================
+# GET /api/lookups/inspetores - Somente inspetores ativos
+# =============================================================================
+
+@router.get("/inspetores", response_model=List[UserOption])
+async def get_inspetores(
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    """
+    Retorna lista de inspetores e admins ATIVOS.
+    Usado no dropdown de Guy do formulário de novo registro.
+    """
+    logger.info("GET /lookups/inspetores | user=%s", current_user.email)
+    
+    with get_db() as conn:
+        conn.row_factory = lambda cursor, row: dict(
+            zip([column[0] for column in cursor.description], row)
+        )
+        cursor = conn.execute(
+            """
+            SELECT id_user, nick, papel, ativo
+            FROM user
+            WHERE (ativo = 1 OR ativo IS NULL)
+              AND (LOWER(papel) = 'inspetor' OR LOWER(papel) = 'admin')
+            ORDER BY nick
+            """
+        )
+        rows = cursor.fetchall()
+    
+    return [
+        UserOption(
+            value=row["id_user"],
+            label=row["nick"] or f"User {row['id_user']}",
+            papel=row["papel"] or "Inspetor",
+            ativo=True
+        )
+        for row in rows
+    ]
+
+
+# =============================================================================
 # GET /api/lookups/contratantes
 # =============================================================================
 
@@ -81,13 +121,14 @@ async def get_contratantes(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """
-    Retorna lista de contratantes (players).
+    Retorna lista de contratantes (players) ATIVOS.
     """
     with get_db() as conn:
         cursor = conn.execute(
             """
             SELECT id_contr, player
             FROM contr
+            WHERE ativo = 1 OR ativo IS NULL
             ORDER BY player
             """
         )

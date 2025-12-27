@@ -80,17 +80,15 @@ export function AlertCell({
     }, 150);
   }, [isEditing, isSaving, handleCancel]);
 
-  const borderClass = {
+  // Somente dots pulsantes, sem bordas
+  const showDot = alertLevel !== "none";
+  
+  const dotClass = {
     none: "",
-    warning: "border-b-2 border-b-orange-500",
-    danger: "border-b-2 border-b-red-500",
-    success: "border-b-2 border-b-emerald-500",
+    warning: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse",
+    danger: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse",
+    success: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse",
   }[alertLevel];
-
-  const showDot = alertLevel === "warning" || alertLevel === "danger";
-  const dotClass = alertLevel === "warning"
-    ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)] animate-pulse"
-    : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse";
 
   if (isEditing) {
     return (
@@ -120,7 +118,7 @@ export function AlertCell({
 
   return (
     <div
-      className={cn("flex items-center justify-between gap-1.5 w-full h-full px-2 py-1 cursor-pointer hover:bg-white/[0.05]", borderClass)}
+      className={cn("flex items-center justify-between gap-1.5 w-full h-full px-2 py-1 cursor-pointer hover:bg-white/[0.05]")}
       onDoubleClick={() => setIsEditing(true)}
       title="Duplo clique para editar"
     >

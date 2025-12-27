@@ -32,10 +32,11 @@ async function proxyToFastAPI(req: Request, res: Response, path?: string) {
     
     const response = await fetch(url, fetchOptions);
     
-    // Copiar headers relevantes
-    const setCookie = response.headers.get("set-cookie");
-    if (setCookie) {
-      res.setHeader("Set-Cookie", setCookie);
+    // Copiar headers Set-Cookie usando raw() para múltiplos cookies
+    const rawHeaders = response.headers.raw();
+    if (rawHeaders["set-cookie"]) {
+      // node-fetch retorna array em raw()
+      res.setHeader("Set-Cookie", rawHeaders["set-cookie"]);
     }
     
     const contentType = response.headers.get("content-type");

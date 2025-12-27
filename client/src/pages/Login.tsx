@@ -1,51 +1,97 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+/**
+ * Página de Login - xFinance
+ * 
+ * Usa o hook useAuth do contexto centralizado.
+ * Redireciona para Dashboard se já autenticado.
+ */
+
+import { useState, useEffect } from "react";
+import { useLocation, Redirect } from "wouter";
 import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { login } from "@/services/api/auth";
+import { useAuth } from "@/hooks";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { login, isLoading: isAuthLoading, isAuthenticated, error: authError, clearError } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  
+  // Estados para primeiro acesso (fluxo futuro)
   const [isFirstAccess, setIsFirstAccess] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Limpar erros ao digitar
+  useEffect(() => {
+    if (localError) setLocalError(null);
+    if (authError) clearError();
+  }, [email, password]);
+
+  // Redirecionar se já autenticado
+  if (isAuthenticated && !isAuthLoading) {
+    return <Redirect to="/" />;
+  }
+
+  // Erro a exibir (prioridade: local > contexto)
+  const displayError = localError || authError;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    
+    // Validação básica
+    if (!email.trim()) {
+      setLocalError("Informe o email");
+      return;
+    }
+    if (!password.trim()) {
+      setLocalError("Informe a senha");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setLocalError(null);
     
     try {
-      const response = await login({ email, password });
+      const success = await login({ email, password });
       
-      if (response.success) {
-        // Salvar dados do usuário no localStorage para acesso rápido
-        if (response.user) {
-          localStorage.setItem("xfinance_user", JSON.stringify(response.user));
-        }
+      if (success) {
+        // Redirecionamento é feito automaticamente pelo Redirect acima
+        // quando isAuthenticated muda para true
         setLocation("/");
       }
+      // Se falhou, o erro já está no contexto (authError)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+      setLocalError(err instanceof Error ? err.message : "Erro ao fazer login");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleSetNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
+      setLocalError("As senhas não coincidem");
       return;
     }
-    setIsLoading(true);
+    setIsSubmitting(true);
+    // TODO: Implementar fluxo de primeiro acesso
     await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
+    setIsSubmitting(false);
     setIsFirstAccess(false);
   };
+
+  // Loading inicial do contexto de auth
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-depth-gradient">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">
@@ -137,10 +183,10 @@ export default function Login() {
             
             {!isFirstAccess ? (
               <form onSubmit={handleLogin} className="login-form">
-                {error && (
+                {displayError && (
                   <div className="login-error">
                     <AlertCircle className="w-4 h-4" />
-                    <span>{error}</span>
+                    <span>{displayError}</span>
                   </div>
                 )}
                 <div className="login-input-group">
@@ -151,6 +197,7 @@ export default function Login() {
                     placeholder="mvrxxx@gmail.com"
                     className="login-input"
                     required
+                    disabled={isSubmitting}
                     data-testid="input-email"
                   />
                 </div>
@@ -164,12 +211,14 @@ export default function Login() {
                       placeholder="Digite sua senha"
                       className="login-input login-input-password"
                       required
+                      disabled={isSubmitting}
                       data-testid="input-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="login-password-toggle"
+                      disabled={isSubmitting}
                       data-testid="button-toggle-password"
                     >
                       {showPassword ? (
@@ -183,11 +232,11 @@ export default function Login() {
                 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   className="login-button"
                   data-testid="button-login"
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     "Entrar"
@@ -200,6 +249,13 @@ export default function Login() {
                   <p>Primeiro acesso detectado. Defina sua nova senha.</p>
                 </div>
                 
+                {displayError && (
+                  <div className="login-error">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{displayError}</span>
+                  </div>
+                )}
+                
                 <div className="login-input-group">
                   <input
                     type="password"
@@ -209,6 +265,7 @@ export default function Login() {
                     className="login-input"
                     required
                     minLength={8}
+                    disabled={isSubmitting}
                     data-testid="input-new-password"
                   />
                 </div>
@@ -222,17 +279,18 @@ export default function Login() {
                     className="login-input"
                     required
                     minLength={8}
+                    disabled={isSubmitting}
                     data-testid="input-confirm-password"
                   />
                 </div>
                 
                 <button
                   type="submit"
-                  disabled={isLoading || newPassword !== confirmPassword}
+                  disabled={isSubmitting || newPassword !== confirmPassword}
                   className="login-button"
                   data-testid="button-set-password"
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     "Definir nova senha"

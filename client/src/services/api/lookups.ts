@@ -120,6 +120,23 @@ export async function fetchUsersOptions(): Promise<UserOption[]> {
 }
 
 // =============================================================================
+// Inspetores (Somente usuários com papel Inspetor e ativos)
+// =============================================================================
+
+export async function fetchInspetoresOptions(): Promise<UserOption[]> {
+  try {
+    const response = await fetch("/api/lookups/inspetores", {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Erro ao buscar inspetores");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar inspetores:", error);
+    return [];
+  }
+}
+
+// =============================================================================
 // Helpers
 // =============================================================================
 

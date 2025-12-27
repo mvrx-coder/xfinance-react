@@ -1,23 +1,49 @@
-import { useState, useEffect } from "react";
+/**
+ * NewRecordModal - Modal de Inserir Novo Registro
+ * 
+ * Implementação limpa do zero, substituindo versão anterior.
+ * 
+ * Funcionalidades:
+ * - Criar novo registro de inspeção
+ * - Dropdowns com busca server-side para Segurado e Atividade
+ * - Criação de novas entidades inline
+ * - Modo multi-local (vários locais para mesmo registro)
+ * - Confirmação antes de criar novas entidades
+ * 
+ * Campos hardcoded (sistema antigo):
+ * - id_user_guilty = 19
+ * - dt_acerto = 1º dia do mês corrente
+ * - loc = 1
+ */
+
+import * as React from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Modal } from "../Modal";
+import { 
+  Building2, 
+  FileText, 
+  Briefcase, 
+  DollarSign,
+  User, 
+  Calendar,
+  MapPin,
+  Layers,
+  Check, 
+  X, 
+  Loader2,
+  ArrowRight,
+  CalendarIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+import { Modal, ModalFormField } from "../Modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,391 +61,98 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { CreatableCombobox } from "@/components/ui/creatable-combobox";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Loader2, 
-  Check, 
-  X, 
-  Building2, 
-  User, 
-  Briefcase, 
-  MapPin,
-  Calendar,
-  DollarSign,
-  FileText,
-  Layers,
-  CalendarIcon,
-  ArrowRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
-  fetchContrOptions,
-  fetchSegurOptions,
-  fetchAtiviOptions,
-  fetchUfOptions,
-  fetchCidadeOptions,
-  fetchUsersOptions,
-  type LookupOption,
-  type UserOption,
-} from "@/services/api/lookups";
+  HeadlessCombobox,
+  ServerSearchHeadlessCombobox,
+} from "@/components/ui/headless-combobox";
 
-// Schema com data obrigatória e cidade obrigatória
-// Segurado e Atividade podem ser number (ID existente) ou string (criar novo)
-const newRecordSchema = z.object({
-  idContr: z.number().min(1, "Contratante obrigatório"),
-  // Segurado: number = ID existente, string = criar novo
-  idSegur: z.union([
-    z.number().min(1),
-    z.string().min(1, "Segurado obrigatório")
-  ]),
-  // Atividade: number = ID existente, string = criar nova
-  idAtivi: z.union([
-    z.number().min(1),
-    z.string().min(1, "Atividade obrigatória")
-  ]),
-  idUserGuy: z.number().min(1, "Inspetor obrigatório"),
-  dtInspecao: z.date({ required_error: "Data obrigatória" }),
-  idUf: z.number().min(1, "UF obrigatória"),
-  idCidade: z.number().min(1, "Cidade obrigatória"),
-  honorario: z.number().min(0).optional(),
-  variosLocais: z.boolean().optional(),
-});
+import { useNewRecord } from "@/hooks/use-new-record";
+import { useContratantes, useUfs, useCidades, useInspetores } from "@/hooks/use-lookups";
 
-type NewRecordFormData = z.infer<typeof newRecordSchema>;
-
-// Estado para confirmação de criação de novas entidades
-interface PendingCreation {
-  data: NewRecordFormData;
-  newEntities: string[];
-}
-
-// Tipos para resposta da API
-interface CreateInspectionResponse {
-  success: boolean;
-  id_princ: number;
-  message: string;
-  dirs_created: string[];
-  loc: number;
-}
-
-// Estado do modo multi-local
-interface MultiLocalState {
-  active: boolean;
-  idPrinc: number | null;
-  idContr: number | null;
-  idSegur: number | null;
-  segurNome: string | null;
-}
+// =============================================================================
+// TYPES
+// =============================================================================
 
 interface NewRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
+
+// =============================================================================
+// ANIMATION VARIANTS
+// =============================================================================
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.3 }
-  })
+    transition: { delay: i * 0.1, duration: 0.3 },
+  }),
 };
 
+// =============================================================================
+// COMPONENT
+// =============================================================================
+
 export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalProps) {
-  const { toast } = useToast();
+  // State para controlar DatePicker
+  const [datePickerOpen, setDatePickerOpen] = React.useState(false);
   
-  // Estado multi-local
-  const [multiLocal, setMultiLocal] = useState<MultiLocalState>({
-    active: false,
-    idPrinc: null,
-    idContr: null,
-    idSegur: null,
-    segurNome: null,
+  // Hook do formulário
+  const {
+    form,
+    multiLocal,
+    pendingCreation,
+    isPending,
+    selectedUf,
+    variosLocais,
+    onSubmit,
+    confirmCreate,
+    cancelCreate,
+    handleVariosLocaisChange,
+    resetForm,
+  } = useNewRecord({
+    onSuccess: () => {
+      onSuccess?.();
+      handleClose();
+    },
   });
-  
-  // Estado para confirmação de criação de novas entidades
-  const [pendingCreation, setPendingCreation] = useState<PendingCreation | null>(null);
   
   // Lookups
-  const [contrOptions, setContrOptions] = useState<LookupOption[]>([]);
-  const [segurOptions, setSegurOptions] = useState<LookupOption[]>([]);
-  const [ativiOptions, setAtiviOptions] = useState<LookupOption[]>([]);
-  const [ufOptions, setUfOptions] = useState<LookupOption[]>([]);
-  const [cidadeOptions, setCidadeOptions] = useState<LookupOption[]>([]);
-  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
-
+  const { data: contratantes = [], isLoading: loadingContratantes } = useContratantes();
+  const { data: ufs = [], isLoading: loadingUfs } = useUfs();
+  const { data: cidades = [], isLoading: loadingCidades } = useCidades(selectedUf);
+  const { data: inspetores = [], isLoading: loadingInspetores } = useInspetores();
+  
+  // Reset cidade quando UF muda
   useEffect(() => {
-    if (isOpen) {
-      fetchContrOptions().then(setContrOptions);
-      fetchSegurOptions().then(setSegurOptions);
-      fetchAtiviOptions().then(setAtiviOptions);
-      fetchUfOptions().then(setUfOptions);
-      fetchUsersOptions().then(setUserOptions);
-    }
-  }, [isOpen]);
-
-  const form = useForm<NewRecordFormData>({
-    resolver: zodResolver(newRecordSchema),
-    defaultValues: {
-      idContr: 0,
-      idSegur: "" as unknown as number | string, // Inicia vazio, aceita number ou string
-      idAtivi: "" as unknown as number | string, // Inicia vazio, aceita number ou string
-      idUserGuy: 0,
-      dtInspecao: undefined,
-      idUf: 0,
-      idCidade: 0,
-      honorario: 0,
-      variosLocais: false,
-    },
-  });
-
-  const selectedUf = form.watch("idUf");
-  const variosLocais = form.watch("variosLocais");
-
-  // Cascata UF -> Cidade
-  useEffect(() => {
-    if (selectedUf && selectedUf > 0) {
-      fetchCidadeOptions(selectedUf).then(setCidadeOptions);
+    if (selectedUf) {
       form.setValue("idCidade", 0);
-    } else {
-      setCidadeOptions([]);
     }
   }, [selectedUf, form]);
-
-  // Mutation para criar inspeção
-  const createMutation = useMutation({
-    mutationFn: async (data: NewRecordFormData): Promise<CreateInspectionResponse> => {
-      // Construir payload diferenciando ID existente de texto para criar
-      const payload: Record<string, unknown> = {
-        id_contr: data.idContr,
-        id_user_guy: data.idUserGuy,
-        dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
-        id_uf: data.idUf,
-        id_cidade: data.idCidade,
-        honorario: data.honorario || null,
-      };
-      
-      // Segurado: number = ID existente, string = criar novo
-      if (typeof data.idSegur === "number") {
-        payload.id_segur = data.idSegur;
-      } else {
-        // Limpar prefixo "➕ Criar: " se presente
-        let segurNome = data.idSegur;
-        if (segurNome.startsWith("➕ Criar: ")) {
-          segurNome = segurNome.replace("➕ Criar: ", "").trim();
-        }
-        payload.segur_nome = segurNome;
-      }
-      
-      // Atividade: number = ID existente, string = criar nova
-      if (typeof data.idAtivi === "number") {
-        payload.id_ativi = data.idAtivi;
-      } else {
-        // Limpar prefixo "➕ Criar: " se presente
-        let atividade = data.idAtivi;
-        if (atividade.startsWith("➕ Criar: ")) {
-          atividade = atividade.replace("➕ Criar: ", "").trim();
-        }
-        payload.atividade = atividade;
-      }
-      
-      return apiRequest("POST", "/api/inspections", payload);
-    },
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      
-      // Mostrar toast com diretórios criados
-      const dirsMsg = response.dirs_created.length > 0 
-        ? `📁 ${response.dirs_created.join(" | ")}` 
-        : "";
-      
-      if (variosLocais) {
-        // Modo multi-local: guardar id_princ e manter modal aberto
-        setMultiLocal({
-          active: true,
-          idPrinc: response.id_princ,
-          idContr: variables.idContr,
-          idSegur: variables.idSegur,
-          segurNome: segurOptions.find(s => s.value === variables.idSegur)?.label || null,
-        });
-        
-        // Limpar apenas campos locais
-        form.setValue("idUserGuy", 0);
-        form.setValue("dtInspecao", undefined as any);
-        form.setValue("idUf", 0);
-        form.setValue("idCidade", 0);
-        
-        toast({
-          title: "✅ Primeiro local cadastrado!",
-          description: `${dirsMsg} Insira o próximo local.`,
-        });
-      } else {
-        // Modo normal: fechar modal
-        toast({
-          title: "✅ Registro criado com sucesso!",
-          description: dirsMsg || response.message,
-        });
-        form.reset();
-        onSuccess();
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ Erro ao criar registro",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation para adicionar local adicional
-  const addLocalMutation = useMutation({
-    mutationFn: async (data: NewRecordFormData): Promise<CreateInspectionResponse> => {
-      const payload = {
-        id_princ: multiLocal.idPrinc,
-        id_user_guy: data.idUserGuy,
-        dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
-        id_uf: data.idUf,
-        id_cidade: data.idCidade,
-      };
-      return apiRequest("POST", "/api/inspections/local-adicional", payload);
-    },
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      
-      const dirsMsg = response.dirs_created.length > 0 
-        ? `📁 ${response.dirs_created.join(" | ")}` 
-        : "";
-      
-      // Limpar campos locais para próximo
-      form.setValue("idUserGuy", 0);
-      form.setValue("dtInspecao", undefined as any);
-      form.setValue("idUf", 0);
-      form.setValue("idCidade", 0);
-      
-      toast({
-        title: `✅ Local adicional cadastrado! (Total: ${response.loc} locais)`,
-        description: `${dirsMsg} Insira o próximo local.`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ Erro ao adicionar local",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Verificar se há novas entidades a serem criadas
-  const checkNewEntities = (data: NewRecordFormData): string[] => {
-    const newEntities: string[] = [];
-    
-    if (typeof data.idSegur === "string") {
-      let nome = data.idSegur;
-      if (nome.startsWith("➕ Criar: ")) {
-        nome = nome.replace("➕ Criar: ", "").trim();
-      }
-      newEntities.push(`Segurado: "${nome}"`);
-    }
-    
-    if (typeof data.idAtivi === "string") {
-      let nome = data.idAtivi;
-      if (nome.startsWith("➕ Criar: ")) {
-        nome = nome.replace("➕ Criar: ", "").trim();
-      }
-      newEntities.push(`Atividade: "${nome}"`);
-    }
-    
-    return newEntities;
-  };
-
-  // Executar criação (após confirmação ou se não há novas entidades)
-  const executeCreate = (data: NewRecordFormData) => {
-    if (multiLocal.active && multiLocal.idPrinc) {
-      // Modo multi-local ativo: adicionar local adicional
-      addLocalMutation.mutate(data);
-    } else {
-      // Modo normal ou primeiro local
-      createMutation.mutate(data);
-    }
-  };
-
-  const onSubmit = (data: NewRecordFormData) => {
-    const newEntities = checkNewEntities(data);
-    
-    if (newEntities.length > 0) {
-      // Há novas entidades - pedir confirmação
-      setPendingCreation({ data, newEntities });
-    } else {
-      // Sem novas entidades - executar diretamente
-      executeCreate(data);
-    }
-  };
   
-  // Handler para confirmação de criação
-  const handleConfirmCreate = () => {
-    if (pendingCreation) {
-      executeCreate(pendingCreation.data);
-      setPendingCreation(null);
-    }
-  };
-  
-  // Handler para cancelar criação
-  const handleCancelCreate = () => {
-    setPendingCreation(null);
-  };
-
-  // Handler para checkbox vários locais
-  const handleVariosLocaisChange = (checked: boolean) => {
-    form.setValue("variosLocais", checked);
-    
-    if (!checked && multiLocal.active) {
-      // Usuário desmarcou enquanto estava no modo multi-local
-      // Resetar estado
-      setMultiLocal({
-        active: false,
-        idPrinc: null,
-        idContr: null,
-        idSegur: null,
-        segurNome: null,
-      });
-      setPendingCreation(null);
-      form.reset();
-      toast({
-        title: "ℹ️ Inserção de múltiplos locais encerrada",
-      });
-    }
-  };
-
   // Handler para fechar modal
   const handleClose = () => {
-    setMultiLocal({
-      active: false,
-      idPrinc: null,
-      idContr: null,
-      idSegur: null,
-      segurNome: null,
-    });
-    setPendingCreation(null);
-    form.reset();
+    resetForm();
     onClose();
   };
-
-  const isPending = createMutation.isPending || addLocalMutation.isPending;
-
+  
   return (
     <Modal
       id="new-record-modal"
       isOpen={isOpen}
       onClose={handleClose}
-      title={multiLocal.active 
-        ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}` 
-        : "Inserir Novo Trabalho"
+      title={
+        multiLocal.active
+          ? `Adicionar Local - ${multiLocal.segurNome || "Registro"}`
+          : "Inserir Novo Trabalho"
+      }
+      subtitle={
+        multiLocal.active
+          ? `Registro #${multiLocal.idPrinc} | Próximo local`
+          : "Preencha os dados do novo registro"
       }
       maxWidth="4xl"
       footer={
@@ -429,43 +162,44 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             onClick={handleClose}
             disabled={isPending}
             className="gap-2 border-white/15 bg-transparent hover:bg-white/5"
-            data-testid="button-cancel-new-record"
           >
             <X className="w-4 h-4" />
             Cancelar
           </Button>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* Checkbox Vários Locais */}
             <div className="flex items-center gap-2">
               <Checkbox
                 id="varios-locais"
                 checked={variosLocais || false}
                 onCheckedChange={handleVariosLocaisChange}
                 disabled={multiLocal.active}
-                className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                data-testid="checkbox-varios-locais"
+                className="border-white/20 data-[state=checked]:bg-primary"
               />
-              <label 
-                htmlFor="varios-locais" 
+              <label
+                htmlFor="varios-locais"
                 className={cn(
-                  "text-sm cursor-pointer",
-                  multiLocal.active ? "text-primary font-medium" : "text-muted-foreground"
+                  "text-sm cursor-pointer select-none",
+                  multiLocal.active
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
                 )}
               >
                 Vários locais
               </label>
             </div>
             
+            {/* Botão Submit */}
             <Button
-              onClick={form.handleSubmit(onSubmit)}
+              onClick={onSubmit}
               disabled={isPending}
               className={cn(
-                "gap-2 font-semibold px-6",
-                multiLocal.active 
-                  ? "bg-gradient-to-r from-blue-500/90 to-blue-600 border border-blue-500/50 text-white"
-                  : "bg-gradient-to-r from-accent/90 to-accent border border-accent/50 text-accent-foreground"
+                "gap-2 font-semibold px-6 min-w-[140px]",
+                multiLocal.active
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                  : "bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70"
               )}
-              data-testid="button-confirm-new-record"
             >
               {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -482,312 +216,274 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     >
       <Form {...form}>
         <form className="space-y-6">
-          {/* Seção 1: Campos Globais (desabilitados no modo multi-local após primeiro registro) */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* SEÇÃO 1: CAMPOS GLOBAIS (desabilitados no modo multi-local) */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
           <motion.div
             custom={0}
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="form-section"
           >
-            <div className="form-section-card">
-              <div className="grid grid-cols-4 gap-6">
-                <FormField
-                  control={form.control}
-                  name="idContr"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <Building2 className="w-3.5 h-3.5 text-primary" />
-                          Player <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
+            <div className="grid grid-cols-4 gap-4">
+              {/* Player (Contratante) */}
+              <FormField
+                control={form.control}
+                name="idContr"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Player" required>
+                      <FormControl>
+                        <HeadlessCombobox
+                          options={contratantes}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Digite para buscar..."
+                          disabled={multiLocal.active}
+                          loading={loadingContratantes}
+                          icon={<Building2 className="w-4 h-4 text-primary" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* Segurado (Server Search) */}
+              <FormField
+                control={form.control}
+                name="idSegur"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Segurado" required>
+                      <FormControl>
+                        <ServerSearchHeadlessCombobox
+                          searchEndpoint="/api/new-record/segurados"
+                          value={field.value || null}
+                          onChange={field.onChange}
+                          placeholder="Digite para buscar..."
+                          disabled={multiLocal.active}
+                          icon={<FileText className="w-4 h-4 text-primary" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* Atividade (Server Search) */}
+              <FormField
+                control={form.control}
+                name="idAtivi"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Atividade" required>
+                      <FormControl>
+                        <ServerSearchHeadlessCombobox
+                          searchEndpoint="/api/new-record/atividades"
+                          value={field.value || null}
+                          onChange={field.onChange}
+                          placeholder="Digite para buscar..."
+                          disabled={multiLocal.active}
+                          icon={<Briefcase className="w-4 h-4 text-primary" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* Honorário */}
+              <FormField
+                control={form.control}
+                name="honorario"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Honorários">
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                          <span className="absolute left-8 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            R$
+                          </span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0,00"
+                            className="pl-14 text-right"
                             disabled={multiLocal.active}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-player">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {contrOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="idSegur"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <FileText className="w-3.5 h-3.5 text-primary" />
-                          Segurado <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <CreatableCombobox
-                            options={segurOptions}
-                            value={field.value || null}
-                            onChange={field.onChange}
-                            placeholder="Digite ou selecione..."
-                            searchPlaceholder="Buscar segurado..."
-                            emptyMessage="Nenhum segurado encontrado"
-                            disabled={multiLocal.active}
-                            data-testid="select-segurado"
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
                           />
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="idAtivi"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <Briefcase className="w-3.5 h-3.5 text-primary" />
-                          Atividade <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <CreatableCombobox
-                            options={ativiOptions}
-                            value={field.value || null}
-                            onChange={field.onChange}
-                            placeholder="Digite ou selecione..."
-                            searchPlaceholder="Buscar atividade..."
-                            emptyMessage="Nenhuma atividade encontrada"
-                            disabled={multiLocal.active}
-                            data-testid="select-atividade"
-                          />
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="honorario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <DollarSign className="w-3.5 h-3.5 text-success" />
-                          Honorários
-                        </label>
-                        <FormControl>
-                          <div className="form-currency-wrapper">
-                            <span className="form-currency-prefix">R$</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0,00"
-                              className="form-input form-input-currency"
-                              disabled={multiLocal.active}
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                              data-testid="input-honorario"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
             </div>
           </motion.div>
-
-          {/* Seção 2: Campos Locais (habilitados sempre - repetidos por local) */}
+          
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* SEÇÃO 2: CAMPOS LOCAIS (sempre habilitados) */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
           <motion.div
             custom={1}
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="form-section"
           >
-            <div className="form-section-card">
-              {multiLocal.active && (
-                <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                  <p className="text-sm text-blue-300">
-                    <strong>Adicionando local #{multiLocal.idPrinc ? "2+" : "1"}</strong> — 
-                    Preencha os dados do novo local e clique em "Próximo Local" ou desmarque "Vários locais" para finalizar.
-                  </p>
-                </div>
-              )}
-              <div className="grid grid-cols-4 gap-6">
-                <FormField
-                  control={form.control}
-                  name="idUserGuy"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <User className="w-3.5 h-3.5 text-primary" />
-                          Inspetor (Guy) <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-guy">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {userOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="dtInspecao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <Calendar className="w-3.5 h-3.5 text-accent" />
-                          Data Inspeção <span className="text-destructive">*</span>
-                        </label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "form-input w-full justify-start text-left font-normal bg-[rgba(15,15,35,0.6)] border-white/12 hover:bg-[rgba(15,15,35,0.8)]",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                                data-testid="button-inspecao-date"
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
-                                {field.value ? (
-                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                ) : (
-                                  <span>Selecione...</span>
-                                )}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-card border-white/15" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              locale={ptBR}
-                              initialFocus
-                              className="rounded-md"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="idUf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <MapPin className="w-3.5 h-3.5 text-accent" />
-                          UF <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-uf">
-                              <SelectValue placeholder="UF" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {ufOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="idCidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="form-field-wrapper">
-                        <label className="form-label">
-                          <Layers className="w-3.5 h-3.5 text-accent" />
-                          Cidade <span className="text-destructive">*</span>
-                        </label>
-                        <FormControl>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value ? field.value.toString() : ""}
-                            disabled={!selectedUf || selectedUf === 0}
-                          >
-                            <SelectTrigger className="form-select w-full" data-testid="select-cidade">
-                              <SelectValue placeholder={selectedUf && selectedUf > 0 ? "Selecione..." : "Selecione a UF primeiro..."} />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {cidadeOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage className="form-error" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
+            {/* Banner multi-local */}
+            {multiLocal.active && (
+              <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <p className="text-sm text-blue-300">
+                  <strong>Adicionando local adicional</strong> — Preencha os dados 
+                  do novo local e clique em "Próximo Local" ou desmarque 
+                  "Vários locais" para finalizar.
+                </p>
               </div>
+            )}
+            
+            <div className="grid grid-cols-4 gap-4">
+              {/* Inspetor (Guy) */}
+              <FormField
+                control={form.control}
+                name="idUserGuy"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Inspetor (Guy)" required>
+                      <FormControl>
+                        <HeadlessCombobox
+                          options={inspetores}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Digite para buscar..."
+                          loading={loadingInspetores}
+                          icon={<User className="w-4 h-4 text-primary" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* Data Inspeção */}
+              <FormField
+                control={form.control}
+                name="dtInspecao"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Data Inspeção" required>
+                      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-center text-center font-normal form-select",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                              ) : (
+                                <span>Selecione...</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-card border-white/15" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(date) => {
+                              field.onChange(date);
+                              setDatePickerOpen(false); // Fecha ao selecionar
+                            }}
+                            locale={ptBR}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* UF */}
+              <FormField
+                control={form.control}
+                name="idUf"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="UF" required>
+                      <FormControl>
+                        <HeadlessCombobox
+                          options={ufs}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Digite UF..."
+                          loading={loadingUfs}
+                          icon={<MapPin className="w-4 h-4 text-accent" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
+              {/* Cidade */}
+              <FormField
+                control={form.control}
+                name="idCidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <ModalFormField label="Cidade" required>
+                      <FormControl>
+                        <HeadlessCombobox
+                          options={cidades}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder={
+                            selectedUf && selectedUf > 0 
+                              ? "Digite cidade..." 
+                              : "Selecione UF primeiro"
+                          }
+                          disabled={!selectedUf || selectedUf === 0}
+                          loading={loadingCidades}
+                          icon={<Layers className="w-4 h-4 text-accent" />}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
             </div>
           </motion.div>
         </form>
       </Form>
       
-      {/* Dialog de confirmação para criar novas entidades */}
-      <AlertDialog open={pendingCreation !== null} onOpenChange={(open) => !open && handleCancelCreate()}>
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* DIALOG DE CONFIRMAÇÃO DE CRIAÇÃO DE NOVAS ENTIDADES */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      <AlertDialog open={pendingCreation !== null} onOpenChange={(open) => !open && cancelCreate()}>
         <AlertDialogContent className="bg-card border-white/15">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold">
               Confirmar criação de novos registros
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Você está prestes a criar os seguintes registros que não existem no sistema:
+              <p>Você está prestes a criar registros que não existem no sistema:</p>
               <ul className="mt-3 space-y-1">
                 {pendingCreation?.newEntities.map((entity, idx) => (
                   <li key={idx} className="flex items-center gap-2 text-foreground font-medium">
@@ -799,14 +495,14 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={handleCancelCreate}
+            <AlertDialogCancel
+              onClick={cancelCreate}
               className="border-white/15 bg-transparent hover:bg-white/5"
             >
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmCreate}
+            <AlertDialogAction
+              onClick={confirmCreate}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Sim, criar

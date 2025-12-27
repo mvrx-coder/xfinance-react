@@ -2,8 +2,11 @@
  * Re-exports de todos os hooks customizados.
  * 
  * Uso:
- * import { useInspections, useKPIs, useLookups } from "@/hooks";
+ * import { useInspections, useKPIs, useLookups, useAuth } from "@/hooks";
  */
+
+// Autenticação
+export { useAuth, type AuthContextValue, type AuthState } from "./use-auth";
 
 // Hooks existentes
 export { useToast } from "./use-toast";
@@ -90,3 +93,19 @@ export {
   type UseInvestmentsOptions,
   type UseInvestmentsReturn,
 } from "./use-investments";
+
+// Novo Registro
+export {
+  useNewRecord,
+  newRecordSchema,
+  type NewRecordFormData,
+  type NewRecordResponse,
+  type MultiLocalState,
+  type PendingCreation,
+} from "./use-new-record";
+
+// Debounce
+export {
+  useDebouncedValue,
+  useDebouncedCallback,
+} from "./use-debounce";

@@ -1,6 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
+/**
+ * Dashboard Principal - xFinance
+ * 
+ * Usa useAuth do contexto centralizado para dados do usuário.
+ * A proteção de rota é feita pelo ProtectedRoute no App.tsx.
+ */
+
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
@@ -11,12 +17,12 @@ import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal
 import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
-import { logout, getCurrentUser, type UserData } from "@/services/api/auth";
+import { useAuth } from "@/hooks";
 import type { FilterState, KPIs, Inspection } from "@shared/schema";
 
 export default function Dashboard() {
-  const [, setLocation] = useLocation();
-  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  // Autenticação via contexto global
+  const { user, logout: authLogout, papel } = useAuth();
   
   const [filters, setFilters] = useState<FilterState>({
     player: false,
@@ -41,27 +47,6 @@ export default function Dashboard() {
     guyPay: false,
   });
 
-  // Carregar usuário atual
-  useEffect(() => {
-    // Primeiro tenta do localStorage (cache)
-    const cachedUser = localStorage.getItem("xfinance_user");
-    if (cachedUser) {
-      setCurrentUser(JSON.parse(cachedUser));
-    }
-    
-    // Depois valida com o backend
-    getCurrentUser().then((user) => {
-      if (user) {
-        setCurrentUser(user);
-        localStorage.setItem("xfinance_user", JSON.stringify(user));
-      } else {
-        // Não autenticado - redireciona para login
-        localStorage.removeItem("xfinance_user");
-        setLocation("/login");
-      }
-    });
-  }, [setLocation]);
-
   // Montar opções de busca baseadas nos filtros
   const fetchOptions: FetchOptions = {
     order: filters.player ? "player" : "normal",
@@ -69,16 +54,14 @@ export default function Dashboard() {
     myJob: filters.myJob,
   };
 
-  // Buscar inspeções da API real
+  // Buscar inspeções da API
   const { 
     data: inspectionsResponse, 
     isLoading: isLoadingInspections, 
     refetch: refetchInspections,
-    error: inspectionsError
   } = useQuery<InspectionsResponse>({
     queryKey: ["inspections", fetchOptions],
     queryFn: () => fetchInspections(fetchOptions),
-    enabled: !!currentUser, // Só busca se usuário estiver logado
     retry: false,
   });
 
@@ -86,17 +69,16 @@ export default function Dashboard() {
   const inspections = inspectionsResponse?.data || [];
   const totalRecords = inspectionsResponse?.total || 0;
 
-  // KPIs (ainda mock - será implementado depois)
-  const kpis: KPIs = { express: totalRecords, honorarios: 0, guyHonorario: 0, despesas: 0, guyDespesa: 0 };
+  // KPIs (mock - será implementado depois com endpoint dedicado)
+  const kpis: KPIs = { 
+    express: totalRecords, 
+    honorarios: 0, 
+    guyHonorario: 0, 
+    despesas: 0, 
+    guyDespesa: 0 
+  };
 
-  // Redirecionar para login se não autenticado
-  useEffect(() => {
-    if (inspectionsError?.message === "Não autenticado") {
-      localStorage.removeItem("xfinance_user");
-      setLocation("/login");
-    }
-  }, [inspectionsError, setLocation]);
-
+  // Handlers
   const dismissStatus = useCallback((id: string) => {
     setStatusMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
@@ -121,10 +103,9 @@ export default function Dashboard() {
       description: "Você será desconectado...",
     });
     
-    await logout();
-    localStorage.removeItem("xfinance_user");
-    setLocation("/login");
-  }, [setLocation]);
+    await authLogout();
+    // Redirecionamento é automático via ProtectedRoute quando isAuthenticated muda
+  }, [authLogout]);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
     toast.info("Registro selecionado", {
@@ -140,11 +121,14 @@ export default function Dashboard() {
     });
   }, [handleCloseModal, refetchInspections]);
 
+  // Nome de exibição do usuário
+  const displayName = user?.short_nome || user?.nick || user?.nome || "Usuário";
+
   return (
     <div className="flex flex-col h-screen bg-depth-gradient" data-testid="dashboard">
       {/* Top Bar */}
       <TopBar
-        userName={currentUser?.short_nome || currentUser?.nick || currentUser?.nome || "Usuário"}
+        userName={displayName}
         kpis={kpis}
         filters={filters}
         onFiltersChange={setFilters}
@@ -167,7 +151,7 @@ export default function Dashboard() {
         isLoading={isLoadingInspections}
         onRowClick={handleRowClick}
         onRefresh={handleSearch}
-        userRole={currentUser?.papel}
+        userRole={papel}
       />
 
       {/* Modals */}

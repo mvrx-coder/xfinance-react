@@ -6,7 +6,7 @@
 param(
     [string]$BindHost = "127.0.0.1",
     [int]$BackendPort = 8000,
-    [int]$FrontendPort = 5173,
+    [int]$FrontendPort = 5000,  # Express proxy serve o frontend
     [switch]$BackendOnly,
     [switch]$FrontendOnly
 )
@@ -75,8 +75,8 @@ function Start-Frontend {
     $scriptContent = @"
 Set-Location '$ProjectRoot'
 Write-Host ''
-Write-Host '  [Vite] Frontend rodando em http://localhost:${FrontendPort}' -ForegroundColor Green
-Write-Host '  [Vite] Pressione Ctrl+C para parar' -ForegroundColor Yellow
+Write-Host '  [Express] Frontend + Proxy rodando em http://localhost:${FrontendPort}' -ForegroundColor Green
+Write-Host '  [Express] Pressione Ctrl+C para parar' -ForegroundColor Yellow
 Write-Host ''
 npm run dev
 "@

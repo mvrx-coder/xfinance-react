@@ -11,7 +11,8 @@ interface ModalProps {
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl";
+  hideHeader?: boolean;
 }
 
 const maxWidthClasses = {
@@ -23,6 +24,7 @@ const maxWidthClasses = {
   "3xl": "max-w-3xl",
   "4xl": "max-w-4xl",
   "5xl": "max-w-5xl",
+  "6xl": "max-w-6xl",
 };
 
 const backdropVariants = {
@@ -66,6 +68,7 @@ export function Modal({
   children,
   footer,
   maxWidth = "lg",
+  hideHeader = false,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -122,35 +125,37 @@ export function Modal({
             {/* Gradient accent line */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary" />
 
-            {/* Header */}
-            <div className="flex items-start justify-between px-6 py-5 border-b border-white/10 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-                  <img src="/logo1.png" alt="Logo" className="w-7 h-7 object-contain" />
+            {/* Header (condicional) */}
+            {!hideHeader && (
+              <div className="flex items-start justify-between px-6 py-5 border-b border-white/10 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
+                    <img src="/logo1.png" alt="Logo" className="w-7 h-7 object-contain" />
+                  </div>
+                  <div>
+                    <h2
+                      id={`${id}-title`}
+                      className="text-lg font-bold text-foreground"
+                      data-testid={`modal-title-${id}`}
+                    >
+                      {title}
+                    </h2>
+                    {subtitle && (
+                      <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h2
-                    id={`${id}-title`}
-                    className="text-lg font-bold text-foreground"
-                    data-testid={`modal-title-${id}`}
-                  >
-                    {title}
-                  </h2>
-                  {subtitle && (
-                    <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
-                  )}
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="glass border border-white/10 -mt-1"
+                  data-testid={`button-close-modal-${id}`}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="glass border border-white/10 -mt-1"
-                data-testid={`button-close-modal-${id}`}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            )}
 
             {/* Body */}
             <div className="px-6 py-5 max-h-[70vh] overflow-y-auto custom-scrollbar">

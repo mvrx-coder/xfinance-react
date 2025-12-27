@@ -19,6 +19,7 @@ import {
   fetchUfOptions,
   fetchCidadeOptions,
   fetchUsersOptions,
+  fetchInspetoresOptions,
   type LookupOption,
   type UserOption,
 } from "@/services/api/lookups";
@@ -90,6 +91,17 @@ export function useUsers() {
   return useQuery<UserOption[]>({
     queryKey: ["lookups", "users"],
     queryFn: fetchUsersOptions,
+    staleTime: CACHE_CONFIG.LOOKUPS_STALE_TIME,
+  });
+}
+
+/**
+ * Hook para buscar inspetores (somente papel Inspetor e ativos)
+ */
+export function useInspetores() {
+  return useQuery<UserOption[]>({
+    queryKey: ["lookups", "inspetores"],
+    queryFn: fetchInspetoresOptions,
     staleTime: CACHE_CONFIG.LOOKUPS_STALE_TIME,
   });
 }
