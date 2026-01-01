@@ -7,6 +7,7 @@
  */
 
 import type { Inspection } from "@shared/schema";
+import { formatDateShort } from "@/services/domain/formatters";
 
 // =============================================================================
 // TIPOS
@@ -70,22 +71,11 @@ export interface InspectionsResponse {
 /**
  * Formata data para DD/MM (padrão do grid xFinance)
  * Fonte: x_main/utils.py linha 100
+ * 
+ * @deprecated Use formatDateShort from @/services/domain/formatters
  */
 function formatDateDDMM(dateStr: string | null | undefined): string {
-  if (!dateStr) return "";
-  
-  try {
-    // Formato esperado: YYYY-MM-DD
-    const parts = dateStr.split("-");
-    if (parts.length === 3) {
-      const day = parts[2].substring(0, 2); // Pega só os 2 primeiros chars (ignora hora)
-      const month = parts[1];
-      return `${day}/${month}`;
-    }
-  } catch {
-    // Se falhar, retorna vazio
-  }
-  return "";
+  return formatDateShort(dateStr);
 }
 
 /**

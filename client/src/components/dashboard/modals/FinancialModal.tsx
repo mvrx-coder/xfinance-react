@@ -12,19 +12,11 @@ import {
   Receipt,
   CreditCard,
 } from "lucide-react";
+import { formatCurrency } from "@/services/domain/formatters";
 
 interface FinancialModalProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
 }
 
 const containerVariants = {

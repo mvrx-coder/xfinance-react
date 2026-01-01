@@ -3,7 +3,15 @@
  * 
  * Tipos são importados de @/hooks.
  * Dados reais vêm da API via hooks.
+ * 
+ * ⚠️ FORMATTERS MOVIDOS - Usar @/services/domain/formatters
  */
+
+import {
+  formatCurrency as formatCurrencyBase,
+  formatNumber,
+  formatDateShort,
+} from "@/services/domain/formatters";
 
 // =============================================================================
 // ANIMATION VARIANTS (Framer Motion)
@@ -20,36 +28,26 @@ export const itemVariants = {
 };
 
 // =============================================================================
-// FORMATADORES
+// FORMATADORES (Wrappers para compatibilidade)
 // =============================================================================
 
+/**
+ * @deprecated Use formatNumber from @/services/domain/formatters
+ */
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+  return formatNumber(value, 2);
 }
 
+/**
+ * @deprecated Use formatCurrency from @/services/domain/formatters
+ */
 export function formatCurrencyShort(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatCurrencyBase(value);
 }
 
+/**
+ * @deprecated Use formatDateShort from @/services/domain/formatters
+ */
 export function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  
-  // Se já está no formato DD/MM/YY ou DD/MM/YYYY
-  if (dateStr.includes("/")) return dateStr;
-  
-  // Se está no formato YYYY-MM-DD
-  try {
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year.slice(-2)}`;
-  } catch {
-    return dateStr;
-  }
+  return formatDateShort(dateStr);
 }
