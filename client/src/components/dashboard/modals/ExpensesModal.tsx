@@ -27,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { formatCurrency as formatCurrencyBase } from "@/services/domain/formatters";
 import {
   Select,
   SelectContent,
@@ -149,10 +150,7 @@ export function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
 
   const formatCurrency = (val: number | string) => {
     const num = typeof val === "string" ? parseFloat(val) : val;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(num);
+    return formatCurrencyBase(num, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const handleSave = async () => {

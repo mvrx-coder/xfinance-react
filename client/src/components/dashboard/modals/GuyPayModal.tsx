@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Wallet, Clock, CheckCircle, AlertCircle, DollarSign, Calendar } from "lucide-react";
+import { formatCurrency } from "@/services/domain/formatters";
 
 interface GuyPayModalProps {
   isOpen: boolean;
@@ -18,15 +19,6 @@ const mockPayments = [
   { id: "4", guy: "Helena Lima", initials: "HL", amount: 6890, status: "atrasado", date: "01/12/2025" },
   { id: "5", guy: "Rafael Costa", initials: "RC", amount: 9200, status: "pendente", date: "25/12/2025" },
 ];
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 const statusConfig = {
   pago: {

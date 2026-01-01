@@ -50,6 +50,7 @@ import {
   getMarkerLevels
 } from "@/services/api/acoes";
 import { getLabelById, type LookupOption } from "@/services/api/lookups";
+import { ACTION_COLOR_CLASSES } from "./action-center/constants";
 
 interface ActionCenterProps {
   inspection: Inspection | null;
@@ -61,15 +62,6 @@ interface ActionCenterProps {
   contrLookup: LookupOption[];
   segurLookup: LookupOption[];
 }
-
-const colorClasses: Record<string, string> = {
-  red: "border-red-500 text-red-400 shadow-red-500/20 hover:shadow-red-500/40 hover:bg-red-500/10",
-  orange: "border-orange-500 text-orange-400 shadow-orange-500/20 hover:shadow-orange-500/40 hover:bg-orange-500/10",
-  yellow: "border-yellow-500 text-yellow-400 shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:bg-yellow-500/10",
-  green: "border-green-500 text-green-400 shadow-green-500/20 hover:shadow-green-500/40 hover:bg-green-500/10",
-  blue: "border-blue-500 text-blue-400 shadow-blue-500/20 hover:shadow-blue-500/40 hover:bg-blue-500/10",
-  purple: "border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10",
-};
 
 export function ActionCenter({ 
   inspection, 
@@ -236,7 +228,7 @@ export function ActionCenter({
                 transition={{ delay: 0 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.red} ${activePanel === 'excluir' ? 'bg-red-500/20' : ''}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.red} ${activePanel === 'excluir' ? 'bg-red-500/20' : ''}`}
                   variant="outline"
                   disabled={!canDelete}
                   onClick={() => setActivePanel(activePanel === 'excluir' ? null : 'excluir')}
@@ -295,7 +287,7 @@ export function ActionCenter({
                 transition={{ delay: 0.05 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.orange} ${activePanel === 'encaminhar' ? 'bg-orange-500/20' : ''}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.orange} ${activePanel === 'encaminhar' ? 'bg-orange-500/20' : ''}`}
                   variant="outline"
                   disabled={!canForward}
                   onClick={() => setActivePanel(activePanel === 'encaminhar' ? null : 'encaminhar')}
@@ -359,7 +351,7 @@ export function ActionCenter({
                 transition={{ delay: 0.1 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.yellow} ${activePanel === 'marcadores' ? 'bg-yellow-500/20' : ''}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.yellow} ${activePanel === 'marcadores' ? 'bg-yellow-500/20' : ''}`}
                   variant="outline"
                   disabled={!canMark}
                   onClick={() => setActivePanel(activePanel === 'marcadores' ? null : 'marcadores')}
@@ -409,7 +401,7 @@ export function ActionCenter({
                 transition={{ delay: 0.15 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.green}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.green}`}
                   variant="outline"
                   onClick={() => {
                     toast({
@@ -430,7 +422,7 @@ export function ActionCenter({
                 transition={{ delay: 0.2 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.blue}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.blue}`}
                   variant="outline"
                   onClick={() => setShowClearFiltersConfirm(true)}
                   data-testid="action-clear-filters"
@@ -446,7 +438,7 @@ export function ActionCenter({
                 transition={{ delay: 0.25 }}
               >
                 <Button
-                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${colorClasses.purple}`}
+                  className={`w-full justify-start gap-3 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl ${ACTION_COLOR_CLASSES.purple}`}
                   variant="outline"
                   disabled
                   data-testid="action-coming-soon"

@@ -4,12 +4,17 @@
  * Este arquivo contém APENAS:
  * - Tipos TypeScript
  * - Constantes visuais (cores, animações)
- * - Funções de formatação
  * 
  * ⚠️ MOCK DATA REMOVIDO - Dados vêm da API via usePerformance hook
+ * ⚠️ FORMATTERS MOVIDOS - Usar @/services/domain/formatters
  */
 
 import { PieChart, LineChart, BarChart3, Wallet } from "lucide-react";
+import {
+  formatCurrency as formatCurrencyBase,
+  formatNumber,
+  formatDateShort as formatDateShortBase,
+} from "@/services/domain/formatters";
 
 // =============================================================================
 // TIPOS
@@ -66,41 +71,28 @@ export const itemVariants = {
 /**
  * Formata número como moeda (sem símbolo R$).
  * Ex: 5851040 → "5.851.040"
+ * 
+ * @deprecated Use formatNumber from @/services/domain/formatters
  */
 export function formatCurrency(value: number | undefined | null): string {
-  if (value == null) return "0";
-  return new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatNumber(value ?? 0, 0);
 }
 
 /**
  * Formata número como moeda (com símbolo R$).
  * Ex: 5851040 → "R$ 5.851.040"
+ * 
+ * @deprecated Use formatCurrency from @/services/domain/formatters
  */
 export function formatCurrencyFull(value: number | undefined | null): string {
-  if (value == null) return "R$ 0";
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatCurrencyBase(value);
 }
 
 /**
  * Formata data DD/MM.
+ * 
+ * @deprecated Use formatDateShort from @/services/domain/formatters
  */
 export function formatDateShort(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  try {
-    const parts = dateStr.split("-");
-    if (parts.length >= 3) {
-      return `${parts[2].substring(0, 2)}/${parts[1]}`;
-    }
-    return dateStr;
-  } catch {
-    return dateStr || "-";
-  }
+  return formatDateShortBase(dateStr);
 }
