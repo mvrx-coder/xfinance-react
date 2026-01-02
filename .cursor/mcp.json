@@ -12,6 +12,10 @@
         "--repository",
         "E:/MVRX/Financeiro/xFinance_3.0/x_finan"
       ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
