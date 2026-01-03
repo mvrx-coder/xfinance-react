@@ -8,7 +8,8 @@
 import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TopBar } from "@/components/dashboard/TopBar";
+import { TopBarPremium } from "@/components/dashboard/TopBarPremium";
+import { CollapsibleSidebar } from "@/components/dashboard/CollapsibleSidebar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
 import { StatusBar } from "@/components/dashboard/StatusBar";
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
@@ -30,6 +31,7 @@ export default function Dashboard() {
     myJob: false,
     dbLimit: true,
     columnGroups: {
+      people: true,
       workflow: true,
       recebiveis: true,
       pagamentos: true,
@@ -128,12 +130,10 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-screen bg-depth-gradient" data-testid="dashboard">
-      {/* Top Bar */}
-      <TopBar
+      {/* Top Bar Premium */}
+      <TopBarPremium
         userName={displayName}
         kpis={kpis}
-        filters={filters}
-        onFiltersChange={setFilters}
         onSearch={handleSearch}
         onNewRecord={() => handleOpenModal("newRecord")}
         onOpenUsers={() => handleOpenModal("users")}
@@ -147,15 +147,23 @@ export default function Dashboard() {
       {/* Status Bar */}
       <StatusBar messages={statusMessages} onDismiss={dismissStatus} />
 
-      {/* Main Grid */}
-      <DataGrid
-        data={inspections}
-        filters={filters}
-        isLoading={isLoadingInspections}
-        onRowClick={handleRowClick}
-        onRefresh={handleSearch}
-        userRole={papel}
-      />
+      {/* Main Content: Sidebar + Grid */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Colapsável */}
+        <CollapsibleSidebar filters={filters} onFiltersChange={setFilters} />
+
+        {/* Main Grid */}
+        <main className="flex-1 overflow-hidden">
+          <DataGrid
+            data={inspections}
+            filters={filters}
+            isLoading={isLoadingInspections}
+            onRowClick={handleRowClick}
+            onRefresh={handleSearch}
+            userRole={papel}
+          />
+        </main>
+      </div>
 
       {/* Modals */}
       <NewRecordModal

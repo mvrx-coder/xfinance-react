@@ -1528,3 +1528,234 @@
   font-size: 0.75rem;
   font-weight: 500;
 }
+
+/* ========================================
+   PREMIUM LAYOUT SYSTEM - TopBar + Sidebar
+   ======================================== */
+
+/* TopBar Premium - Glassmorphism Header */
+.topbar-premium {
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  /* T3: Border Glow Inferior Cyan */
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(0, 188, 212, 0.4) 20%, 
+    rgba(0, 188, 212, 0.6) 50%, 
+    rgba(0, 188, 212, 0.4) 80%, 
+    transparent 100%
+  ) 1;
+  position: relative;
+}
+
+.topbar-premium::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 10%;
+  right: 10%;
+  height: 6px;
+  background: radial-gradient(ellipse at center, rgba(0, 188, 212, 0.3) 0%, transparent 70%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* T2: Separadores Gradient */
+.separator-gradient {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 15%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.2) 85%,
+    transparent 100%
+  );
+  width: 1px;
+  min-width: 1px;
+  flex-shrink: 0;
+}
+
+/* T4: Botoes com Glow Hover */
+.btn-glow-hover {
+  transition: all 0.2s ease;
+}
+
+.btn-glow-hover:hover {
+  box-shadow: 0 0 12px rgba(206, 98, 217, 0.4);
+}
+
+.btn-glow-hover:hover svg {
+  filter: drop-shadow(0 0 4px rgba(206, 98, 217, 0.6));
+}
+
+/* Sidebar Premium - Glassmorphism Sidebar */
+.sidebar-premium {
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* Botao Toggle Sidebar - Fixo na borda */
+.sidebar-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateX(50%) translateY(-50%);
+  z-index: 20;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(206, 98, 217, 0.4);
+  background: hsl(var(--card));
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    0 0 8px rgba(206, 98, 217, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle-btn:hover {
+  border-color: rgba(206, 98, 217, 0.7);
+  background: rgba(206, 98, 217, 0.15);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(206, 98, 217, 0.4);
+}
+
+/* ========================================
+   SWITCH/TOGGLE - Pill Glow com Glassmorphism
+   ======================================== */
+
+/* Switch Pill Glow - Compacto */
+.switch-pill-glow {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch-pill-glow::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  border-radius: 50%;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.switch-pill-glow[data-checked="true"] {
+  background: rgba(206, 98, 217, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(206, 98, 217, 0.5);
+  box-shadow: 
+    0 0 12px rgba(206, 98, 217, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.switch-pill-glow[data-checked="true"]::after {
+  left: 13px;
+  background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.95));
+  box-shadow: 
+    0 0 8px rgba(206, 98, 217, 0.6),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Switch Pill Glow - Variantes de Cor */
+/* Violet (People) */
+.switch-pill-glow[data-color="violet"][data-checked="true"] {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+.switch-pill-glow[data-color="violet"][data-checked="true"]::after {
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Cyan (Workflow) */
+.switch-pill-glow[data-color="cyan"][data-checked="true"] {
+  background: rgba(0, 188, 212, 0.25);
+  border-color: rgba(0, 188, 212, 0.5);
+  box-shadow: 0 0 12px rgba(0, 188, 212, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+.switch-pill-glow[data-color="cyan"][data-checked="true"]::after {
+  box-shadow: 0 0 8px rgba(0, 188, 212, 0.6), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Green (Recebiveis) */
+.switch-pill-glow[data-color="green"][data-checked="true"] {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+.switch-pill-glow[data-color="green"][data-checked="true"]::after {
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Amber (Pagamentos) */
+.switch-pill-glow[data-color="amber"][data-checked="true"] {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+.switch-pill-glow[data-color="amber"][data-checked="true"]::after {
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* KPI Express Glow Effect */
+.kpi-express-glow {
+  background: rgba(206, 98, 217, 0.08);
+  border: 1px solid rgba(206, 98, 217, 0.25);
+  box-shadow: 
+    0 0 20px rgba(206, 98, 217, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Main Content Area */
+.main-content-premium {
+  background: rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Scrollbar Premium para Sidebar */
+.sidebar-premium::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-premium::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-premium::-webkit-scrollbar-thumb {
+  background: rgba(206, 98, 217, 0.3);
+  border-radius: 2px;
+}
+
+.sidebar-premium::-webkit-scrollbar-thumb:hover {
+  background: rgba(206, 98, 217, 0.5);
+}

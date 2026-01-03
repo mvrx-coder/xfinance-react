@@ -69,26 +69,33 @@ export function DataGridHeader({ table, filters }: DataGridHeaderProps) {
             <span className="text-xs font-bold text-muted-foreground tracking-wider">Loc</span>
           </FilterableHeader>
         </TableHead>
-        <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-          <FilterableHeader column={getColumn("guilty")}>
-            <span className="text-xs font-bold text-muted-foreground tracking-wider">Guilty</span>
-          </FilterableHeader>
-        </TableHead>
-        <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
-          <FilterableHeader column={getColumn("guy")}>
-            <span className="text-xs font-bold text-muted-foreground tracking-wider">Guy</span>
-          </FilterableHeader>
-        </TableHead>
-        <TableHead className="w-[55px] min-w-[55px] max-w-[55px] bg-card">
-          <FilterableHeader column={getColumn("meta")}>
-            <span className="text-xs font-bold text-muted-foreground tracking-wider">Meta</span>
-          </FilterableHeader>
-        </TableHead>
         
-        {/* Separador */}
-        <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
-          <div className="w-[1px] h-full bg-muted-foreground/40" />
-        </TableHead>
+        {/* Grupo People: Guilty, Guy, Meta - Violet */}
+        {filters.columnGroups.people && (
+          <>
+            <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card relative">
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-violet-500 rounded-b-sm" />
+              <FilterableHeader column={getColumn("guilty")}>
+                <span className="text-xs font-bold text-violet-400 tracking-wider">Guilty</span>
+              </FilterableHeader>
+            </TableHead>
+            <TableHead className="w-[80px] min-w-[80px] max-w-[80px] bg-card">
+              <FilterableHeader column={getColumn("guy")}>
+                <span className="text-xs font-bold text-violet-400 tracking-wider">Guy</span>
+              </FilterableHeader>
+            </TableHead>
+            <TableHead className="w-[55px] min-w-[55px] max-w-[55px] bg-card">
+              <FilterableHeader column={getColumn("meta")}>
+                <span className="text-xs font-bold text-violet-400 tracking-wider">Meta</span>
+              </FilterableHeader>
+            </TableHead>
+            
+            {/* Separador People */}
+            <TableHead className="w-[1px] min-w-[1px] max-w-[1px] p-0 bg-card">
+              <div className="w-[1px] h-full bg-violet-500/40" />
+            </TableHead>
+          </>
+        )}
         
         {/* Grupo 3: Workflow Principal */}
         {filters.columnGroups.workflow && (

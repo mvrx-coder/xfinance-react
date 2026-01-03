@@ -96,6 +96,7 @@ export interface FilterState {
   myJob: boolean;
   dbLimit: boolean;
   columnGroups: {
+    people: boolean;
     workflow: boolean;
     recebiveis: boolean;
     pagamentos: boolean;

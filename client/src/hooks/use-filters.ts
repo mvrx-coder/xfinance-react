@@ -41,6 +41,7 @@ export const DEFAULT_FILTERS: FilterState = {
   myJob: false,
   dbLimit: true,
   columnGroups: {
+    people: true,
     workflow: true,
     recebiveis: true,
     pagamentos: true,
