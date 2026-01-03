@@ -225,62 +225,63 @@ export function TopBarPremium({
             </div>
           </div>
 
-          {/* Botões de Ação - Glassmorphism */}
+          {/* Botões de Ação - Estilo Central de Ações */}
           <div className="flex items-center gap-2">
             <Button
               size="sm"
+              variant="outline"
               onClick={onNewRecord}
-              className="gap-2 btn-glass text-primary-foreground"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-green-500 text-green-400 shadow-green-500/20 hover:shadow-green-500/40 hover:bg-green-500/10"
               data-testid="button-new-record"
             >
               <Plus className="h-4 w-4" />
               Novo
             </Button>
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onOpenUsers}
-              className="gap-2 btn-glass-ghost"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-users"
             >
               <Users className="h-4 w-4" />
               Usuários
             </Button>
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onOpenInvestments}
-              className="gap-2 btn-glass-ghost"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-investments"
             >
               <TrendingUp className="h-4 w-4" />
               Aportes
             </Button>
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onOpenFinancial}
-              className="gap-2 btn-glass-ghost"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-financial"
             >
               <Zap className="h-4 w-4" />
               Performance
             </Button>
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onOpenGuyPay}
-              className="gap-2 btn-glass-ghost"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-guypay"
             >
               <Wallet className="h-4 w-4" />
               Guy Pay
             </Button>
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onOpenExpenses}
-              className="gap-2 btn-glass-ghost"
+              className="gap-2 rounded-xl border-2 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl border-purple-500 text-purple-400 shadow-purple-500/20 hover:shadow-purple-500/40 hover:bg-purple-500/10"
               data-testid="button-expenses"
             >
               <Receipt className="h-4 w-4" />
