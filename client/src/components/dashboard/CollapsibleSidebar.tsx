@@ -1,75 +1,47 @@
 /**
- * CollapsibleSidebar - Sidebar colapsável com filtros
+ * CollapsibleSidebar - Sidebar colapsável com filtros e ações
  * 
- * Contém:
- * - Filtros de ordenação (Player, MyJob, DB Limit)
- * - Toggles de grupos de colunas (People, Workflow, Recebíveis, Pagamentos)
- * - Switch Pill Glow com glassmorphism
+ * Layout:
+ * - Filtros e toggles de colunas (sempre visíveis)
+ * - Ações de inspeção (aparecem quando linha selecionada)
  */
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
-import {
-  ChevronLeft,
-  Filter,
-  User,
-  Briefcase,
-  Database,
-  Workflow,
-  DollarSign,
-  CreditCard,
-  Users,
-} from "lucide-react";
+import { ChevronLeft, Filter, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { FilterState } from "@shared/schema";
-
-// Switch Pill Glow com suporte a cores
-function SwitchPillGlow({ checked, onChange, testId, color }: { 
-  checked: boolean; 
-  onChange: () => void; 
-  testId: string;
-  color?: "violet" | "cyan" | "green" | "amber";
-}) {
-  return (
-    <div
-      className="switch-pill-glow"
-      data-checked={checked}
-      data-color={color}
-      onClick={onChange}
-      data-testid={testId}
-      role="switch"
-      aria-checked={checked}
-    />
-  );
-}
-
+import type { FilterState, Inspection } from "@shared/schema";
+import type { LookupOption } from "@/services/api/lookups";
+import { SidebarFilters, SidebarActions } from "./sidebar";
 
 interface CollapsibleSidebarProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
+  selectedInspection?: Inspection | null;
+  onClearSelection?: () => void;
+  onRefresh?: () => void;
+  userRole?: string;
+  contrLookup?: LookupOption[];
+  segurLookup?: LookupOption[];
 }
 
-export function CollapsibleSidebar({ filters, onFiltersChange }: CollapsibleSidebarProps) {
+export function CollapsibleSidebar({ 
+  filters, 
+  onFiltersChange,
+  selectedInspection,
+  onClearSelection,
+  onRefresh,
+  userRole,
+  contrLookup = [],
+  segurLookup = [],
+}: CollapsibleSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const toggleFilter = (key: keyof Omit<FilterState, "columnGroups">) => {
-    onFiltersChange({ ...filters, [key]: !filters[key] });
-  };
-
-  const toggleColumnGroup = (group: keyof FilterState["columnGroups"]) => {
-    onFiltersChange({
-      ...filters,
-      columnGroups: {
-        ...filters.columnGroups,
-        [group]: !filters.columnGroups[group],
-      },
-    });
-  };
 
   return (
     <aside
       className={cn(
-        "sidebar-premium h-full flex flex-col relative transition-all duration-300 ease-in-out border-r border-white/10",
+        "sidebar-premium h-full flex flex-col relative transition-all duration-300 ease-in-out border-r border-white/10 overflow-y-auto",
         isCollapsed ? "w-14" : "w-64"
       )}
       data-testid="collapsible-sidebar"
@@ -93,126 +65,69 @@ export function CollapsibleSidebar({ filters, onFiltersChange }: CollapsibleSide
         "flex-1 overflow-hidden transition-opacity duration-200",
         isCollapsed && "opacity-0 pointer-events-none"
       )}>
-        <div className="p-4 space-y-6">
-          {/* Seção: Filtros */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              <Filter className="h-3.5 w-3.5" />
-              Filtros
-            </div>
+        {/* Filtros - Sempre visíveis */}
+        <SidebarFilters filters={filters} onFiltersChange={onFiltersChange} />
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  <User className="h-3.5 w-3.5" />
-                  <span>Ordenar por Player</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.player}
-                  onChange={() => toggleFilter("player")}
-                  testId="switch-filter-player"
-                />
-              </div>
+        {/* Ações - Aparecem quando linha selecionada */}
+        <AnimatePresence>
+          {selectedInspection && onClearSelection && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="px-4 pb-4"
+            >
+              {/* Separador animado */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                exit={{ scaleX: 0 }}
+                transition={{ duration: 0.2 }}
+                className="origin-left"
+              >
+                <Separator className="bg-primary/30 mb-4" />
+              </motion.div>
 
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Briefcase className="h-3.5 w-3.5" />
-                  <span>Meus Trabalhos</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.myJob}
-                  onChange={() => toggleFilter("myJob")}
-                  testId="switch-filter-myjob"
-                />
-              </div>
+              {/* Header da seção */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wide mb-3"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Ações
+              </motion.div>
 
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Database className="h-3.5 w-3.5" />
-                  <span>Limitar 800 registros</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.dbLimit}
-                  onChange={() => toggleFilter("dbLimit")}
-                  testId="switch-filter-dblimit"
-                />
-              </div>
-            </div>
-          </div>
-
-          <Separator className="bg-white/10" />
-
-          {/* Seção: Colunas Visíveis */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              <Workflow className="h-3.5 w-3.5" />
-              Colunas Visíveis
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-violet-400 group-hover:text-violet-300 transition-colors">
-                  <Users className="h-3.5 w-3.5" />
-                  <span>People</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.columnGroups.people}
-                  onChange={() => toggleColumnGroup("people")}
-                  testId="switch-column-people"
-                  color="violet"
-                />
-              </div>
-
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-accent group-hover:text-accent/80 transition-colors">
-                  <Workflow className="h-3.5 w-3.5" />
-                  <span>Workflow</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.columnGroups.workflow}
-                  onChange={() => toggleColumnGroup("workflow")}
-                  testId="switch-column-workflow"
-                  color="cyan"
-                />
-              </div>
-
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-success group-hover:text-success/80 transition-colors">
-                  <DollarSign className="h-3.5 w-3.5" />
-                  <span>Recebíveis</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.columnGroups.recebiveis}
-                  onChange={() => toggleColumnGroup("recebiveis")}
-                  testId="switch-column-recebiveis"
-                  color="green"
-                />
-              </div>
-
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-sm text-warning group-hover:text-warning/80 transition-colors">
-                  <CreditCard className="h-3.5 w-3.5" />
-                  <span>Pagamentos</span>
-                </div>
-                <SwitchPillGlow
-                  checked={filters.columnGroups.pagamentos}
-                  onChange={() => toggleColumnGroup("pagamentos")}
-                  testId="switch-column-pagamentos"
-                  color="amber"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+              {/* Botões de ação */}
+              <SidebarActions
+                inspection={selectedInspection}
+                onClearSelection={onClearSelection}
+                onRefresh={onRefresh}
+                userRole={userRole}
+                contrLookup={contrLookup}
+                segurLookup={segurLookup}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Estado Colapsado - Ícone */}
+      {/* Estado Colapsado - Ícones */}
       {isCollapsed && (
-        <div className="flex items-center justify-center py-6">
+        <div className="flex flex-col items-center py-6 gap-4">
           <Filter className="h-5 w-5 text-muted-foreground" />
+          {selectedInspection && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <Sparkles className="h-5 w-5 text-primary" />
+            </motion.div>
+          )}
         </div>
       )}
     </aside>
   );
 }
-

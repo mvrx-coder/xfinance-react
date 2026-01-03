@@ -33,15 +33,12 @@ import {
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
-  fetchContrOptions,
-  fetchSegurOptions,
   fetchAtiviOptions,
   fetchUfOptions,
   fetchUsersOptions as fetchUsersLookup,
   type LookupOption,
 } from "@/services/api/lookups";
 import { updateInspectionField } from "@/services/api/inspections";
-import { ActionCenter } from "./ActionCenter";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
 import { ColumnFilter } from "./ColumnFilter";
@@ -256,10 +253,6 @@ export function DataGrid({
 }: DataGridProps) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
-  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
-  const [isActionCenterOpen, setIsActionCenterOpen] = useState(false);
-  const [contrLookup, setContrLookup] = useState<LookupOption[]>([]);
-  const [segurLookup, setSegurLookup] = useState<LookupOption[]>([]);
   const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
@@ -276,8 +269,6 @@ export function DataGrid({
   const paginatedRows = table.getRowModel().rows;
 
   useEffect(() => {
-    fetchContrOptions().then(setContrLookup);
-    fetchSegurOptions().then(setSegurLookup);
     fetchUsersLookup().then((users) => setUsersLookup(users.map(u => ({ value: u.value, label: u.label }))));
     fetchUfOptions().then(setUfLookup);
     fetchAtiviOptions().then(setAtiviLookup);
@@ -585,15 +576,8 @@ export function DataGrid({
                               className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getStatusActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (userRole === "admin" || userRole === "BackOffice") {
-                                  setSelectedInspection(row);
-                                  setSelectedRowIndex(index);
-                                  setIsActionCenterOpen(true);
-                                } else {
-                                  toast.error("Sem permissão", {
-                                    description: "Ações disponíveis apenas para Admin e BackOffice",
-                                  });
-                                }
+                                setSelectedRowIndex(index);
+                                onRowClick?.(row);
                               }}
                               data-testid={`badge-action-${row.idPrinc || index}`}
                             >
@@ -992,16 +976,6 @@ export function DataGrid({
           </div>
         </div>
       </Card>
-      
-      <ActionCenter
-        inspection={selectedInspection}
-        isOpen={isActionCenterOpen}
-        onClose={() => setIsActionCenterOpen(false)}
-        onRefresh={onRefresh}
-        userRole={userRole || undefined}
-        contrLookup={contrLookup}
-        segurLookup={segurLookup}
-      />
     </motion.div>
   );
 }

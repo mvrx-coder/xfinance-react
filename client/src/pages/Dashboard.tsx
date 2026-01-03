@@ -19,6 +19,7 @@ import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
+import { fetchContrOptions, fetchSegurOptions, type LookupOption } from "@/services/api/lookups";
 import { useAuth } from "@/hooks";
 import type { FilterState, KPIs, Inspection } from "@shared/schema";
 
@@ -51,6 +52,9 @@ export default function Dashboard() {
     expenses: false,
   });
 
+  // Inspeção selecionada para ações na sidebar
+  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+
   // Montar opções de busca baseadas nos filtros
   const fetchOptions: FetchOptions = {
     order: filters.player ? "player" : "normal",
@@ -72,6 +76,20 @@ export default function Dashboard() {
   // Extrair dados do response
   const inspections = inspectionsResponse?.data || [];
   const totalRecords = inspectionsResponse?.total || 0;
+
+  // Buscar lookups para ações (só quando há seleção)
+  const { data: contrLookup = [] } = useQuery<LookupOption[]>({
+    queryKey: ["lookups", "contratantes"],
+    queryFn: fetchContrOptions,
+    staleTime: 1000 * 60 * 5,
+    enabled: !!selectedInspection,
+  });
+  const { data: segurLookup = [] } = useQuery<LookupOption[]>({
+    queryKey: ["lookups", "segurados"],
+    queryFn: fetchSegurOptions,
+    staleTime: 1000 * 60 * 5,
+    enabled: !!selectedInspection,
+  });
 
   // KPIs (mock - será implementado depois com endpoint dedicado)
   const kpis: KPIs = { 
@@ -112,9 +130,19 @@ export default function Dashboard() {
   }, [authLogout]);
 
   const handleRowClick = useCallback((inspection: Inspection) => {
-    toast.info("Registro selecionado", {
-      description: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
-    });
+    // Toggle seleção: se clicar na mesma, desmarca
+    if (selectedInspection?.idPrinc === inspection.idPrinc) {
+      setSelectedInspection(null);
+    } else {
+      setSelectedInspection(inspection);
+      toast.info("Registro selecionado", {
+        description: `ID: ${inspection.idPrinc} - ${inspection.segurado || "Sem nome"}`,
+      });
+    }
+  }, [selectedInspection]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedInspection(null);
   }, []);
 
   const handleNewRecordSuccess = useCallback(() => {
@@ -150,7 +178,16 @@ export default function Dashboard() {
       {/* Main Content: Sidebar + Grid */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar Colapsável */}
-        <CollapsibleSidebar filters={filters} onFiltersChange={setFilters} />
+        <CollapsibleSidebar 
+          filters={filters} 
+          onFiltersChange={setFilters}
+          selectedInspection={selectedInspection}
+          onClearSelection={handleClearSelection}
+          onRefresh={handleSearch}
+          userRole={papel}
+          contrLookup={contrLookup}
+          segurLookup={segurLookup}
+        />
 
         {/* Main Grid */}
         <main className="flex-1 overflow-hidden">

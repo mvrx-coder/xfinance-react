@@ -45,7 +45,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          {/* Radix Toaster - mantido para ActionCenter */}
+          {/* Radix Toaster - para notificações do sistema */}
           <Toaster />
           {/* Sonner Toaster - novo sistema premium */}
           <SonnerToaster
