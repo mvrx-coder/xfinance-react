@@ -11,7 +11,6 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
-  ChevronRight,
   Filter,
   User,
   Briefcase,
@@ -81,11 +80,12 @@ export function CollapsibleSidebar({ filters, onFiltersChange }: CollapsibleSide
         className="sidebar-toggle-btn cursor-pointer"
         data-testid="button-toggle-sidebar"
       >
-        {isCollapsed ? (
-          <ChevronRight className="h-3 w-3 text-primary" />
-        ) : (
-          <ChevronLeft className="h-3 w-3 text-primary" />
-        )}
+        <ChevronLeft 
+          className={cn(
+            "h-3 w-3 text-primary transition-transform duration-300 ease-in-out",
+            isCollapsed && "rotate-180"
+          )} 
+        />
       </button>
 
       {/* Conteúdo Expandido */}

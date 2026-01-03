@@ -202,22 +202,22 @@ export function TopBarPremium({
 
               <div className="separator-gradient h-10" />
 
-              {/* Pagamentos Guy */}
+              {/* Pagamentos Guy - Amber */}
               <div className="flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-accent" />
+                <Wallet className="h-4 w-4 text-amber-500" />
                 <div className="text-left">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Guy Hon.</p>
-                  <p className="font-mono text-accent text-sm font-semibold tabular-nums">
+                  <p className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
                     {formatCurrency(kpis.guyHonorario)}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-accent" />
+                <CreditCard className="h-4 w-4 text-amber-500" />
                 <div className="text-left">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Guy Desp.</p>
-                  <p className="font-mono text-accent text-sm font-semibold tabular-nums">
+                  <p className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
                     {formatCurrency(kpis.guyDespesa)}
                   </p>
                 </div>
@@ -225,62 +225,62 @@ export function TopBarPremium({
             </div>
           </div>
 
-          {/* Botões de Ação */}
+          {/* Botões de Ação - Glassmorphism */}
           <div className="flex items-center gap-2">
             <Button
               size="sm"
               onClick={onNewRecord}
-              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 btn-glow-hover"
+              className="gap-2 btn-glass text-primary-foreground"
               data-testid="button-new-record"
             >
               <Plus className="h-4 w-4" />
               Novo
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={onOpenUsers}
-              className="gap-2 border-white/15 bg-white/5 text-foreground btn-glow-hover"
+              className="gap-2 btn-glass-ghost"
               data-testid="button-users"
             >
               <Users className="h-4 w-4" />
               Usuários
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={onOpenInvestments}
-              className="gap-2 border-white/15 bg-white/5 text-foreground btn-glow-hover"
+              className="gap-2 btn-glass-ghost"
               data-testid="button-investments"
             >
               <TrendingUp className="h-4 w-4" />
               Aportes
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={onOpenFinancial}
-              className="gap-2 border-white/15 bg-white/5 text-foreground btn-glow-hover"
+              className="gap-2 btn-glass-ghost"
               data-testid="button-financial"
             >
               <Zap className="h-4 w-4" />
               Performance
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={onOpenGuyPay}
-              className="gap-2 border-white/15 bg-white/5 text-foreground btn-glow-hover"
+              className="gap-2 btn-glass-ghost"
               data-testid="button-guypay"
             >
               <Wallet className="h-4 w-4" />
               Guy Pay
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={onOpenExpenses}
-              className="gap-2 border-white/15 bg-white/5 text-foreground btn-glow-hover"
+              className="gap-2 btn-glass-ghost"
               data-testid="button-expenses"
             >
               <Receipt className="h-4 w-4" />

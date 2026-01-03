@@ -1533,35 +1533,96 @@
    PREMIUM LAYOUT SYSTEM - TopBar + Sidebar
    ======================================== */
 
-/* TopBar Premium - Glassmorphism Header */
+/* Registrar propriedade CSS para animacao suave de cores */
+@property --glow-hue {
+  syntax: '<number>';
+  initial-value: 187;
+  inherits: false;
+}
+
+/* Animacao Chromatic para Border Glow - Transicao Suave */
+@keyframes chromatic-border-hue {
+  /* Ciclo 1: Rotacao de cores (0-16%) */
+  0% { --glow-hue: 187; }      /* Cyan */
+  4% { --glow-hue: 258; }      /* Violet */
+  8% { --glow-hue: 295; }      /* Magenta */
+  12% { --glow-hue: 142; }     /* Green */
+  16% { --glow-hue: 187; }     /* Cyan */
+  /* Pausa em Cyan (16-33%) */
+  17%, 33% { --glow-hue: 187; }
+  
+  /* Ciclo 2: Rotacao de cores (33-50%) */
+  34% { --glow-hue: 187; }     /* Cyan */
+  38% { --glow-hue: 38; }      /* Amber */
+  42% { --glow-hue: 295; }     /* Magenta */
+  46% { --glow-hue: 258; }     /* Violet */
+  49% { --glow-hue: 142; }     /* Green */
+  /* Pausa em Verde-Limao (50-66%) */
+  50%, 66% { --glow-hue: 142; }
+  
+  /* Ciclo 3: Rotacao de cores (66-83%) */
+  67% { --glow-hue: 142; }     /* Green */
+  71% { --glow-hue: 295; }     /* Magenta */
+  75% { --glow-hue: 258; }     /* Violet */
+  79% { --glow-hue: 38; }      /* Amber */
+  83% { --glow-hue: 295; }     /* Magenta */
+  /* Pausa em Magenta (83-100%) */
+  84%, 100% { --glow-hue: 295; }
+}
+
+/* TopBar Premium - Glassmorphism Header com Gradiente */
 .topbar-premium {
-  background: rgba(2, 6, 23, 0.85);
+  background: 
+    linear-gradient(135deg, 
+      rgba(206, 98, 217, 0.08) 0%,
+      rgba(2, 6, 23, 0.9) 30%,
+      rgba(2, 6, 23, 0.95) 70%,
+      rgba(0, 188, 212, 0.06) 100%
+    ),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 100%
+    );
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-  /* T3: Border Glow Inferior Cyan */
+    0 4px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
   border-bottom: 2px solid transparent;
-  border-image: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(0, 188, 212, 0.4) 20%, 
-    rgba(0, 188, 212, 0.6) 50%, 
-    rgba(0, 188, 212, 0.4) 80%, 
-    transparent 100%
-  ) 1;
   position: relative;
 }
 
+/* Border Glow Chromatic Animado */
+.topbar-premium::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    hsl(var(--glow-hue) 80% 50% / 0.6) 20%, 
+    hsl(var(--glow-hue) 80% 55% / 0.7) 50%, 
+    hsl(var(--glow-hue) 80% 50% / 0.6) 80%, 
+    transparent 100%
+  );
+  animation: chromatic-border-hue 48s linear infinite;
+  pointer-events: none;
+}
+
+/* Glow Diffuso Chromatic */
 .topbar-premium::after {
   content: '';
   position: absolute;
   bottom: -2px;
   left: 10%;
   right: 10%;
-  height: 6px;
-  background: radial-gradient(ellipse at center, rgba(0, 188, 212, 0.3) 0%, transparent 70%);
-  filter: blur(4px);
+  height: 8px;
+  background: radial-gradient(ellipse at center, hsl(var(--glow-hue) 80% 50% / 0.35) 0%, transparent 70%);
+  filter: blur(6px);
+  animation: chromatic-border-hue 48s linear infinite;
   pointer-events: none;
 }
 
@@ -1580,7 +1641,79 @@
   flex-shrink: 0;
 }
 
-/* T4: Botoes com Glow Hover */
+/* Botoes Glassmorphism Premium */
+.btn-glass {
+  background: rgba(206, 98, 217, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.btn-glass:hover {
+  background: rgba(206, 98, 217, 0.18);
+  border-color: rgba(206, 98, 217, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(206, 98, 217, 0.25);
+}
+
+.btn-glass:hover svg {
+  filter: drop-shadow(0 0 6px rgba(206, 98, 217, 0.6));
+}
+
+.btn-glass:active {
+  transform: translateY(0);
+  background: rgba(206, 98, 217, 0.25);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Variante Ghost Glass - Mais sutil */
+.btn-glass-ghost {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-glass-ghost:hover {
+  background: rgba(206, 98, 217, 0.12);
+  border-color: rgba(206, 98, 217, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 0 16px rgba(206, 98, 217, 0.2);
+}
+
+.btn-glass-ghost:hover svg {
+  filter: drop-shadow(0 0 4px rgba(206, 98, 217, 0.5));
+}
+
+.btn-glass-ghost:active {
+  transform: translateY(0);
+  background: rgba(206, 98, 217, 0.2);
+}
+
+/* T4: Botoes com Glow Hover (legado) */
 .btn-glow-hover {
   transition: all 0.2s ease;
 }
@@ -1593,11 +1726,26 @@
   filter: drop-shadow(0 0 4px rgba(206, 98, 217, 0.6));
 }
 
-/* Sidebar Premium - Glassmorphism Sidebar */
+/* Sidebar Premium - Glassmorphism Sidebar com Gradiente */
 .sidebar-premium {
-  background: rgba(2, 6, 23, 0.75);
+  background: 
+    linear-gradient(180deg,
+      rgba(206, 98, 217, 0.06) 0%,
+      rgba(2, 6, 23, 0.85) 15%,
+      rgba(2, 6, 23, 0.9) 50%,
+      rgba(139, 92, 246, 0.04) 85%,
+      rgba(0, 188, 212, 0.05) 100%
+    ),
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0.02) 0%,
+      transparent 100%
+    );
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 
+    inset -1px 0 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 1px 0 0 rgba(255, 255, 255, 0.03);
 }
 
 /* Botao Toggle Sidebar - Fixo na borda */
@@ -1643,7 +1791,7 @@
   -webkit-backdrop-filter: blur(8px);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.05),
@@ -1659,7 +1807,7 @@
   height: 12px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
   border-radius: 50%;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
     0 1px 2px rgba(0, 0, 0, 0.3),
     inset 0 1px 1px rgba(255, 255, 255, 0.4);
