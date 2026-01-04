@@ -41,12 +41,12 @@ export function CollapsibleSidebar({
   return (
     <aside
       className={cn(
-        "sidebar-premium h-full flex flex-col relative transition-all duration-300 ease-in-out border-r border-white/10 overflow-y-auto",
+        "sidebar-premium h-full flex flex-col relative transition-all duration-300 ease-in-out border-r border-white/10 overflow-visible",
         isCollapsed ? "w-14" : "w-64"
       )}
       data-testid="collapsible-sidebar"
     >
-      {/* Botão de Colapsar - Fixo na borda */}
+      {/* Botão de Colapsar - Fixo na borda externa */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="sidebar-toggle-btn cursor-pointer"
@@ -60,9 +60,9 @@ export function CollapsibleSidebar({
         />
       </button>
 
-      {/* Conteúdo Expandido */}
+      {/* Conteúdo Expandido - Com scroll interno */}
       <div className={cn(
-        "flex-1 overflow-hidden transition-opacity duration-200",
+        "flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200",
         isCollapsed && "opacity-0 pointer-events-none"
       )}>
         {/* Filtros - Sempre visíveis */}

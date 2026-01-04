@@ -25,11 +25,9 @@ import {
   Receipt,
   CreditCard,
   FileText,
-  Zap,
   FilterX,
   Check,
   X,
-  Sparkles,
 } from "lucide-react";
 import type { Inspection, FilterState } from "@shared/schema";
 import {
@@ -315,12 +313,12 @@ export function DataGrid({
             <Table className="w-auto min-w-max">
               <TableHeader className="sticky top-0 z-50 grid-header-shell">
                 <TableRow className="border-b border-white/10">
-                  {/* Grupo 1: Ação */}
+                  {/* Grupo 1: Status */}
                   <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
                     <div className="flex items-center justify-center">
                       <StatusLegendTooltip>
-                        <Sparkles className="w-4 h-4 chromatic-sparkle cursor-help" />
+                        <span className="text-[10px] font-medium text-muted-foreground cursor-help">Status</span>
                       </StatusLegendTooltip>
                     </div>
                   </TableHead>
@@ -573,7 +571,7 @@ export function DataGrid({
                           {/* Grupo 1: Ação */}
                           <TableCell className="w-[50px] min-w-[50px] max-w-[50px] leading-tight">
                             <button
-                              className={`p-1.5 rounded-md cursor-pointer transition-all duration-200 hover:scale-110 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getStatusActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
+                              className={`p-2 rounded-md cursor-pointer transition-all duration-200 hover:scale-125 bg-transparent hover:shadow-lg hover:shadow-primary/20 ${getStatusActionClasses(row)} ${showPulse ? "action-center-trigger" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedRowIndex(index);
@@ -581,7 +579,7 @@ export function DataGrid({
                               }}
                               data-testid={`badge-action-${row.idPrinc || index}`}
                             >
-                              <Zap className="w-3.5 h-3.5" />
+                              <span className="w-2 h-2 rounded-full bg-current block shadow-[0_0_4px_currentColor]" />
                             </button>
                           </TableCell>
                           

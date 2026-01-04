@@ -20,8 +20,8 @@ import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
 import { fetchContrOptions, fetchSegurOptions, type LookupOption } from "@/services/api/lookups";
-import { useAuth } from "@/hooks";
-import type { FilterState, KPIs, Inspection } from "@shared/schema";
+import { useAuth, useKPIs } from "@/hooks";
+import type { FilterState, Inspection } from "@shared/schema";
 
 export default function Dashboard() {
   // Autenticação via contexto global
@@ -91,14 +91,14 @@ export default function Dashboard() {
     enabled: !!selectedInspection,
   });
 
-  // KPIs (mock - será implementado depois com endpoint dedicado)
-  const kpis: KPIs = { 
-    express: totalRecords, 
+  // KPIs Express (totais financeiros pendentes)
+  const { data: kpis = { 
+    express: 0, 
     honorarios: 0, 
     guyHonorario: 0, 
     despesas: 0, 
     guyDespesa: 0 
-  };
+  }} = useKPIs();
 
   // Handlers
   const dismissStatus = useCallback((id: string) => {
@@ -176,7 +176,7 @@ export default function Dashboard() {
       <StatusBar messages={statusMessages} onDismiss={dismissStatus} />
 
       {/* Main Content: Sidebar + Grid */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-visible">
         {/* Sidebar Colapsável */}
         <CollapsibleSidebar 
           filters={filters} 

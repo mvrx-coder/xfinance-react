@@ -17,6 +17,7 @@ import { format } from "date-fns";
 
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "./use-toast";
+import { KPIS_QUERY_KEY } from "./use-kpis";
 
 // =============================================================================
 // SCHEMA ZOD
@@ -182,6 +183,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
     },
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
+      queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
       
       const dirsMsg = response.dirs_created.length > 0
         ? `📁 ${response.dirs_created.join(" | ")}`
@@ -246,6 +248,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
+      queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
       
       const dirsMsg = response.dirs_created.length > 0
         ? `📁 ${response.dirs_created.join(" | ")}`

@@ -1,0 +1,24 @@
+# Node / build
+node_modules
+**/node_modules
+dist
+**/dist
+
+# Python
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+**/.venv
+
+# Git / editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Local artifacts
+terminals
+cookies.txt
+
+

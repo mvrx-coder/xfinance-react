@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      # Banco SQLite no layout padrão do projeto (sem alterar a lógica do código)
+      # resolve_sqlite_path: XF_BASE_DIR/x_db/xFinanceDB.db
+      XF_BASE_DIR: /app
+      # Segurança (defina via .env no servidor)
+      SECRET_KEY: ${XFINANCE_SECRET_KEY:-xfinance-secret-key-change-in-production-2024}
+      DEBUG: ${XFINANCE_DEBUG:-false}
+    volumes:
+      - ./x_db:/app/x_db
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+

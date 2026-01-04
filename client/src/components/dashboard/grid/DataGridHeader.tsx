@@ -18,7 +18,6 @@ import {
   Receipt,
   CreditCard,
   FileText,
-  Sparkles,
 } from "lucide-react";
 import { FilterableHeader } from "./FilterableHeader";
 import { StatusLegendTooltip } from "../StatusTooltip";
@@ -34,12 +33,12 @@ export function DataGridHeader({ table, filters }: DataGridHeaderProps) {
   return (
     <TableHeader className="sticky top-0 z-50 grid-header-shell">
       <TableRow className="border-b border-white/10">
-        {/* Grupo 1: Ação */}
+        {/* Grupo 1: Status */}
         <TableHead className="w-[50px] min-w-[50px] max-w-[50px] bg-card relative">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary rounded-b-sm" />
           <div className="flex items-center justify-center">
             <StatusLegendTooltip>
-              <Sparkles className="w-4 h-4 chromatic-sparkle cursor-help" />
+              <span className="text-[10px] font-medium text-muted-foreground cursor-help">Status</span>
             </StatusLegendTooltip>
           </div>
         </TableHead>

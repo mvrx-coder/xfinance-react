@@ -5,12 +5,19 @@
  * - Busca de KPIs do Express
  * - Cálculos derivados
  * - Cache otimizado
+ * - Invalidação após ações (delete, forward, marker, new record, edit)
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useCallback } from "react";
 import { API_ENDPOINTS, CACHE_CONFIG } from "@/constants";
 import type { KPIs, Inspection } from "@shared/schema";
+
+// =============================================================================
+// QUERY KEY - Exportada para invalidação em outros componentes
+// =============================================================================
+
+export const KPIS_QUERY_KEY = [API_ENDPOINTS.KPIS];
 
 // =============================================================================
 // TIPOS
@@ -44,7 +51,7 @@ async function fetchKPIs(): Promise<KPIs> {
  */
 export function useKPIs() {
   return useQuery<KPIs>({
-    queryKey: [API_ENDPOINTS.KPIS],
+    queryKey: KPIS_QUERY_KEY,
     queryFn: fetchKPIs,
     staleTime: CACHE_CONFIG.KPIS_STALE_TIME,
     // KPIs começam com valores zerados enquanto carrega
@@ -56,6 +63,19 @@ export function useKPIs() {
       guyDespesa: 0,
     },
   });
+}
+
+/**
+ * Hook para invalidar cache de KPIs.
+ * Usar após ações que alteram valores financeiros:
+ * - Delete, Forward, Marker, New Record, Edit inline
+ */
+export function useInvalidateKPIs() {
+  const queryClient = useQueryClient();
+  
+  return useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
+  }, [queryClient]);
 }
 
 /**

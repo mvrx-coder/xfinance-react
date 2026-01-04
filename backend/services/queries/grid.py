@@ -90,12 +90,19 @@ def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
     Calcula o valor do campo prazo seguindo a lógica de negócio.
     
     Regras (em ordem de prioridade):
-    1. Se prazo > 0 no DB → retorna valor do DB (não calcular)
-    2. BLOQUEIO: dt_pago preenchido E dt_entregue vazio → retorna None
-    3. Se dt_entregue vazio → calcula (hoje - dt_inspecao)
-    4. Se dt_entregue preenchido E dt_envio vazio → retorna None
-    5. Se dt_entregue E dt_envio preenchidos E dt_pago vazio → calcula (hoje - dt_envio)
-    6. Se dt_pago E dt_entregue preenchidos → calcula (dt_entregue - dt_inspecao) e GRAVA
+    0. Se prazo > 0 no DB → retorna valor do DB (não calcular)
+    BLOQUEIO: dt_pago preenchido E dt_entregue vazio → retorna None (anômalo)
+    
+    1. GRUPO 2 (Vermelho): dt_envio preenchido E dt_pago vazio → (hoje - dt_envio)
+       Ordena por tempo desde envio da cobrança
+    2. GRUPO 1 (Laranja/Cinza): dt_entregue vazio → (hoje - dt_inspecao)
+       Ordena por tempo desde inspeção
+    3. dt_entregue preenchido E dt_envio vazio → retorna None
+       Aguardando envio de cobrança
+    4. dt_pago E dt_entregue preenchidos → (dt_entregue - dt_inspecao) e GRAVA
+       Prazo de execução final (fixo)
+    
+    Ver: docs/STATUS_INDICATOR_SYSTEM.md → Sistema de Ordenação do Grid
     
     Returns:
         tuple: (valor_prazo, deve_gravar)
@@ -135,7 +142,20 @@ def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
     
     today = date.today()
     
-    # Regra 1: dt_entregue vazio → calcular (hoje - dt_inspecao)
+    # Regra 1: GRUPO 2 (Vermelho) - dt_envio preenchido E dt_pago vazio → (hoje - dt_envio)
+    # IMPORTANTE: Esta regra deve vir ANTES da verificação de dt_entregue para garantir
+    # que o Grupo 2 ordene por tempo de cobrança, não por tempo desde inspeção.
+    # Ver: docs/STATUS_INDICATOR_SYSTEM.md → Grupo 2 - Vermelho (Cobrança)
+    if has_envio and not has_pago:
+        dt_env = _parse_date(dt_envio)
+        if dt_env:
+            dias = (today - dt_env).days
+            # Se negativo (data futura), retorna None
+            return (dias if dias >= 0 else None, False)
+        return (None, False)
+    
+    # Regra 2: GRUPO 1 (Laranja/Cinza) - dt_entregue vazio → calcular (hoje - dt_inspecao)
+    # Apenas para registros ainda em andamento (sem envio de cobrança)
     if not has_entregue:
         if has_inspecao:
             dt_insp = _parse_date(dt_inspecao)
@@ -145,17 +165,9 @@ def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
                 return (dias if dias >= 0 else None, False)
         return (None, False)
     
-    # Regra 2: dt_entregue preenchido E dt_envio vazio → não calcular
+    # Regra 3: dt_entregue preenchido E dt_envio vazio → não calcular
+    # (Aguardando o usuário enviar cobrança)
     if has_entregue and not has_envio:
-        return (None, False)
-    
-    # Regra 3: dt_entregue E dt_envio preenchidos E dt_pago vazio → (hoje - dt_envio)
-    if has_entregue and has_envio and not has_pago:
-        dt_env = _parse_date(dt_envio)
-        if dt_env:
-            dias = (today - dt_env).days
-            # Se negativo (data futura), retorna None
-            return (dias if dias >= 0 else None, False)
         return (None, False)
     
     # Regra 4: dt_pago E dt_entregue preenchidos → (dt_entregue - dt_inspecao) e GRAVAR
@@ -373,8 +385,11 @@ def get_order_by_clause(modo_ordenacao: str) -> str:
     # Modo "normal" (padrão)
     # Ordenação por grupo:
     # - Grupo 1 (em andamento/agendado): dt_inspecao ASC (mais antigo primeiro = maior prazo)
-    # - Grupo 2 (vermelho/cobrança): prazo DESC (maior tempo de cobrança primeiro)
+    # - Grupo 2 (vermelho/cobrança): dias desde dt_envio DESC (maior tempo de cobrança primeiro)
     # - Grupo 3/4 (finalizadas): dt_pago DESC (mais recente primeiro)
+    #
+    # NOTA: Para Grupo 2, usamos JULIANDAY para calcular dinamicamente os dias desde
+    # dt_envio, pois o campo p.prazo só é gravado quando dt_pago está preenchido.
     return (
         _order_head()
         + _order_groups()
@@ -388,11 +403,13 @@ def get_order_by_clause(modo_ordenacao: str) -> str:
                     END
                 ELSE NULL
             END ASC,
-            -- Grupo 2: Ordenar por prazo DESC (maior tempo de cobrança primeiro)
+            -- Grupo 2: Ordenar por dias desde dt_envio DESC (maior tempo de cobrança primeiro)
+            -- Calcula dinamicamente: hoje - dt_envio (JULIANDAY retorna dias)
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE
-                        WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL THEN p.prazo
+                        WHEN p.dt_envio IS NOT NULL AND p.dt_pago IS NULL 
+                        THEN CAST(JULIANDAY('now', 'localtime') - JULIANDAY(p.dt_envio) AS INTEGER)
                         ELSE NULL
                     END
                 ELSE NULL

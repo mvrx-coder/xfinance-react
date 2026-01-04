@@ -21,7 +21,7 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast, useInvalidateKPIs } from "@/hooks";
 import type { Inspection } from "@shared/schema";
 import type { MarkerType, UserOption } from "@/types/acoes";
 import { 
@@ -52,6 +52,7 @@ export function ActionPanels({
   segurLookup,
 }: ActionPanelsProps) {
   const { toast } = useToast();
+  const invalidateKPIs = useInvalidateKPIs();
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
@@ -81,6 +82,7 @@ export function ActionPanels({
           title: "Inspeção excluída",
           description: result.message || "Registro removido com sucesso",
         });
+        invalidateKPIs(); // Recalcular KPIs após exclusão
         onRefresh?.();
         onClose();
       } else {
@@ -109,6 +111,7 @@ export function ActionPanels({
           title: "Inspeção encaminhada",
           description: result.message || "Registro encaminhado com sucesso",
         });
+        invalidateKPIs(); // Recalcular KPIs após encaminhamento
         setSelectedUser("");
         setObservacao("");
         onRefresh?.();
@@ -139,6 +142,7 @@ export function ActionPanels({
           title: level > 0 ? "Marcador aplicado" : "Marcador removido",
           description: result.message,
         });
+        invalidateKPIs(); // Recalcular KPIs após marcação
         onRefresh?.();
       }
     } catch {

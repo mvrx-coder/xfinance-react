@@ -28,6 +28,8 @@ export {
   useKPIs,
   useKPIsExtended,
   useCalculatedKPIs,
+  useInvalidateKPIs,
+  KPIS_QUERY_KEY,
   type KPIsExtended,
 } from "./use-kpis";
 
