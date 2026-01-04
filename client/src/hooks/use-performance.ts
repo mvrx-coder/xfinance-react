@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   fetchPerformanceFilters,
   fetchPerformanceKPIs,
+  fetchPerformanceKPIsExtended,
   fetchMarketShare,
   fetchBusiness,
   fetchOperational,
@@ -23,6 +24,7 @@ import {
   type PerformanceFilters,
   type FiltersResponse,
   type KPIsResponse,
+  type KPIsExtendedResponse,
   type MarketShareItem,
   type BusinessResponse,
   type OperationalItem,
@@ -35,6 +37,7 @@ export type {
   PerformanceFilters,
   FiltersResponse,
   KPIsResponse,
+  KPIsExtendedResponse,
   MarketShareItem,
   BusinessResponse,
   OperationalItem,
@@ -49,6 +52,7 @@ export type {
 const QUERY_KEYS = {
   FILTERS: ["performance", "filters"],
   KPIS: ["performance", "kpis"],
+  KPIS_EXTENDED: ["performance", "kpis-extended"],
   MARKET: ["performance", "market"],
   BUSINESS: ["performance", "business"],
   OPERATIONAL: ["performance", "operational"],
@@ -89,6 +93,18 @@ export function usePerformanceKPIs(filters?: PerformanceFilters, enabled: boolea
   return useQuery<KPIsResponse>({
     queryKey: [...QUERY_KEYS.KPIS, filters],
     queryFn: () => fetchPerformanceKPIs(filters),
+    staleTime: STALE_TIME.KPIS,
+    enabled,
+  });
+}
+
+/**
+ * Hook para buscar KPIs estendidos (com sparklines, trends, etc).
+ */
+export function usePerformanceKPIsExtended(filters?: PerformanceFilters, enabled: boolean = true) {
+  return useQuery<KPIsExtendedResponse>({
+    queryKey: [...QUERY_KEYS.KPIS_EXTENDED, filters],
+    queryFn: () => fetchPerformanceKPIsExtended(filters),
     staleTime: STALE_TIME.KPIS,
     enabled,
   });

@@ -538,3 +538,194 @@ def fetch_details(
         })
     
     return {"data": data, "total": total}
+
+
+# =============================================================================
+# KPIs EXTENDED (COM SPARKLINES, TRENDS E PERÍODO ANTERIOR)
+# =============================================================================
+
+def fetch_kpis_extended(
+    base_date: str = "dt_envio",
+    ano_ini: Optional[int] = None,
+    ano_fim: Optional[int] = None,
+) -> dict:
+    """
+    Busca KPIs financeiros estendidos com dados para visualização premium.
+    
+    Inclui:
+    - Valores atuais (honorarios, despesas, resultado_oper, inspecoes)
+    - Valores do período anterior (para comparação)
+    - Trend (variação percentual)
+    - Sparkline (últimos 12 meses de dados mensais)
+    - KPIs calculados (ticket_medio, margem, eficiencia, crescimento)
+    - Goal progress (percentual da meta atingida)
+    
+    Returns:
+        Dict com KPIs estendidos
+    """
+    # Definir período atual e anterior
+    import datetime
+    
+    current_year = datetime.datetime.now().year
+    
+    if ano_ini and ano_fim:
+        periodo_atual = (ano_ini, ano_fim)
+        # Período anterior: mesmo range de anos, mas deslocado
+        anos_range = ano_fim - ano_ini + 1
+        periodo_anterior = (ano_ini - anos_range, ano_fim - anos_range)
+    elif ano_ini:
+        periodo_atual = (ano_ini, current_year)
+        periodo_anterior = (ano_ini - 1, ano_ini - 1)
+    elif ano_fim:
+        periodo_atual = (2015, ano_fim)
+        periodo_anterior = (2015, ano_fim - 1)
+    else:
+        periodo_atual = (current_year, current_year)
+        periodo_anterior = (current_year - 1, current_year - 1)
+    
+    # Buscar KPIs do período atual
+    kpis_atual = fetch_kpis(base_date, periodo_atual[0], periodo_atual[1])
+    
+    # Buscar KPIs do período anterior
+    kpis_anterior = fetch_kpis(base_date, periodo_anterior[0], periodo_anterior[1])
+    
+    # Calcular trends (variação percentual)
+    def calc_trend(atual: float, anterior: float) -> float:
+        if anterior == 0:
+            return 0 if atual == 0 else 100
+        return round(((atual - anterior) / abs(anterior)) * 100, 1)
+    
+    trend_honorarios = calc_trend(kpis_atual["honorarios"], kpis_anterior["honorarios"])
+    trend_despesas = calc_trend(kpis_atual["despesas"], kpis_anterior["despesas"])
+    trend_resultado = calc_trend(kpis_atual["resultado_oper"], kpis_anterior["resultado_oper"])
+    trend_inspecoes = calc_trend(kpis_atual["inspecoes"], kpis_anterior["inspecoes"])
+    
+    # Buscar sparkline (dados mensais dos últimos 12 meses)
+    sparkline_sql = f"""
+        SELECT
+            strftime('%Y-%m', p.{base_date}) AS mes,
+            SUM(COALESCE(p.honorario, 0)) AS honorarios,
+            SUM(COALESCE(p.despesa, 0)) AS despesas,
+            SUM(COALESCE(p.loc, 0)) AS inspecoes
+        FROM princ p
+        WHERE p.{base_date} IS NOT NULL
+          AND p.{base_date} >= date('now', '-12 months')
+        GROUP BY mes
+        ORDER BY mes ASC
+    """
+    
+    with get_db() as conn:
+        cursor = conn.execute(sparkline_sql)
+        sparkline_rows = cursor.fetchall()
+    
+    # Montar sparklines
+    sparkline_honorarios = [row["honorarios"] / 1000 for row in sparkline_rows]  # em milhares
+    sparkline_despesas = [row["despesas"] / 1000 for row in sparkline_rows]
+    sparkline_resultado = [(row["honorarios"] - row["despesas"]) / 1000 for row in sparkline_rows]
+    sparkline_inspecoes = [row["inspecoes"] for row in sparkline_rows]
+    
+    # Calcular KPIs extras
+    ticket_medio = (kpis_atual["honorarios"] / kpis_atual["inspecoes"]) if kpis_atual["inspecoes"] > 0 else 0
+    margem = (kpis_atual["resultado_oper"] / kpis_atual["honorarios"] * 100) if kpis_atual["honorarios"] > 0 else 0
+    
+    ticket_medio_anterior = (kpis_anterior["honorarios"] / kpis_anterior["inspecoes"]) if kpis_anterior["inspecoes"] > 0 else 0
+    margem_anterior = (kpis_anterior["resultado_oper"] / kpis_anterior["honorarios"] * 100) if kpis_anterior["honorarios"] > 0 else 0
+    
+    trend_ticket = calc_trend(ticket_medio, ticket_medio_anterior)
+    trend_margem = calc_trend(margem, margem_anterior)
+    
+    # Crescimento = trend de honorários
+    crescimento = trend_honorarios
+    
+    # Eficiência: calculada como (jobs pagos / jobs enviados) * 100
+    eficiencia_sql = f"""
+        SELECT
+            COUNT(CASE WHEN dt_pago IS NOT NULL THEN 1 END) AS pagos,
+            COUNT(*) AS total
+        FROM princ p
+        WHERE p.{base_date} IS NOT NULL
+    """
+    if ano_ini:
+        eficiencia_sql += f" AND CAST(strftime('%Y', p.{base_date}) AS INTEGER) >= {ano_ini}"
+    if ano_fim:
+        eficiencia_sql += f" AND CAST(strftime('%Y', p.{base_date}) AS INTEGER) <= {ano_fim}"
+    
+    with get_db() as conn:
+        cursor = conn.execute(eficiencia_sql)
+        efic_row = cursor.fetchone()
+    
+    eficiencia = (efic_row["pagos"] / efic_row["total"] * 100) if efic_row and efic_row["total"] > 0 else 0
+    
+    # Sparkline de ticket médio e eficiência
+    sparkline_ticket = []
+    for row in sparkline_rows:
+        if row["inspecoes"] > 0:
+            sparkline_ticket.append(row["honorarios"] / row["inspecoes"])
+        else:
+            sparkline_ticket.append(0)
+    
+    # Goal progress (metas fixas para demonstração - podem ser configuradas depois)
+    # Usando margem como progresso de meta (ex: meta = 40% de margem)
+    goal_resultado = min(100, margem / 40 * 100)  # Meta: 40% de margem
+    goal_margem = min(100, margem / 35 * 100)  # Meta: 35% de margem
+    goal_eficiencia = eficiencia  # A própria eficiência é o progresso
+    
+    # Formatar valores anteriores para exibição
+    def format_currency_short(value: float) -> str:
+        if value >= 1_000_000:
+            return f"R$ {value / 1_000_000:.1f}M"
+        elif value >= 1_000:
+            return f"R$ {value / 1_000:.0f}K"
+        return f"R$ {value:.0f}"
+    
+    return {
+        # KPIs principais (do período atual)
+        "honorarios": kpis_atual["honorarios"],
+        "despesas": kpis_atual["despesas"],
+        "resultado_oper": kpis_atual["resultado_oper"],
+        "inspecoes": kpis_atual["inspecoes"],
+        
+        # KPIs calculados
+        "ticket_medio": round(ticket_medio, 2),
+        "margem": round(margem, 1),
+        "eficiencia": round(eficiencia, 1),
+        "crescimento": round(crescimento, 1),
+        
+        # Trends (variação percentual)
+        "trends": {
+            "honorarios": trend_honorarios,
+            "despesas": trend_despesas,
+            "resultado_oper": trend_resultado,
+            "inspecoes": trend_inspecoes,
+            "ticket_medio": trend_ticket,
+            "margem": trend_margem,
+            "eficiencia": 0,  # Não temos período anterior para eficiência
+            "crescimento": crescimento,
+        },
+        
+        # Valores do período anterior (formatados para exibição)
+        "previous": {
+            "honorarios": format_currency_short(kpis_anterior["honorarios"]),
+            "despesas": format_currency_short(kpis_anterior["despesas"]),
+            "resultado_oper": format_currency_short(kpis_anterior["resultado_oper"]),
+            "inspecoes": str(int(kpis_anterior["inspecoes"])),
+            "ticket_medio": format_currency_short(ticket_medio_anterior),
+            "margem": f"{margem_anterior:.1f}%",
+        },
+        
+        # Sparklines (últimos 12 meses)
+        "sparklines": {
+            "honorarios": sparkline_honorarios,
+            "despesas": sparkline_despesas,
+            "resultado_oper": sparkline_resultado,
+            "inspecoes": sparkline_inspecoes,
+            "ticket_medio": sparkline_ticket,
+        },
+        
+        # Goal progress (0-100)
+        "goals": {
+            "resultado_oper": round(goal_resultado, 0),
+            "margem": round(goal_margem, 0),
+            "eficiencia": round(goal_eficiencia, 0),
+        },
+    }

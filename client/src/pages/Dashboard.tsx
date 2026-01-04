@@ -15,7 +15,7 @@ import { StatusBar } from "@/components/dashboard/StatusBar";
 import { NewRecordModal } from "@/components/dashboard/modals/NewRecordModal";
 import { UsersModal } from "@/components/dashboard/modals/UsersModal";
 import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal";
-import { PerformanceModal } from "@/components/dashboard/modals/PerformanceModal";
+import { PerformanceModalNew as PerformanceModal } from "@/components/dashboard/modals/PerformanceModalNew";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";

@@ -27,6 +27,7 @@ from dependencies import (
 from services.queries.performance import (
     fetch_filter_options,
     fetch_kpis,
+    fetch_kpis_extended,
     fetch_market_share,
     fetch_business,
     fetch_operational,
@@ -133,6 +134,60 @@ async def get_kpis(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar KPIs",
+        )
+
+
+# =============================================================================
+# GET /api/performance/kpis-extended - KPIs Estendidos (Premium)
+# =============================================================================
+
+@router.get("/kpis-extended")
+async def get_kpis_extended(
+    current_user: CurrentUser = Depends(require_financial_access),
+    base_date: Literal["dt_envio", "dt_pago", "dt_acerto"] = Query("dt_envio"),
+    ano_ini: Optional[int] = Query(None, ge=2000, le=2100),
+    ano_fim: Optional[int] = Query(None, ge=2000, le=2100),
+):
+    """
+    Retorna KPIs financeiros estendidos para visualização premium.
+    
+    Inclui todos os dados básicos mais:
+    - Valores do período anterior
+    - Trends (variação percentual)
+    - Sparklines (últimos 12 meses)
+    - KPIs calculados (ticket_medio, margem, eficiencia, crescimento)
+    - Goal progress
+    
+    Args:
+        base_date: Campo de data para filtro
+        ano_ini: Ano inicial
+        ano_fim: Ano final
+        
+    Returns:
+        {
+            honorarios, despesas, resultado_oper, inspecoes,
+            ticket_medio, margem, eficiencia, crescimento,
+            trends: { honorarios, despesas, ... },
+            previous: { honorarios, despesas, ... },
+            sparklines: { honorarios, despesas, ... },
+            goals: { resultado_oper, margem, eficiencia }
+        }
+    """
+    logger.info(
+        "GET /performance/kpis-extended | user=%s | base_date=%s | ano=%s-%s",
+        current_user.email,
+        base_date,
+        ano_ini,
+        ano_fim,
+    )
+    
+    try:
+        return fetch_kpis_extended(base_date, ano_ini, ano_fim)
+    except Exception as e:
+        logger.exception("Erro ao buscar KPIs Extended")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao buscar KPIs Extended",
         )
 
 

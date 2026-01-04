@@ -11,8 +11,10 @@ interface ModalProps {
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "full";
   hideHeader?: boolean;
+  /** Se true, o modal ocupa a tela inteira */
+  fullscreen?: boolean;
 }
 
 const maxWidthClasses = {
@@ -25,6 +27,7 @@ const maxWidthClasses = {
   "4xl": "max-w-4xl",
   "5xl": "max-w-5xl",
   "6xl": "max-w-6xl",
+  "full": "max-w-full",
 };
 
 const backdropVariants = {
@@ -69,6 +72,7 @@ export function Modal({
   footer,
   maxWidth = "lg",
   hideHeader = false,
+  fullscreen = false,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -117,7 +121,11 @@ export function Modal({
             animate="visible"
             exit="exit"
             id={id}
-            className={`relative w-full ${maxWidthClasses[maxWidth]} mx-4 glass-strong rounded-2xl shadow-2xl border border-white/15 overflow-hidden`}
+            className={`relative w-full ${
+              fullscreen 
+                ? "h-full m-0 rounded-none" 
+                : `${maxWidthClasses[maxWidth]} mx-4 rounded-2xl`
+            } glass-strong shadow-2xl border border-white/15 overflow-hidden`}
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${id}-title`}
@@ -158,7 +166,7 @@ export function Modal({
             )}
 
             {/* Body */}
-            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className={`${fullscreen ? "h-full" : "px-6 py-5 max-h-[70vh]"} overflow-y-auto custom-scrollbar`}>
               {children}
             </div>
 

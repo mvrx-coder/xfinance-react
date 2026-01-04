@@ -90,6 +90,61 @@ export interface DetailsResponse {
   total: number;
 }
 
+// KPIs Extended para visualização premium
+export interface KPIsTrends {
+  honorarios: number;
+  despesas: number;
+  resultado_oper: number;
+  inspecoes: number;
+  ticket_medio: number;
+  margem: number;
+  eficiencia: number;
+  crescimento: number;
+}
+
+export interface KPIsPrevious {
+  honorarios: string;
+  despesas: string;
+  resultado_oper: string;
+  inspecoes: string;
+  ticket_medio: string;
+  margem: string;
+}
+
+export interface KPIsSparklines {
+  honorarios: number[];
+  despesas: number[];
+  resultado_oper: number[];
+  inspecoes: number[];
+  ticket_medio: number[];
+}
+
+export interface KPIsGoals {
+  resultado_oper: number;
+  margem: number;
+  eficiencia: number;
+}
+
+export interface KPIsExtendedResponse {
+  // KPIs principais
+  honorarios: number;
+  despesas: number;
+  resultado_oper: number;
+  inspecoes: number;
+  
+  // KPIs calculados
+  ticket_medio: number;
+  margem: number;
+  eficiencia: number;
+  crescimento: number;
+  
+  // Dados extras
+  trends: KPIsTrends;
+  previous: KPIsPrevious;
+  sparklines: KPIsSparklines;
+  goals: KPIsGoals;
+}
+
 // =============================================================================
 // ENDPOINTS
 // =============================================================================
@@ -156,6 +211,14 @@ export async function fetchPerformanceFilters(): Promise<FiltersResponse> {
 export async function fetchPerformanceKPIs(filters?: PerformanceFilters): Promise<KPIsResponse> {
   const qs = buildQueryString(filters);
   return fetchWithAuth<KPIsResponse>(`${BASE_URL}/kpis${qs}`);
+}
+
+/**
+ * Busca KPIs estendidos (com sparklines, trends e previous values).
+ */
+export async function fetchPerformanceKPIsExtended(filters?: PerformanceFilters): Promise<KPIsExtendedResponse> {
+  const qs = buildQueryString(filters);
+  return fetchWithAuth<KPIsExtendedResponse>(`${BASE_URL}/kpis-extended${qs}`);
 }
 
 /**
