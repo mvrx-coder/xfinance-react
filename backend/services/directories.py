@@ -1,13 +1,14 @@
 """
 Serviço de criação de diretórios - xFinance
 
-Cria diretórios no NAS e pasta local de fotos após inserção de nova inspeção.
+Cria diretórios no NAS e pasta de fotos após inserção de nova inspeção.
+Suporta tanto ambiente Windows (caminhos UNC) quanto Linux/Docker (volumes montados).
 """
 
 import logging
 import os
+import platform
 import socket
-import subprocess
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from typing import Tuple, List
@@ -19,61 +20,119 @@ logger = logging.getLogger(__name__)
 # Timeout para operações de rede (segundos)
 NETWORK_TIMEOUT = 5
 
+# Detectar ambiente de execução
+IS_LINUX = platform.system() == "Linux"
+
 # =============================================================================
-# CONFIGURAÇÃO NAS
+# CONFIGURAÇÃO - CAMINHOS
 # =============================================================================
 
-# Servidor NAS (pode ser sobrescrito via variável de ambiente)
-NAS_SERVER = os.getenv("XF_NAS_SERVER", r"\\192.168.1.100")
-NAS_USER = os.getenv("XF_NAS_USER", "")
-NAS_PASS = os.getenv("XF_NAS_PASS", "")
+# Caminhos montados (Linux/Docker) - definidos via variáveis de ambiente
+# Se estiver no Linux E as variáveis estiverem definidas, usa os mounts
+NAS_MOUNT = os.getenv("XF_NAS_MOUNT", "")  # Ex: /mnt/trabalhos
+PHOTOS_MOUNT = os.getenv("XF_PHOTOS_MOUNT", "")  # Ex: /mnt/fotos
 
-# Pasta base de fotos (local)
-PHOTOS_BASE = r"E:\MVRX\Fotos"
+# Caminhos UNC Windows (fallback se não estiver em Linux ou mounts não configurados)
+NAS_SERVER_UNC = os.getenv("XF_NAS_SERVER", r"\\192.168.1.35\mvrx_nas")
+PHOTOS_SERVER_UNC = os.getenv("XF_PHOTOS_SERVER", r"\\192.168.1.50")
+PHOTOS_SHARE = os.getenv("XF_PHOTOS_SHARE", "Fotos")
 
-# Cache de autenticação (evita re-autenticação na mesma sessão)
-_nas_authenticated = False
+# Credenciais (usadas apenas no Windows)
+NAS_USER = os.getenv("XF_NAS_USER", "xfinance_svc")
+NAS_PASS = os.getenv("XF_NAS_PASS", "Aa25101208*")
+
+# Determinar qual modo usar
+USE_LINUX_MOUNTS = IS_LINUX and NAS_MOUNT and PHOTOS_MOUNT
+
+if USE_LINUX_MOUNTS:
+    logger.info("Modo Linux: usando volumes montados em %s e %s", NAS_MOUNT, PHOTOS_MOUNT)
+else:
+    logger.info("Modo Windows: usando caminhos UNC")
 
 
 # =============================================================================
 # VERIFICAÇÃO DE CONECTIVIDADE
 # =============================================================================
 
-def _is_nas_reachable() -> bool:
+def _is_mount_available(mount_path: str) -> bool:
     """
-    Verifica se o NAS está acessível via ping/socket com timeout curto.
+    Verifica se um ponto de montagem está disponível (Linux).
+    
+    Args:
+        mount_path: Caminho do mount (ex: /mnt/trabalhos)
+    
+    Returns:
+        bool: True se montado e acessível, False caso contrário
+    """
+    if not mount_path:
+        return False
+    
+    try:
+        # Verifica se o diretório existe e é acessível
+        if os.path.isdir(mount_path) and os.access(mount_path, os.W_OK):
+            logger.debug("Mount disponível: %s", mount_path)
+            return True
+        else:
+            logger.warning("Mount não disponível ou sem permissão: %s", mount_path)
+            return False
+    except Exception as e:
+        logger.warning("Erro ao verificar mount %s: %s", mount_path, e)
+        return False
+
+
+def _is_server_reachable(server_path: str) -> bool:
+    """
+    Verifica se um servidor de rede está acessível via socket (Windows).
+    
+    Args:
+        server_path: Caminho UNC (ex: \\\\192.168.1.35\\share)
     
     Returns:
         bool: True se acessível, False caso contrário
     """
-    # Extrair IP/hostname do path UNC
-    server = NAS_SERVER.replace("\\", "").strip()
+    # Extrair IP/hostname do path UNC (pega apenas a primeira parte após \\)
+    parts = server_path.replace("\\", "/").strip("/").split("/")
+    server = parts[0] if parts else ""
+    
     if not server:
         return False
     
     try:
-        # Tentar conectar na porta SMB (445) com timeout curto
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(NETWORK_TIMEOUT)
         result = sock.connect_ex((server, 445))
         sock.close()
         
         if result == 0:
-            logger.debug("NAS acessível: %s", server)
+            logger.debug("Servidor acessível: %s", server)
             return True
         else:
-            logger.warning("NAS inacessível (porta 445): %s", server)
+            logger.warning("Servidor inacessível (porta 445): %s", server)
             return False
             
     except socket.timeout:
-        logger.warning("NAS timeout: %s", server)
+        logger.warning("Servidor timeout: %s", server)
         return False
     except socket.gaierror:
-        logger.warning("NAS nome não resolvido: %s", server)
+        logger.warning("Servidor nome não resolvido: %s", server)
         return False
     except Exception as e:
-        logger.warning("NAS erro de verificação: %s -> %s", server, e)
+        logger.warning("Servidor erro de verificação: %s -> %s", server, e)
         return False
+
+
+def _is_nas_reachable() -> bool:
+    """Verifica se o NAS de Trabalhos está acessível."""
+    if USE_LINUX_MOUNTS:
+        return _is_mount_available(NAS_MOUNT)
+    return _is_server_reachable(NAS_SERVER_UNC)
+
+
+def _is_photos_server_reachable() -> bool:
+    """Verifica se o servidor de Fotos está acessível."""
+    if USE_LINUX_MOUNTS:
+        return _is_mount_available(PHOTOS_MOUNT)
+    return _is_server_reachable(PHOTOS_SERVER_UNC)
 
 
 def _create_directory_with_timeout(path: str, timeout: int = 10) -> bool:
@@ -104,20 +163,24 @@ def _create_directory_with_timeout(path: str, timeout: int = 10) -> bool:
 
 
 # =============================================================================
-# AUTENTICAÇÃO NAS
+# AUTENTICAÇÃO SERVIDORES DE REDE (Windows only)
 # =============================================================================
+
+# Cache de autenticação (evita re-autenticação na mesma sessão)
+_nas_authenticated = False
+_photos_authenticated = False
+
 
 def _ensure_nas_connection() -> bool:
     """
-    Garante conexão autenticada com o NAS usando net use.
-    
-    Usa credenciais das variáveis de ambiente XF_NAS_USER e XF_NAS_PASS.
-    A autenticação é feita uma vez por sessão do servidor.
-    
-    Returns:
-        bool: True se conectado/autenticado, False se falhou
+    Garante conexão autenticada com o NAS (Windows only).
+    No Linux com volumes montados, retorna True diretamente.
     """
     global _nas_authenticated
+
+    # No Linux com mounts, não precisa autenticar
+    if USE_LINUX_MOUNTS:
+        return True
 
     # Se já autenticou nesta sessão, não refaz
     if _nas_authenticated:
@@ -126,22 +189,23 @@ def _ensure_nas_connection() -> bool:
     # Se não há credenciais configuradas, tenta sem autenticação
     if not NAS_USER or not NAS_PASS:
         logger.info("NAS: Sem credenciais configuradas, tentando acesso direto")
-        return True  # Deixa tentar - pode funcionar se o serviço rodar como usuário com acesso
+        return True
 
     try:
-        # Primeiro, desconecta conexão anterior se existir (evita conflitos)
+        import subprocess
+        # Primeiro, desconecta conexão anterior se existir
         subprocess.run(
-            ["net", "use", NAS_SERVER, "/delete", "/y"],
+            ["net", "use", NAS_SERVER_UNC, "/delete", "/y"],
             capture_output=True,
             timeout=10,
         )
     except Exception:
-        pass  # Ignora se não tinha conexão anterior
+        pass
 
     try:
-        # Conecta com as credenciais
+        import subprocess
         result = subprocess.run(
-            ["net", "use", NAS_SERVER, f"/user:{NAS_USER}", NAS_PASS, "/persistent:no"],
+            ["net", "use", NAS_SERVER_UNC, f"/user:{NAS_USER}", NAS_PASS, "/persistent:no"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -149,18 +213,36 @@ def _ensure_nas_connection() -> bool:
 
         if result.returncode == 0:
             _nas_authenticated = True
-            logger.info("NAS: Autenticação bem-sucedida para %s", NAS_SERVER)
+            logger.info("NAS: Autenticação bem-sucedida para %s", NAS_SERVER_UNC)
             return True
         else:
             logger.warning("NAS: Falha na autenticação - %s", result.stderr or result.stdout)
             return False
 
-    except subprocess.TimeoutExpired:
-        logger.warning("NAS: Timeout ao tentar autenticar")
-        return False
     except Exception as e:
         logger.warning("NAS: Erro ao autenticar - %s", e)
         return False
+
+
+def _ensure_photos_connection() -> bool:
+    """
+    Garante conexão autenticada com o servidor de Fotos (Windows only).
+    No Linux com volumes montados, retorna True diretamente.
+    """
+    global _photos_authenticated
+
+    # No Linux com mounts, não precisa autenticar
+    if USE_LINUX_MOUNTS:
+        return True
+
+    # Se já autenticou nesta sessão, não refaz
+    if _photos_authenticated:
+        return True
+
+    # Sem credenciais configuradas = acesso direto
+    logger.info("FOTOS: Tentando acesso direto (sem credenciais)")
+    _photos_authenticated = True
+    return True
 
 
 # =============================================================================
@@ -169,7 +251,7 @@ def _ensure_nas_connection() -> bool:
 
 def _clean_path_component(s: str) -> str:
     """
-    Remove caracteres inválidos para nomes de diretório Windows.
+    Remove caracteres inválidos para nomes de diretório.
     
     Args:
         s: String a limpar
@@ -190,7 +272,11 @@ def create_directories(
     id_cidade: int,
 ) -> Tuple[str, List[str]]:
     """
-    Cria diretórios no NAS e pasta de fotos local.
+    Cria diretórios no NAS (Trabalhos) e no servidor de Fotos.
+    
+    Detecta automaticamente o ambiente:
+    - Linux/Docker: usa volumes montados (/mnt/trabalhos, /mnt/fotos)
+    - Windows: usa caminhos UNC (\\\\server\\share)
     
     Args:
         id_contr: ID do contratante
@@ -212,8 +298,19 @@ def create_directories(
         uf_sigla = info.get("uf_sigla", "XX")
         cidade_nome = info.get("cidade_nome", "")
         
-        # Base paths
-        base = os.path.join(NAS_SERVER, "Trabalhos")
+        # Determinar caminhos base conforme ambiente
+        if USE_LINUX_MOUNTS:
+            # Linux/Docker: volumes montados
+            # /mnt/trabalhos já aponta para o share Trabalhos do NAS
+            base_trabalhos = NAS_MOUNT
+            base_fotos = PHOTOS_MOUNT
+            logger.debug("Usando mounts Linux: %s, %s", base_trabalhos, base_fotos)
+        else:
+            # Windows: caminhos UNC
+            base_trabalhos = os.path.join(NAS_SERVER_UNC, "Trabalhos")
+            base_fotos = os.path.join(PHOTOS_SERVER_UNC, PHOTOS_SHARE)
+            logger.debug("Usando caminhos UNC: %s, %s", base_trabalhos, base_fotos)
+        
         year = datetime.now().strftime("%Y")
         
         # Formatar data no padrão AAMMDD
@@ -234,19 +331,21 @@ def create_directories(
         # Definir caminhos baseado na flag diretorio do contratante
         if flag_dir == 1:
             # Player tem diretório próprio
-            target = os.path.join(base, year, player_clean, name_part)
-            photos_target = os.path.join(PHOTOS_BASE, player_clean, name_part)
+            target_trabalhos = os.path.join(base_trabalhos, year, player_clean, name_part)
+            target_fotos = os.path.join(base_fotos, player_clean, name_part)
         else:
             # Vai para pasta MVRX
             name_with_player = _clean_path_component(f"{name_part} {player_clean}")
-            target = os.path.join(base, year, "MVRX", name_with_player)
-            photos_target = os.path.join(PHOTOS_BASE, "MVRX", name_with_player)
+            target_trabalhos = os.path.join(base_trabalhos, year, "MVRX", name_with_player)
+            target_fotos = os.path.join(base_fotos, "MVRX", name_with_player)
         
         created = []
         created_display = []
         failures = []
         
-        # Verificar se NAS está acessível ANTES de tentar criar diretório
+        # =========================================
+        # 1. Criar diretório no NAS de Trabalhos
+        # =========================================
         nas_reachable = _is_nas_reachable()
         
         if nas_reachable:
@@ -254,32 +353,39 @@ def create_directories(
             _ensure_nas_connection()
             
             # Criar diretório no NAS com timeout
-            if _create_directory_with_timeout(target, timeout=15):
-                created.append(target)
+            if _create_directory_with_timeout(target_trabalhos, timeout=15):
+                created.append(target_trabalhos)
                 created_display.append(f"NAS: {name_part}")
-                logger.info("NAS criado: %s", target)
+                logger.info("NAS criado: %s", target_trabalhos)
             else:
-                failures.append((target, "Timeout ou erro ao criar"))
-                logger.warning("ERRO AO CRIAR NAS: %s", target)
+                failures.append((target_trabalhos, "Timeout ou erro ao criar"))
+                logger.warning("ERRO AO CRIAR NAS: %s", target_trabalhos)
         else:
             # NAS inacessível - pular sem esperar
-            failures.append((target, "NAS inacessível"))
+            failures.append((target_trabalhos, "NAS inacessível"))
             logger.warning("NAS INACESSÍVEL - Pulando criação de diretório")
         
-        # Criar diretório de fotos local (verificar se drive existe)
-        photos_drive = os.path.splitdrive(photos_target)[0]
-        if photos_drive and os.path.exists(photos_drive + "\\"):
-            try:
-                os.makedirs(photos_target, exist_ok=True)
-                created.append(photos_target)
+        # =========================================
+        # 2. Criar diretório no servidor de Fotos
+        # =========================================
+        photos_reachable = _is_photos_server_reachable()
+        
+        if photos_reachable:
+            # Garantir autenticação no servidor de fotos
+            _ensure_photos_connection()
+            
+            # Criar diretório de fotos com timeout
+            if _create_directory_with_timeout(target_fotos, timeout=15):
+                created.append(target_fotos)
                 created_display.append(f"Fotos: {name_part}")
-                logger.info("FOTOS criado: %s", photos_target)
-            except Exception as e:
-                failures.append((photos_target, str(e)))
-                logger.warning("ERRO AO CRIAR FOTOS: %s -> %r", photos_target, e)
+                logger.info("FOTOS criado: %s", target_fotos)
+            else:
+                failures.append((target_fotos, "Timeout ou erro ao criar"))
+                logger.warning("ERRO AO CRIAR FOTOS: %s", target_fotos)
         else:
-            failures.append((photos_target, f"Drive {photos_drive} não disponível"))
-            logger.warning("FOTOS: Drive %s não disponível - pulando", photos_drive)
+            # Servidor de fotos inacessível - pular sem esperar
+            failures.append((target_fotos, "Servidor de fotos inacessível"))
+            logger.warning("FOTOS: Mount/servidor inacessível - pulando")
         
         # Retornar resultado
         if len(created) == 2:

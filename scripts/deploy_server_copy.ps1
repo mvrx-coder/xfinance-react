@@ -151,11 +151,11 @@ Write-Host "==> Subindo stack (docker compose up -d --build)" -ForegroundColor C
 Invoke-SshScript @(
   "set -euo pipefail"
   "cd '$RemoteAppDir'"
-  "SERVICES=$(docker compose config --services)"
-  "echo ""==> Services:"""
-  "echo ""$SERVICES"""
-  "echo ""$SERVICES"" | grep -qx 'api'"
-  "echo ""$SERVICES"" | grep -qx 'web'"
+  'SERVICES=$(docker compose config --services)'
+  'echo "==> Services:"'
+  'echo "$SERVICES"'
+  'echo "$SERVICES" | grep -qx "api"'
+  'echo "$SERVICES" | grep -qx "web"'
   "docker compose up -d --build --remove-orphans"
   "docker compose ps"
 )

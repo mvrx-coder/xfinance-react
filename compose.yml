@@ -10,8 +10,13 @@ services:
       # Segurança (defina via .env no servidor)
       SECRET_KEY: ${XFINANCE_SECRET_KEY:-xfinance-secret-key-change-in-production-2024}
       DEBUG: ${XFINANCE_DEBUG:-false}
+      # Caminhos montados para NAS e Fotos (Linux)
+      XF_NAS_MOUNT: /mnt/trabalhos
+      XF_PHOTOS_MOUNT: /mnt/fotos
     volumes:
       - ./x_db:/app/x_db
+      - nas_trabalhos:/mnt/trabalhos
+      - nas_fotos:/mnt/fotos
     restart: unless-stopped
 
   web:
@@ -23,5 +28,21 @@ services:
     depends_on:
       - api
     restart: unless-stopped
+
+# Volumes CIFS para acesso ao NAS e servidor de Fotos
+volumes:
+  nas_trabalhos:
+    driver: local
+    driver_opts:
+      type: cifs
+      o: "username=xfinance_svc,password=Aa25101208*,uid=1000,gid=1000,file_mode=0775,dir_mode=0775"
+      device: "//192.168.1.35/mvrx_nas/Trabalhos"
+  nas_fotos:
+    driver: local
+    driver_opts:
+      type: cifs
+      # Share administrativo Dados$ na máquina MVRDESKTOP (192.168.1.50)
+      o: "username=Marcus Vinicius,password=123456,uid=1000,gid=1000,file_mode=0775,dir_mode=0775"
+      device: "//192.168.1.50/Dados$/Fotos"
 
 

@@ -94,10 +94,15 @@ export function CollapsibleSidebar({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wide mb-3"
+                className="mb-3"
               >
-                <Sparkles className="h-3.5 w-3.5" />
-                Ações
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wide">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Ações
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 truncate">
+                  {selectedInspection.player || "—"} - {selectedInspection.segurado || "—"}
+                </p>
               </motion.div>
 
               {/* Botões de ação */}

@@ -168,11 +168,13 @@ export function ActionPanels({
       {panelType === 'excluir' && (
         <>
           <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-xs text-muted-foreground">
-              <strong className="text-foreground">{getLabelById(contrLookup, inspection.idContr)}</strong> - {getLabelById(segurLookup, inspection.idSegur)}
+            <p className="text-xs text-foreground font-medium">
+              {inspection.player || "—"} - {inspection.segurado || "—"}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Loc {inspection.loc?.toString().padStart(2, '0')} | ID-{inspection.idPrinc}
+              Inspeção: {inspection.dtInspecao 
+                ? new Date(inspection.dtInspecao + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                : "—"}
             </p>
           </div>
           <p className="text-xs text-red-400">
