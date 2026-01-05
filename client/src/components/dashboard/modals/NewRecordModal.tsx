@@ -205,6 +205,20 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               </label>
             </div>
             
+            {/* Botão Finalizar (apenas no modo multi-local) */}
+            {multiLocal.active && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isPending}
+                className="gap-2 border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300"
+              >
+                <Check className="w-4 h-4" />
+                Finalizar
+              </Button>
+            )}
+            
             {/* Botão Submit */}
             <Button
               onClick={onSubmit}

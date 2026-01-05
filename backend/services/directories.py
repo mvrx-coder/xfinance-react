@@ -34,7 +34,7 @@ PHOTOS_MOUNT = os.getenv("XF_PHOTOS_MOUNT", "")  # Ex: /mnt/fotos
 
 # Caminhos UNC Windows (fallback se não estiver em Linux ou mounts não configurados)
 NAS_SERVER_UNC = os.getenv("XF_NAS_SERVER", r"\\192.168.1.35\mvrx_nas")
-PHOTOS_SERVER_UNC = os.getenv("XF_PHOTOS_SERVER", r"\\192.168.1.50")
+PHOTOS_SERVER_UNC = os.getenv("XF_PHOTOS_SERVER", r"\\MVRDESKTOP\Dados$")
 PHOTOS_SHARE = os.getenv("XF_PHOTOS_SHARE", "Fotos")
 
 # Credenciais (usadas apenas no Windows)

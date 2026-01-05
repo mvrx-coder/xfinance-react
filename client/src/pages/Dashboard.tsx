@@ -30,7 +30,7 @@ export default function Dashboard() {
   const [filters, setFilters] = useState<FilterState>({
     player: false,
     myJob: false,
-    dbLimit: true,
+    dbLimit: false,
     columnGroups: {
       people: true,
       workflow: true,

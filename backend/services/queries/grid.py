@@ -528,17 +528,35 @@ def load_grid(
         where_sql = "WHERE " + " AND ".join(where_clauses)
     
     # Montar query final
-    query = f"""
-        SELECT
-            {colunas_sql_str}
-        FROM princ p
-        {joins_sql}
-        {where_sql}
-        {order_by_clause}
-    """
-    
+    # Se há limite, usar subquery para pegar os N registros mais recentes por id_princ
+    # (id_princ é auto-increment, então reflete a ordem de criação)
     if limit is not None and limit > 0:
-        query = f"{query}\nLIMIT {limit}"
+        # Montar filtro de IDs: pegar os últimos N id_princ
+        # Isso garante que sempre teremos os registros mais recentes
+        limit_where = f"p.id_princ IN (SELECT id_princ FROM princ ORDER BY id_princ DESC LIMIT {limit})"
+        
+        if where_sql:
+            full_where = f"{where_sql} AND {limit_where}"
+        else:
+            full_where = f"WHERE {limit_where}"
+        
+        query = f"""
+            SELECT
+                {colunas_sql_str}
+            FROM princ p
+            {joins_sql}
+            {full_where}
+            {order_by_clause}
+        """
+    else:
+        query = f"""
+            SELECT
+                {colunas_sql_str}
+            FROM princ p
+            {joins_sql}
+            {where_sql}
+            {order_by_clause}
+        """
     
     logger.debug("Query grid para papel %s (limite=%s, my_job=%s)", papel, limit, my_job_user_id)
     

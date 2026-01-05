@@ -261,6 +261,12 @@ async def excluir_inspecoes(
                 request.ids_princ
             )
             
+            # Excluir locais adicionais (demais_locais)
+            conn.execute(
+                f"DELETE FROM demais_locais WHERE id_princ IN ({placeholders})",
+                request.ids_princ
+            )
+            
             # Excluir inspeções
             cursor = conn.execute(
                 f"DELETE FROM princ WHERE id_princ IN ({placeholders})",

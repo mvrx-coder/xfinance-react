@@ -39,7 +39,7 @@ export interface UseFiltersReturn {
 export const DEFAULT_FILTERS: FilterState = {
   player: false,
   myJob: false,
-  dbLimit: true,
+  dbLimit: false,
   columnGroups: {
     people: true,
     workflow: true,

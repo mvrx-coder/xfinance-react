@@ -177,13 +177,12 @@ async def create_new_record(
         )
         
         # ═══════════════════════════════════════════════════════════════════
-        # 4. CRIAR DIRETÓRIOS
+        # 4. CRIAR DIRETÓRIOS (usando data da inspeção)
         # ═══════════════════════════════════════════════════════════════════
-        dt_acerto = date.today().replace(day=1).strftime("%Y-%m-%d")
         dir_msg, dirs_created = create_directories(
             id_contr=request.id_contr,
             id_segur=id_segur,
-            dt_acerto=dt_acerto,
+            dt_acerto=request.dt_inspecao,  # Usar data do formulário
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
         )
@@ -280,13 +279,12 @@ async def add_local_adicional(
         logger.info("Local adicional: princ=%d → loc=%d", request.id_princ, new_loc)
         
         # ═══════════════════════════════════════════════════════════════════
-        # 4. CRIAR DIRETÓRIOS
+        # 4. CRIAR DIRETÓRIOS (usando data da inspeção)
         # ═══════════════════════════════════════════════════════════════════
-        dt_acerto = date.today().replace(day=1).strftime("%Y-%m-%d")
         dir_msg, dirs_created = create_directories(
             id_contr=id_contr,
             id_segur=id_segur,
-            dt_acerto=dt_acerto,
+            dt_acerto=request.dt_inspecao,  # Usar data do formulário
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
         )
