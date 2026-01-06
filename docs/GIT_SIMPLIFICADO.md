@@ -63,7 +63,7 @@ Voce tem 2 remotes configurados:
 
 | Nome | URL | Uso |
 |------|-----|-----|
-| `github` | `https://github.com/mvrx-coder/xfinance-react.git` | Compartilhar telas Replit |
+| `github` | `https://github.com/mvrx-coder/xfinance-react.git` | Repositório do projeto |
 | `gitsafe-backup` | `git://gitsafe:5418/backup.git` | Backup bare repo |
 
 ---

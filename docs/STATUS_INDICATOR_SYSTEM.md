@@ -357,5 +357,5 @@ const temPendencias = despesaPendente || guyHonorarioPendente || guyDespesaPende
 
 ---
 
-*Ultima atualizacao: 27/12/2024*
+*Ultima atualizacao: 2025-12-27*
 *Versao: 2.0*

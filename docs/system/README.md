@@ -14,11 +14,14 @@ Leia os documentos **nesta ordem exata** antes de fazer qualquer alteração:
 |---|-----------|-------|----------|
 | 1 | `../../CLAUDE.md` | 5 min | Regras críticas, sigilo, estrutura |
 | 2 | `SIGILO.md` | 3 min | Matriz de permissões por papel |
-| 3 | `ARCHITECTURE.md` | 5 min | Visão geral da arquitetura |
-| 4 | `padroes/areas_de_codigo.md` | 3 min | Onde editar cada tipo de código |
-| 5 | `ui/TYPOGRAPHY.md` | 2 min | Esquema de fontes |
-| 6 | `ui/TOAST.md` | 2 min | Sistema de notificações |
-| 7 | `ui/GRID.md` | 3 min | Regras do grid principal |
+| 3 | `schema/MAPEAMENTO_CAMPOS.md` | 5 min | Fonte de verdade DB ↔ TypeScript |
+| 4 | `ARCHITECTURE.md` | 5 min | Visão geral da arquitetura |
+| 5 | `padroes/areas_de_codigo.md` | 3 min | Onde editar cada tipo de código |
+| 6 | `DESIGN_TOKENS.md` | 3 min | Tokens e variáveis (evita hex hardcoded) |
+| 7 | `ui/TYPOGRAPHY.md` | 2 min | Esquema de fontes |
+| 8 | `ui/TOAST.md` | 2 min | Sistema de notificações |
+| 9 | `ui/GRID.md` | 3 min | Regras do grid principal |
+| 10 | `../STATUS_INDICATOR_SYSTEM.md` | 6 min | Especificação do status/cores e ordenação |
 
 ---
 

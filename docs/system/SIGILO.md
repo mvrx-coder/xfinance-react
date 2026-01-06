@@ -15,6 +15,11 @@ O xFinance implementa **controle de sigilo por papel de usuário** através da t
                        ela NÃO DEVE ser retornada pelo backend NEM renderizada no frontend.
 ```
 
+> ✅ **Fonte de verdade:** a tabela `permi` no SQLite.
+>
+> 🔒 **Segurança:** o controle de sigilo precisa ser garantido no **BACKEND** (SELECT com colunas permitidas + filtros por usuário quando aplicável).
+> O FRONTEND serve para UX (não renderizar o que não veio / esconder grupos), mas **não** pode ser a camada de segurança.
+
 ---
 
 ## 👥 Papéis do Sistema
@@ -193,6 +198,10 @@ export function usePermissions() {
   
   const canViewColumn = useCallback((column: string): boolean => {
     if (!user) return false;
+    // ⚠️ IMPORTANTE:
+    // - Não trate este check como segurança.
+    // - Idealmente, use uma lista vinda do backend (ex: /api/auth/me com colunas permitidas)
+    //   ou derive do payload já filtrado.
     const permitted = PERMITTED_COLUMNS[user.papel] ?? [];
     return permitted.includes(column);
   }, [user]);
@@ -204,6 +213,12 @@ export function usePermissions() {
   return { canViewColumn, canDelete, canForward, canManageUsers };
 }
 ```
+
+> ✅ Recomendação prática: para evitar drift entre docs e banco,
+> prefira o backend retornar junto do usuário logado um payload com:
+> - papel
+> - `permittedColumns` (derivado de `permi`)
+> E o frontend usa isso apenas para montar o grid.
 
 ### Renderização Condicional de Colunas
 

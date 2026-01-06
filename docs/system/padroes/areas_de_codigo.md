@@ -36,7 +36,7 @@ x_finan/
 │       ├── constants/          # Constantes globais
 │       └── lib/                # Utilitários
 │
-├── backend/                    # Backend FastAPI (A CRIAR)
+├── backend/                    # Backend FastAPI
 │   ├── routers/                # Endpoints da API
 │   ├── services/               # Lógica de negócio
 │   └── main.py                 # Entry point

@@ -9,7 +9,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import logoMvrx from "@assets/logo_1766218677246.png";
+import logoMvrx from "@assets/logo_mvrx.png";
 import { 
   Search, 
   Plus, 

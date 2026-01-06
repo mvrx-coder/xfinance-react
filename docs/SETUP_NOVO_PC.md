@@ -129,7 +129,13 @@ pip install -r requirements.txt
 ### Opção A: Script Automatizado (Recomendado)
 
 ```powershell
-.\scripts\start_dev.ps1
+\.\scripts\start.ps1
+```
+
+Ou, por duplo clique:
+
+```powershell
+start.bat
 ```
 
 ### Opção B: Manual (Dois Terminais)
@@ -154,7 +160,14 @@ npm run dev
 Abra o navegador em:
 
 ```
-http://localhost:5000
+http://localhost:5173
+```
+
+O backend (API) roda em:
+
+```
+http://127.0.0.1:8000
+http://127.0.0.1:8000/docs
 ```
 
 ---
@@ -170,7 +183,7 @@ http://localhost:5000
 - [ ] `npm install` executado (raiz do projeto)
 - [ ] `.venv` criado na pasta `backend`
 - [ ] `pip install -r requirements.txt` executado
-- [ ] Sistema acessível em `http://localhost:5000`
+- [ ] Sistema acessível em `http://localhost:5173`
 
 ---
 
@@ -192,11 +205,11 @@ $env:XF_BASE_DIR = "E:\MVRX\Financeiro\xFinance_3.0"
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Erro: "Porta 5000 ou 8000 em uso"
+### Erro: "Porta 5173 ou 8000 em uso"
 
 ```powershell
 # Verificar processos nas portas
-netstat -ano | findstr ":5000 :8000"
+netstat -ano | findstr ":5173 :8000"
 
 # Encerrar processo (substitua PID pelo número encontrado)
 taskkill /PID <PID> /F
@@ -234,7 +247,6 @@ ls "$env:XF_BASE_DIR\x_db"
     │   ├── requirements.txt
     │   └── main.py
     ├── client\                     ← Frontend React
-    ├── server\                     ← Express Proxy
     ├── docs\                       ← Documentação
     ├── scripts\                    ← Scripts de desenvolvimento
     ├── node_modules\               ← Dependências Node (criar localmente)

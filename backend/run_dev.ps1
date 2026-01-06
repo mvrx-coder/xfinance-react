@@ -22,7 +22,11 @@ Write-Host "Instalando dependências..." -ForegroundColor Cyan
 pip install -r requirements.txt --quiet
 
 # Definir variável de ambiente para o banco
-$env:XF_BASE_DIR = "E:\MVRX\Financeiro\xFinance_3.0"
+# Preferência: usar XF_BASE_DIR se já estiver definido; senão inferir como pai do repo.
+if (-not $env:XF_BASE_DIR -or $env:XF_BASE_DIR.Trim() -eq "") {
+    $projectRoot = Split-Path -Parent $scriptPath
+    $env:XF_BASE_DIR = Split-Path -Parent $projectRoot
+}
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green

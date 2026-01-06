@@ -94,6 +94,22 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+        display: ["var(--font-display)"],
+      },
+      letterSpacing: {
+        'header': '0.08em',
+        'wide': '0.05em',
+      },
+      boxShadow: {
+        // Neon glow shadows - cores da paleta xFinance
+        'neon-primary': '0 0 20px rgba(206, 98, 217, 0.3), 0 0 40px rgba(206, 98, 217, 0.1)',
+        'neon-accent': '0 0 20px rgba(0, 188, 212, 0.3), 0 0 40px rgba(0, 188, 212, 0.1)',
+        'neon-success': '0 0 20px rgba(52, 211, 153, 0.3), 0 0 40px rgba(52, 211, 153, 0.1)',
+        'neon-warning': '0 0 20px rgba(245, 158, 11, 0.3), 0 0 40px rgba(245, 158, 11, 0.1)',
+        'neon-destructive': '0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1)',
+        // Inner glow para cards/modais
+        'inner-glow': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+        'inner-glow-strong': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 0 rgba(0, 0, 0, 0.1)',
       },
       keyframes: {
         "accordion-down": {
@@ -104,10 +120,30 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "float-slow": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 5px rgba(206, 98, 217, 0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(206, 98, 217, 0.4)" },
+        },
+        "border-glow": {
+          "0%, 100%": { borderColor: "rgba(255, 255, 255, 0.1)" },
+          "50%": { borderColor: "rgba(255, 255, 255, 0.2)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
+        "float-slow": "float-slow 4s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "border-glow": "border-glow 3s ease-in-out infinite",
       },
     },
   },

@@ -29,7 +29,12 @@ Write-Host "  +=============================================+" -ForegroundColor 
 Write-Host ""
 
 # Configurar variável de ambiente para o banco
-$env:XF_BASE_DIR = "E:\MVRX\Financeiro\xFinance_3.0"
+# Preferência:
+# 1) Respeitar XF_BASE_DIR se já estiver definido
+# 2) Inferir como diretório pai do repositório (espera-se: <XF_BASE_DIR>\x_finan)
+if (-not $env:XF_BASE_DIR -or $env:XF_BASE_DIR.Trim() -eq "") {
+    $env:XF_BASE_DIR = Split-Path -Parent $ProjectRoot
+}
 Write-Host "[CONFIG] XF_BASE_DIR = $env:XF_BASE_DIR" -ForegroundColor Cyan
 
 # Verificar se o banco existe
@@ -66,7 +71,9 @@ function Start-Backend {
 `$Host.UI.RawUI.WindowTitle = 'xFinance - Backend FastAPI'
 Set-Location '$backendPath'
 & '$venvActivate'
-`$env:XF_BASE_DIR = 'E:\MVRX\Financeiro\xFinance_3.0'
+if (-not `$env:XF_BASE_DIR -or `$env:XF_BASE_DIR.Trim() -eq "") {
+    `$env:XF_BASE_DIR = '$(Split-Path -Parent $ProjectRoot)'
+}
 Write-Host ''
 Write-Host '  ========================================' -ForegroundColor Green
 Write-Host '  FastAPI Backend - xFinance 3.0' -ForegroundColor Green

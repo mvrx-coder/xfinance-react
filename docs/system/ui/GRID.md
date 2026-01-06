@@ -15,6 +15,14 @@
 
 ---
 
+## ⚡ Status da Linha (fonte única)
+
+O status da linha (cores do ícone de ação/Player/Segurado, incluindo **Pre-Final**) é especificado em:
+
+- `docs/STATUS_INDICATOR_SYSTEM.md`
+
+---
+
 ## Estrutura de Arquivos
 
 ```

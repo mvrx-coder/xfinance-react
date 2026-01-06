@@ -142,40 +142,47 @@ export function useInspections(filters?: InspectionsFilters) {
 
 ---
 
-## 🔧 Backend (FastAPI) - A CRIAR
+## 🔧 Backend (FastAPI)
 
-### Estrutura Planejada
+### Estrutura Atual
 
 ```
 backend/
 ├── main.py                 # Entry point FastAPI
 ├── config.py               # Configurações e paths
 ├── database.py             # Conexão SQLite
+├── dependencies.py         # CurrentUser, require_admin, helpers de acesso
 ├── routers/
-│   ├── inspections.py      # CRUD inspeções (/api/inspections)
-│   ├── users.py            # CRUD usuários (/api/users)
-│   ├── kpis.py             # Cálculos Express (/api/kpis)
-│   └── lookups.py          # Dropdowns (/api/lookups/*)
+│   ├── auth.py             # /api/auth/* (login/logout/me)
+│   ├── inspections.py      # /api/inspections (grid + CRUD)
+│   ├── acoes.py             # /api/acoes/* (ações do grid)
+│   ├── lookups.py          # /api/lookups/* (combos/dropdowns)
+│   ├── kpis.py              # /api/kpis (KPIs Express - admin only)
+│   ├── performance.py       # /api/performance/*
+│   ├── investments.py       # Rotas de investimentos
+│   └── new_record.py        # /api/new-record/*
 └── services/
-    ├── queries.py          # Queries SQL (migradas do x_main)
-    └── calculations.py     # Cálculos financeiros
+  ├── auth.py              # JWT + login
+  ├── permissions.py       # 🔒 Consulta tabela permi (sigilo)
+  ├── directories.py       # Criação/validação de diretórios
+  └── queries/             # SQLs (grid, kpis, etc.)
 ```
 
-### Endpoints Planejados
+### Endpoints Principais
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/inspections` | Lista inspeções (com filtros) |
-| POST | `/api/inspections` | Cria nova inspeção |
-| PATCH | `/api/inspections/{id}` | Atualiza inspeção |
-| DELETE | `/api/inspections` | Remove inspeções (body: ids) |
-| GET | `/api/kpis` | Retorna totais Express |
-| GET | `/api/users` | Lista usuários |
-| GET | `/api/lookups/contratantes` | Dropdown de players |
-| GET | `/api/lookups/segurados` | Dropdown de segurados |
-| GET | `/api/lookups/atividades` | Dropdown de atividades |
-| GET | `/api/lookups/ufs` | Dropdown de UFs |
-| GET | `/api/lookups/cidades?uf={id}` | Dropdown de cidades |
+| GET | `/api/health` | Health check |
+| POST | `/api/auth/login` | Login (cookie httponly) |
+| POST | `/api/auth/logout` | Logout |
+| GET | `/api/auth/me` | Usuário logado |
+| GET | `/api/inspections` | Lista inspeções do grid (🔒 colunas por papel) |
+| POST | `/api/inspections` | Criar inspeção (admin only) |
+| PATCH | `/api/inspections/{id}` | Atualizar inspeção (respeita papel) |
+| DELETE | `/api/inspections/{id}` | Excluir inspeção (admin only) |
+| GET | `/api/kpis` | KPIs Express (🔒 admin only) |
+| GET | `/api/lookups/*` | Lookups para dropdowns |
+| POST | `/api/new-record/*` | Fluxo de criação de registro |
 
 ---
 
