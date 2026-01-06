@@ -5,6 +5,17 @@
  * Dados reais vêm da API via hooks.
  */
 
+export interface AllocationItem {
+  id: string;
+  name: string;
+  value: number;
+  percentage: number;
+  color: string;
+}
+
+// Usado apenas para tipagem (os dados reais vêm da API)
+export const mockAllocations: AllocationItem[] = [];
+
 // =============================================================================
 // ANIMATION VARIANTS (Framer Motion)
 // =============================================================================

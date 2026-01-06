@@ -109,6 +109,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
     selectedUf,
     variosLocais,
     onSubmit,
+    onSubmitAndFinalize,
     confirmCreate,
     cancelCreate,
     handleVariosLocaisChange,
@@ -205,17 +206,21 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               </label>
             </div>
             
-            {/* Botão Finalizar (apenas no modo multi-local) */}
+            {/* Botão Último local - Finalizar (apenas no modo multi-local) */}
             {multiLocal.active && (
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleClose}
+                onClick={onSubmitAndFinalize}
                 disabled={isPending}
                 className="gap-2 border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300"
               >
-                <Check className="w-4 h-4" />
-                Finalizar
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                Último local - Finalizar
               </Button>
             )}
             

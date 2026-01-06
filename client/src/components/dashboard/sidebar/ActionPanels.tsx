@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useToast, useInvalidateKPIs } from "@/hooks";
 import type { Inspection } from "@shared/schema";
-import type { MarkerType, UserOption } from "@/types/acoes";
+import type { MarkerLevel, MarkerType, UserOption } from "@/types/acoes";
 import { 
   excluir, 
   encaminhar, 
@@ -57,7 +57,7 @@ export function ActionPanels({
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [observacao, setObservacao] = useState("");
-  const [markers, setMarkers] = useState<Record<MarkerType, number>>({
+  const [markers, setMarkers] = useState<Record<MarkerType, MarkerLevel>>({
     state_loc: 0,
     state_dt_envio: 0,
     state_dt_denvio: 0,
@@ -128,7 +128,7 @@ export function ActionPanels({
     }
   };
 
-  const handleMarcar = async (markerType: MarkerType, level: number) => {
+  const handleMarcar = async (markerType: MarkerType, level: MarkerLevel) => {
     if (!idPrinc) return;
     setMarkers(prev => ({ ...prev, [markerType]: level }));
     try {
@@ -258,7 +258,11 @@ export function ActionPanels({
               </span>
               <Select
                 value={String(markers[marker.type])}
-                onValueChange={(val) => handleMarcar(marker.type, parseInt(val, 10))}
+                onValueChange={(val) => {
+                  const parsed = parseInt(val, 10);
+                  if (![0, 1, 2, 3].includes(parsed)) return;
+                  handleMarcar(marker.type, parsed as MarkerLevel);
+                }}
               >
                 <SelectTrigger className="w-[120px] bg-slate-800/50 border-white/10 text-xs h-7" data-testid={`select-marker-${marker.type}`}>
                   <SelectValue placeholder="Selecione nível" />

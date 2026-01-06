@@ -254,7 +254,7 @@ export function InvestmentsModal({ isOpen, onClose }: InvestmentsModalProps) {
                     <HighlightCard
                       title="Maior Posição"
                       name={highlights.maior_posicao?.nome ?? "-"}
-                      value={highlights.maior_posicao?.valor ? formatCurrency(highlights.maior_posicao.valor) : undefined}
+                      value={highlights.maior_posicao?.valor}
                       icon={Target}
                       colorClass="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10"
                       iconColorClass="text-emerald-400"

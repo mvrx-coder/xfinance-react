@@ -17,6 +17,7 @@ import {
   ComboboxButton,
   ComboboxOptions,
   ComboboxOption,
+  Transition,
 } from "@headlessui/react";
 import { Check, ChevronDown, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";

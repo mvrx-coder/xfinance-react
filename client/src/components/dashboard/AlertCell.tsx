@@ -16,7 +16,7 @@ interface AlertCellProps {
   idPrinc: number;
   type?: "text" | "date" | "currency";
   className?: string;
-  onSave?: (idPrinc: number, field: string, newValue: string) => Promise<void>;
+  onSave?: (idPrinc: number, field: string, newValue: string) => Promise<boolean>;
 }
 
 export function AlertCell({

@@ -233,8 +233,9 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
   });
   
   // Mutation: adicionar local
+  type AddLocalVariables = NewRecordFormData & { finalize?: boolean };
   const addLocalMutation = useMutation({
-    mutationFn: async (data: NewRecordFormData): Promise<NewRecordResponse> => {
+    mutationFn: async (data: AddLocalVariables): Promise<NewRecordResponse> => {
       const payload = {
         id_princ: multiLocal.idPrinc,
         id_user_guy: data.idUserGuy,
@@ -246,7 +247,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       const response = await apiRequest("POST", "/api/new-record/local", payload);
       return response.json();
     },
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
       queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
       
@@ -254,16 +255,36 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         ? `📁 ${response.dirs_created.join(" | ")}`
         : "";
       
-      // Limpar campos locais
-      form.setValue("idUserGuy", 0);
-      form.setValue("dtInspecao", undefined as unknown as Date);
-      form.setValue("idUf", 0);
-      form.setValue("idCidade", 0);
+      // Verificar se é para finalizar (flag passada via variables)
+      const shouldFinalize = Boolean(variables.finalize);
       
-      toast({
-        title: `✅ Local #${response.loc} adicionado!`,
-        description: `${dirsMsg} Insira o próximo local.`,
-      });
+      if (shouldFinalize) {
+        // Finalizar: resetar tudo e chamar onSuccess
+        toast({
+          title: `✅ Último local #${response.loc} adicionado!`,
+          description: dirsMsg || "Inserção de múltiplos locais concluída.",
+        });
+        setMultiLocal({
+          active: false,
+          idPrinc: null,
+          idContr: null,
+          idSegur: null,
+          segurNome: null,
+        });
+        form.reset();
+        options.onSuccess?.();
+      } else {
+        // Continuar: limpar apenas campos locais
+        form.setValue("idUserGuy", 0);
+        form.setValue("dtInspecao", undefined as unknown as Date);
+        form.setValue("idUf", 0);
+        form.setValue("idCidade", 0);
+        
+        toast({
+          title: `✅ Local #${response.loc} adicionado!`,
+          description: `${dirsMsg} Insira o próximo local.`,
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -275,9 +296,9 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
   });
   
   // Executar criação
-  const executeCreate = useCallback((data: NewRecordFormData) => {
+  const executeCreate = useCallback((data: NewRecordFormData, finalize = false) => {
     if (multiLocal.active && multiLocal.idPrinc) {
-      addLocalMutation.mutate(data);
+      addLocalMutation.mutate({ ...data, finalize });
     } else {
       createMutation.mutate(data);
     }
@@ -295,6 +316,12 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       executeCreate(data);
     }
   }, [executeCreate, multiLocal.active]);
+  
+  // Handler de submit + finalizar (último local)
+  const onSubmitAndFinalize = useCallback((data: NewRecordFormData) => {
+    // Executar com flag finalize=true
+    executeCreate(data, true);
+  }, [executeCreate]);
   
   // Confirmar criação
   const confirmCreate = useCallback(() => {
@@ -400,6 +427,27 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
     [form, onSubmit, handleValidationError]
   );
   
+  // Wrapper para submit + finalizar (último local)
+  const handleFormSubmitAndFinalize = useCallback(
+    (e?: React.BaseSyntheticEvent) => {
+      e?.preventDefault?.();
+      console.log("[NewRecord] Submit + Finalizar iniciado, validando...");
+      
+      return form.handleSubmit(
+        // onValid - dados válidos
+        (data) => {
+          console.log("[NewRecord] Validação OK, finalizando com dados:", data);
+          onSubmitAndFinalize(data);
+        },
+        // onInvalid - erros de validação
+        (errors) => {
+          handleValidationError(errors);
+        }
+      )(e);
+    },
+    [form, onSubmitAndFinalize, handleValidationError]
+  );
+  
   return {
     form,
     multiLocal,
@@ -408,6 +456,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
     selectedUf,
     variosLocais,
     onSubmit: handleFormSubmit,
+    onSubmitAndFinalize: handleFormSubmitAndFinalize,
     confirmCreate,
     cancelCreate,
     handleVariosLocaisChange,

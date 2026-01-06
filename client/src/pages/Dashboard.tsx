@@ -184,7 +184,7 @@ export default function Dashboard() {
           selectedInspection={selectedInspection}
           onClearSelection={handleClearSelection}
           onRefresh={handleSearch}
-          userRole={papel}
+          userRole={papel ?? undefined}
           contrLookup={contrLookup}
           segurLookup={segurLookup}
         />
@@ -197,7 +197,7 @@ export default function Dashboard() {
             isLoading={isLoadingInspections}
             onRowClick={handleRowClick}
             onRefresh={handleSearch}
-            userRole={papel}
+            userRole={papel ?? undefined}
           />
         </main>
       </div>
