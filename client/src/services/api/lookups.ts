@@ -5,6 +5,8 @@
  * Conecta aos endpoints reais do backend FastAPI.
  */
 
+import { apiFetch } from "@/lib/queryClient";
+
 export interface LookupOption {
   value: number;
   label: string;
@@ -21,11 +23,7 @@ export interface UserOption extends LookupOption {
 
 export async function fetchUfOptions(): Promise<LookupOption[]> {
   try {
-    const response = await fetch("/api/lookups/ufs", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar UFs");
-    return await response.json();
+    return await apiFetch<LookupOption[]>("/api/lookups/ufs");
   } catch (error) {
     console.error("Erro ao buscar UFs:", error);
     return [];
@@ -40,11 +38,7 @@ export async function fetchCidadeOptions(idUf: number): Promise<LookupOption[]> 
   if (!idUf) return [];
   
   try {
-    const response = await fetch(`/api/lookups/cidades?id_uf=${idUf}`, {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error(`Erro ao buscar cidades`);
-    return await response.json();
+    return await apiFetch<LookupOption[]>(`/api/lookups/cidades?id_uf=${idUf}`);
   } catch (error) {
     console.error(`Erro ao buscar cidades da UF ${idUf}:`, error);
     return [];
@@ -57,11 +51,7 @@ export async function fetchCidadeOptions(idUf: number): Promise<LookupOption[]> 
 
 export async function fetchContrOptions(): Promise<LookupOption[]> {
   try {
-    const response = await fetch("/api/lookups/contratantes", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar contratantes");
-    return await response.json();
+    return await apiFetch<LookupOption[]>("/api/lookups/contratantes");
   } catch (error) {
     console.error("Erro ao buscar contratantes:", error);
     return [];
@@ -74,11 +64,7 @@ export async function fetchContrOptions(): Promise<LookupOption[]> {
 
 export async function fetchSegurOptions(): Promise<LookupOption[]> {
   try {
-    const response = await fetch("/api/lookups/segurados", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar segurados");
-    return await response.json();
+    return await apiFetch<LookupOption[]>("/api/lookups/segurados");
   } catch (error) {
     console.error("Erro ao buscar segurados:", error);
     return [];
@@ -91,11 +77,7 @@ export async function fetchSegurOptions(): Promise<LookupOption[]> {
 
 export async function fetchAtiviOptions(): Promise<LookupOption[]> {
   try {
-    const response = await fetch("/api/lookups/atividades", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar atividades");
-    return await response.json();
+    return await apiFetch<LookupOption[]>("/api/lookups/atividades");
   } catch (error) {
     console.error("Erro ao buscar atividades:", error);
     return [];
@@ -108,11 +90,7 @@ export async function fetchAtiviOptions(): Promise<LookupOption[]> {
 
 export async function fetchUsersOptions(): Promise<UserOption[]> {
   try {
-    const response = await fetch("/api/lookups/users", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar usuários");
-    return await response.json();
+    return await apiFetch<UserOption[]>("/api/lookups/users");
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     return [];
@@ -125,11 +103,7 @@ export async function fetchUsersOptions(): Promise<UserOption[]> {
 
 export async function fetchInspetoresOptions(): Promise<UserOption[]> {
   try {
-    const response = await fetch("/api/lookups/inspetores", {
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Erro ao buscar inspetores");
-    return await response.json();
+    return await apiFetch<UserOption[]>("/api/lookups/inspetores");
   } catch (error) {
     console.error("Erro ao buscar inspetores:", error);
     return [];

@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/queryClient";
 import type { 
   EncaminharInput, 
   MarcadorInput, 
@@ -12,51 +13,45 @@ import type {
 const BASE_URL = "";
 
 export async function encaminhar(input: EncaminharInput): Promise<AcaoResult> {
-  const response = await fetch(`${BASE_URL}/api/acoes/encaminhar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(input),
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    return { success: false, message: error.detail || "Erro ao encaminhar inspeções" };
+  try {
+    return await apiFetch<AcaoResult>(`${BASE_URL}/api/acoes/encaminhar`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "Erro ao encaminhar inspeções" 
+    };
   }
-  
-  return await response.json();
 }
 
 export async function marcar(input: MarcadorInput): Promise<AcaoResult> {
-  const response = await fetch(`${BASE_URL}/api/acoes/marcar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(input),
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    return { success: false, message: error.detail || "Erro ao aplicar marcador" };
+  try {
+    return await apiFetch<AcaoResult>(`${BASE_URL}/api/acoes/marcar`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "Erro ao aplicar marcador" 
+    };
   }
-  
-  return await response.json();
 }
 
 export async function excluir(input: ExcluirInput): Promise<AcaoResult> {
-  const response = await fetch(`${BASE_URL}/api/acoes/excluir`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(input),
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    return { success: false, message: error.detail || "Erro ao excluir inspeções" };
+  try {
+    return await apiFetch<AcaoResult>(`${BASE_URL}/api/acoes/excluir`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "Erro ao excluir inspeções" 
+    };
   }
-  
-  return await response.json();
 }
 
 export async function limparFiltros(): Promise<{ success: boolean }> {
@@ -65,15 +60,7 @@ export async function limparFiltros(): Promise<{ success: boolean }> {
 }
 
 export async function fetchUsersOptions(): Promise<UserOption[]> {
-  const response = await fetch(`${BASE_URL}/api/lookups/users`, {
-    credentials: "include",
-  });
-  
-  if (!response.ok) {
-    throw new Error("Failed to fetch users");
-  }
-  
-  return await response.json();
+  return apiFetch<UserOption[]>(`${BASE_URL}/api/lookups/users`);
 }
 
 export function getMarkerTypes(): MarkerOption[] {

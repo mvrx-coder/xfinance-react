@@ -23,6 +23,42 @@ export async function apiRequest(
   return res;
 }
 
+/**
+ * Helper genérico para fazer requisições GET à API.
+ * Consolida padrão de fetch com credentials, tratamento de erro e parsing JSON.
+ * 
+ * @param endpoint - URL do endpoint (ex: "/api/lookups/ufs")
+ * @param options - Opções adicionais do fetch (opcional)
+ * @returns Promise com dados parseados como JSON
+ * @throws Error se a requisição falhar
+ * 
+ * @example
+ * ```ts
+ * const ufs = await apiFetch<LookupOption[]>("/api/lookups/ufs");
+ * const cidades = await apiFetch<LookupOption[]>(`/api/lookups/cidades?id_uf=${uf}`);
+ * ```
+ */
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(endpoint, {
+    credentials: "include",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || `Erro na requisição: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;

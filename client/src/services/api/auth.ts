@@ -4,7 +4,7 @@
  * Integração com backend FastAPI
  */
 
-import { apiRequest } from "@/lib/queryClient";
+import { apiFetch } from "@/lib/queryClient";
 
 // =============================================================================
 // TIPOS
@@ -48,19 +48,10 @@ const API_BASE = "";
  * @throws Error se credenciais inválidas
  */
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE}/api/auth/login`, {
+  return apiFetch<LoginResponse>(`${API_BASE}/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
-    credentials: "include", // Importante: envia e recebe cookies
   });
-  
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Erro ao fazer login");
-  }
-  
-  return response.json();
 }
 
 /**
