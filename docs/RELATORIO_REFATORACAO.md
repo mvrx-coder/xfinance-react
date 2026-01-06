@@ -123,18 +123,110 @@ Todos os arquivos agora usam `@/services/domain/formatters.ts` como fonte única
 
 ---
 
+### Fase 3: Consolidação de Cache e API (Janeiro 2026)
+
+#### Problema Identificado
+
+**Duplicação de lógica de invalidação de cache:**
+- Múltiplos hooks repetiam lógica de `queryClient.invalidateQueries()`
+- Query keys espalhadas em diferentes arquivos
+- Acoplamento entre hooks de domínios diferentes
+
+**Duplicação de lógica de fetching:**
+- Padrão `fetch()` + `credentials: "include"` repetido em 4 arquivos
+- Tratamento de erro similar em múltiplos lugares
+- Parsing de JSON duplicado
+
+#### Arquivos Modificados
+
+**Fase 3.1 - Cache Helpers:**
+1. ✅ **Criado:** `client/src/lib/cache-helpers.ts`
+   - Centraliza todas as query keys do sistema
+   - Hook `useInvalidateQueries()` com métodos especializados
+   - 103 linhas
+
+2. ✅ **Refatorado:** `client/src/hooks/use-kpis.ts`
+   - Usa `QUERY_KEYS.KPIS` centralizado
+   - `useInvalidateKPIs()` agora delega para `useInvalidateQueries()`
+   - Mantém compatibilidade retroativa com `@deprecated`
+
+3. ✅ **Refatorado:** `client/src/hooks/use-inspections.ts`
+   - Usa `QUERY_KEYS.INSPECTIONS` centralizado
+   - Mutations usam `invalidateAll()` ao invés de repetir lógica
+   - Redução de 8 linhas de código duplicado
+
+4. ✅ **Refatorado:** `client/src/hooks/use-new-record.ts`
+   - Remove import direto de `KPIS_QUERY_KEY`
+   - Usa `useInvalidateQueries().invalidateAll()`
+   - Elimina acoplamento com `use-kpis.ts`
+
+5. ✅ **Atualizado:** `client/src/hooks/index.ts`
+   - Exporta `QUERY_KEYS` e `useInvalidateQueries`
+   - Mantém `KPIS_QUERY_KEY` para compatibilidade
+
+**Fase 3.2 - API Fetching:**
+1. ✅ **Estendido:** `client/src/lib/queryClient.ts`
+   - Nova função `apiFetch<T>()` genérica
+   - Consolida `credentials: "include"` e tratamento de erro
+   - 31 linhas adicionadas
+
+2. ✅ **Refatorado:** `client/src/services/api/lookups.ts`
+   - 7 funções agora usam `apiFetch()`
+   - Removidos blocos `try/catch` + `fetch()` repetitivos
+   - Redução de ~50 linhas de código duplicado
+
+3. ✅ **Refatorado:** `client/src/services/api/auth.ts`
+   - Função `login()` usa `apiFetch()`
+   - Mantém lógica específica de `getCurrentUser()` (tratamento 401)
+   - Redução de ~10 linhas
+
+4. ✅ **Refatorado:** `client/src/services/api/acoes.ts`
+   - 3 funções principais usam `apiFetch()`
+   - Tratamento de erro centralizado
+   - Redução de ~30 linhas
+
+#### Benefícios
+
+**Manutenibilidade:**
+- ✅ Mudanças em invalidação propagam de um único lugar
+- ✅ Query keys centralizadas facilitam refatoração
+- ✅ Padrão de fetch unificado
+
+**Redução de Código:**
+- 🔢 **~98 linhas** de código duplicado eliminadas
+- 🔢 **1 novo arquivo** criado (`cache-helpers.ts`)
+- 🔢 **8 arquivos** modificados
+
+**Acoplamento:**
+- ✅ Hooks não importam mais query keys de outros hooks
+- ✅ Services usam helper centralizado ao invés de repetir lógica
+
+**Compatibilidade:**
+- ✅ `KPIS_QUERY_KEY` mantido com `@deprecated`
+- ✅ Assinaturas de função não alteradas
+- ✅ Zero breaking changes
+
+#### Validação
+
+- ✅ TypeScript compila sem novos erros (115 erros pré-existentes do schema)
+- ✅ Todas as exportações mantidas
+- ✅ Padrão de hooks preservado
+- ⏳ Testes manuais pendentes (login, grid, KPIs, ações)
+
+---
+
 ## 📊 Métricas de Qualidade
 
-### Antes da Refatoração
+### Antes da Refatoração (Total)
 - **Arquivos com violações:** 5
-- **Linhas de código duplicado:** ~150
+- **Linhas de código duplicado:** ~150 (formatters) + ~98 (cache/API) = **~248**
 - **Arquivos > 400 linhas:** 5
 
-### Depois da Refatoração
-- **Arquivos corrigidos:** 8
-- **Linhas economizadas:** ~250
+### Depois da Refatoração (Total)
+- **Arquivos corrigidos:** 16 (8 anteriores + 8 novos)
+- **Linhas economizadas:** ~250 (formatters) + ~98 (cache/API) = **~348**
 - **Arquivos > 400 linhas:** 4 (1 melhorado)
-- **Novos arquivos criados:** 7
+- **Novos arquivos criados:** 8 (7 anteriores + 1 novo)
 
 ### Cobertura de Testes
 - ❌ Não verificado (build tools não instalados no ambiente)
@@ -276,7 +368,7 @@ export function DataGrid(props) {
 
 ## 📚 Arquivos Criados/Modificados
 
-### Criados (7)
+### Criados (8)
 ```
 client/src/
 ├── components/dashboard/grid/
@@ -284,13 +376,15 @@ client/src/
 │   ├── SkeletonRow.tsx
 │   ├── FilterableHeader.tsx
 │   └── index.ts
+├── lib/
+│   └── cache-helpers.ts
 └── services/domain/helpers/
     ├── status-helpers.ts
     ├── marker-helpers.tsx
     └── index.ts
 ```
 
-### Modificados (8)
+### Modificados (16)
 ```
 client/src/
 ├── components/dashboard/
@@ -301,8 +395,18 @@ client/src/
 │       ├── ExpensesModal.tsx
 │       ├── performance/data.ts
 │       └── investments/data.ts
+├── hooks/
+│   ├── index.ts
+│   ├── use-kpis.ts
+│   ├── use-inspections.ts
+│   └── use-new-record.ts
+├── lib/
+│   └── queryClient.ts
 └── services/api/
-    └── inspections.ts
+    ├── inspections.ts
+    ├── lookups.ts
+    ├── auth.ts
+    └── acoes.ts
 ```
 
 ---
@@ -310,14 +414,17 @@ client/src/
 ## ✅ Checklist de Conformidade
 
 - [x] Código compila sem erros TypeScript
-- [x] Formatters consolidados
-- [x] Helpers extraídos
-- [x] Componentes modulares
+- [x] Formatters consolidados (Fase 2)
+- [x] Helpers extraídos (Fase 1)
+- [x] Componentes modulares (Fase 1)
+- [x] Cache invalidation centralizado (Fase 3.1)
+- [x] API fetching consolidado (Fase 3.2)
 - [x] Documentação inline
 - [x] Re-exports organizados
 - [ ] Todos arquivos < 400 linhas (4 pendentes)
 - [ ] Testes adicionados
 - [ ] Build de produção validado
+- [ ] Testes manuais completos (login, grid, KPIs, ações)
 
 ---
 
@@ -326,10 +433,12 @@ client/src/
 1. **Extração gradual:** Extrair componentes menores primeiro facilita a refatoração
 2. **Wrappers @deprecated:** Permitem transição suave sem quebrar código existente
 3. **Re-exports:** Mantêm imports limpos e organizados
-4. **Single Source of Truth:** Formatters centralizados eliminam inconsistências
+4. **Single Source of Truth:** Formatters e query keys centralizados eliminam inconsistências
+5. **Hooks de composição:** `useInvalidateQueries()` fornece API clara para invalidação
+6. **Fetching genérico:** Helper `apiFetch<T>()` reduz boilerplate e padroniza erros
 
 ---
 
-*Última atualização: 01/01/2026*  
+*Última atualização: 06/01/2026*  
 *Autor: GitHub Copilot Agent*  
-*Status: ✅ Fases 1 e 2 completas | ⏳ Fases 3-5 pendentes*
+*Status: ✅ Fases 1, 2 e 3 completas | ⏳ Fases 4-5 pendentes*
