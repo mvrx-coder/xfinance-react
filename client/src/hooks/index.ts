@@ -29,9 +29,15 @@ export {
   useKPIsExtended,
   useCalculatedKPIs,
   useInvalidateKPIs,
-  KPIS_QUERY_KEY,
+  KPIS_QUERY_KEY, // Deprecated: use QUERY_KEYS from @/lib/cache-helpers
   type KPIsExtended,
 } from "./use-kpis";
+
+// Cache helpers centralizados
+export {
+  QUERY_KEYS,
+  useInvalidateQueries,
+} from "@/lib/cache-helpers";
 
 export {
   useContratantes,

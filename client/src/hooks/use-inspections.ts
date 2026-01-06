@@ -8,7 +8,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { API_ENDPOINTS, CACHE_CONFIG } from "@/constants";
+import { CACHE_CONFIG } from "@/constants";
+import { QUERY_KEYS, useInvalidateQueries } from "@/lib/cache-helpers";
 import { apiRequest } from "@/lib/queryClient";
 import type { Inspection, FilterState } from "@shared/schema";
 
@@ -55,8 +56,8 @@ async function fetchInspections(filters?: InspectionsFilters): Promise<Inspectio
   if (filters?.search) params.append("search", filters.search);
 
   const url = params.toString()
-    ? `${API_ENDPOINTS.INSPECTIONS}?${params}`
-    : API_ENDPOINTS.INSPECTIONS;
+    ? `${QUERY_KEYS.INSPECTIONS[0]}?${params}`
+    : QUERY_KEYS.INSPECTIONS[0];
 
   const response = await fetch(url, { credentials: "include" });
   if (!response.ok) throw new Error("Falha ao buscar inspeções");
@@ -72,7 +73,7 @@ async function fetchInspections(filters?: InspectionsFilters): Promise<Inspectio
  */
 export function useInspections(filters?: InspectionsFilters) {
   return useQuery<Inspection[]>({
-    queryKey: [API_ENDPOINTS.INSPECTIONS, filters],
+    queryKey: [...QUERY_KEYS.INSPECTIONS, filters],
     queryFn: () => fetchInspections(filters),
     staleTime: CACHE_CONFIG.INSPECTIONS_STALE_TIME,
   });
@@ -83,16 +84,16 @@ export function useInspections(filters?: InspectionsFilters) {
  */
 export function useCreateInspection() {
   const queryClient = useQueryClient();
+  const { invalidateAll } = useInvalidateQueries();
 
   return useMutation({
     mutationFn: async (data: CreateInspectionData) => {
-      const response = await apiRequest("POST", API_ENDPOINTS.INSPECTIONS, data);
+      const response = await apiRequest("POST", QUERY_KEYS.INSPECTIONS[0], data);
       return response.json();
     },
     onSuccess: () => {
       // Invalida cache de inspeções e KPIs
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.INSPECTIONS] });
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.KPIS] });
+      invalidateAll();
     },
   });
 }
@@ -102,20 +103,20 @@ export function useCreateInspection() {
  */
 export function useUpdateInspection() {
   const queryClient = useQueryClient();
+  const { invalidateAll } = useInvalidateQueries();
 
   return useMutation({
     mutationFn: async (data: UpdateInspectionData) => {
       const { idPrinc, ...updateData } = data;
       const response = await apiRequest(
         "PATCH",
-        `${API_ENDPOINTS.INSPECTIONS}/${idPrinc}`,
+        `${QUERY_KEYS.INSPECTIONS[0]}/${idPrinc}`,
         updateData
       );
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.INSPECTIONS] });
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.KPIS] });
+      invalidateAll();
     },
   });
 }
@@ -125,17 +126,17 @@ export function useUpdateInspection() {
  */
 export function useDeleteInspection() {
   const queryClient = useQueryClient();
+  const { invalidateAll } = useInvalidateQueries();
 
   return useMutation({
     mutationFn: async (ids: number[]) => {
-      const response = await apiRequest("DELETE", API_ENDPOINTS.INSPECTIONS, {
+      const response = await apiRequest("DELETE", QUERY_KEYS.INSPECTIONS[0], {
         ids_princ: ids,
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.INSPECTIONS] });
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.KPIS] });
+      invalidateAll();
     },
   });
 }

@@ -17,7 +17,7 @@ import { format } from "date-fns";
 
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "./use-toast";
-import { KPIS_QUERY_KEY } from "./use-kpis";
+import { useInvalidateQueries } from "@/lib/cache-helpers";
 
 // =============================================================================
 // SCHEMA ZOD
@@ -123,6 +123,7 @@ export interface UseNewRecordOptions {
 
 export function useNewRecord(options: UseNewRecordOptions = {}) {
   const { toast } = useToast();
+  const { invalidateAll } = useInvalidateQueries();
   
   // Estado multi-local
   const [multiLocal, setMultiLocal] = useState<MultiLocalState>({
@@ -182,8 +183,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       return response.json();
     },
     onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
+      invalidateAll();
       
       const dirsMsg = response.dirs_created.length > 0
         ? `📁 ${response.dirs_created.join(" | ")}`
@@ -248,8 +248,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       return response.json();
     },
     onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      queryClient.invalidateQueries({ queryKey: KPIS_QUERY_KEY });
+      invalidateAll();
       
       const dirsMsg = response.dirs_created.length > 0
         ? `📁 ${response.dirs_created.join(" | ")}`
