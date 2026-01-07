@@ -7,7 +7,6 @@ export type MarkerLevel = 0 | 1 | 2 | 3;
 export interface EncaminharInput {
   ids_princ: number[];
   id_user_destino: number;
-  obs?: string;
 }
 
 export interface MarcadorInput {
@@ -44,4 +43,20 @@ export interface MarkerLevelOption {
   level: MarkerLevel;
   label: string;
   color: string;
+}
+
+// Tipos para visualização de locais
+export interface LocalAdicional {
+  id_local: number;
+  dt_inspecao: string | null;
+  uf_sigla: string | null;
+  cidade_nome: string | null;
+  inspetor_nome: string | null;
+}
+
+export interface LocaisResponse {
+  id_princ: number;
+  total_locais: number;
+  segurado: string | null;
+  locais: LocalAdicional[];
 }

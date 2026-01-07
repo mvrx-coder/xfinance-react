@@ -12,7 +12,6 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -45,9 +44,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          {/* Radix Toaster - para notificações do sistema */}
-          <Toaster />
-          {/* Sonner Toaster - novo sistema premium */}
+          {/* Sonner Toaster - sistema premium (topo-direita) */}
           <SonnerToaster
             position="top-right"
             theme="dark"

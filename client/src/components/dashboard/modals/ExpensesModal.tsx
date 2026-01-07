@@ -43,7 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -109,7 +109,6 @@ interface ExpensesModalProps {
 }
 
 export function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -157,10 +156,8 @@ export function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
 
   const handleSave = async () => {
     if (!group1 || !group2 || !group3 || !dueDate || !amount) {
-      toast({
-        title: "Campos obrigatórios",
+      toast.warning("Campos obrigatórios", {
         description: "Preencha todos os campos para salvar.",
-        variant: "destructive",
       });
       return;
     }
@@ -183,8 +180,7 @@ export function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
     setAmount("");
     setPaymentDate(undefined);
 
-    toast({
-      title: "Despesa registrada",
+    toast.success("Despesa registrada", {
       description: "O lançamento foi salvo com sucesso.",
     });
   };
@@ -194,8 +190,7 @@ export function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
     await new Promise((r) => setTimeout(r, 800));
     setExpenses(generateMockData());
     setIsLoading(false);
-    toast({
-      title: "Dados atualizados",
+    toast.success("Dados atualizados", {
       description: "Lista de despesas recarregada.",
     });
   };

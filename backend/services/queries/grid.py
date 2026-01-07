@@ -384,27 +384,29 @@ def get_order_by_clause(modo_ordenacao: str) -> str:
     
     # Modo "normal" (padrão)
     # Ordenação por grupo:
-    # - Grupo 1 (em andamento/agendado): dt_inspecao ASC (mais antigo primeiro = maior prazo)
-    # - Grupo 2 (vermelho/cobrança): dias desde dt_envio DESC (maior tempo de cobrança primeiro)
+    # - Grupo 1 (em andamento/agendado): prazo DESC = (hoje - dt_inspecao) DESC
+    # - Grupo 2 (vermelho/cobrança): prazo DESC = (hoje - dt_envio) DESC
     # - Grupo 3/4 (finalizadas): dt_pago DESC (mais recente primeiro)
     #
-    # NOTA: Para Grupo 2, usamos JULIANDAY para calcular dinamicamente os dias desde
-    # dt_envio, pois o campo p.prazo só é gravado quando dt_pago está preenchido.
+    # NOTA: O campo p.prazo no banco pode não estar atualizado para grupos 1 e 2,
+    # pois só é gravado quando o registro é finalizado. Por isso calculamos
+    # dinamicamente via JULIANDAY.
+    # Ver: docs/STATUS_INDICATOR_SYSTEM.md → Sistema de Ordenação do Grid
     return (
         _order_head()
         + _order_groups()
         + """
-            -- Grupo 1: Ordenar por dt_inspecao ASC (mais antigo primeiro)
+            -- Grupo 1: Ordenar por prazo DESC = (hoje - dt_inspecao) DESC
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE
-                        WHEN p.dt_envio IS NULL AND p.dt_pago IS NULL THEN p.dt_inspecao
+                        WHEN p.dt_envio IS NULL AND p.dt_pago IS NULL 
+                        THEN CAST(JULIANDAY('now', 'localtime') - JULIANDAY(p.dt_inspecao) AS INTEGER)
                         ELSE NULL
                     END
                 ELSE NULL
-            END ASC,
-            -- Grupo 2: Ordenar por dias desde dt_envio DESC (maior tempo de cobrança primeiro)
-            -- Calcula dinamicamente: hoje - dt_envio (JULIANDAY retorna dias)
+            END DESC,
+            -- Grupo 2: Ordenar por prazo DESC = (hoje - dt_envio) DESC
             CASE
                 WHEN COALESCE(p.ms, 0) = 0 THEN
                     CASE

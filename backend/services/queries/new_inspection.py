@@ -181,6 +181,7 @@ def insert_demais_local(
     id_uf: int,
     id_cidade: int,
     id_user_guy: int,
+    unidade: Optional[str] = None,
 ) -> int:
     """
     Insere registro de local adicional na tabela demais_locais.
@@ -191,6 +192,7 @@ def insert_demais_local(
         id_uf: FK UF
         id_cidade: FK cidade
         id_user_guy: FK usuário (inspetor deste local)
+        unidade: Unidade do player (opcional)
         
     Returns:
         ID do novo registro local
@@ -199,17 +201,17 @@ def insert_demais_local(
         cursor = conn.execute(
             """
             INSERT INTO demais_locais (
-                id_princ, dt_inspecao, id_uf, id_cidade, guy_demais
-            ) VALUES (?, ?, ?, ?, ?)
+                id_princ, dt_inspecao, id_uf, id_cidade, guy_demais, unidade
+            ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (id_princ, dt_inspecao, id_uf, id_cidade, id_user_guy)
+            (id_princ, dt_inspecao, id_uf, id_cidade, id_user_guy, unidade)
         )
         conn.commit()
         new_id = cursor.lastrowid
         
         logger.info(
-            "Local adicional criado: id=%d | princ=%d | uf=%d | cidade=%d",
-            new_id, id_princ, id_uf, id_cidade
+            "Local adicional criado: id=%d | princ=%d | uf=%d | cidade=%d | unidade=%s",
+            new_id, id_princ, id_uf, id_cidade, unidade or "(vazio)"
         )
         return new_id
 
@@ -409,6 +411,7 @@ def insert_inspection_with_conn(
     id_cidade: int,
     honorario: Optional[float] = None,
     atividade_texto: Optional[str] = None,
+    unidade: Optional[str] = None,
 ) -> int:
     """
     Insere registro em princ usando conexão externa (sem commit).
@@ -422,17 +425,17 @@ def insert_inspection_with_conn(
         INSERT INTO princ (
             id_contr, id_segur, id_ativi, atividade,
             id_user_guy, dt_inspecao, id_uf, id_cidade,
-            honorario, id_user_guilty, dt_acerto, loc, meta, ms
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            honorario, id_user_guilty, dt_acerto, loc, meta, ms, unidade
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             id_contr, id_segur, id_ativi, atividade_texto,
             id_user_guy, dt_inspecao, id_uf, id_cidade,
-            honorario, id_user_guilty, dt_acerto, loc, 1, 0  # meta=1, ms=0 (padrão)
+            honorario, id_user_guilty, dt_acerto, loc, 1, 0, unidade  # meta=1, ms=0 (padrão)
         )
     )
     new_id = cursor.lastrowid
-    logger.info("Inspeção criada (pending): id_princ=%d", new_id)
+    logger.info("Inspecao criada (pending): id_princ=%d | unidade=%s", new_id, unidade or "(vazio)")
     return new_id
 
 
@@ -451,6 +454,7 @@ def create_inspection_atomic(
     id_uf: int,
     id_cidade: int,
     honorario: Optional[float] = None,
+    unidade: Optional[str] = None,
 ) -> Tuple[int, int, int]:
     """
     Cria inspeção em transação atômica.
@@ -469,6 +473,7 @@ def create_inspection_atomic(
         id_uf: FK UF
         id_cidade: FK cidade
         honorario: Valor honorário (opcional)
+        unidade: Unidade do player (opcional, ex: Biodiesel)
         
     Returns:
         Tuple (id_princ, id_segur_final, id_ativi_final)
@@ -522,6 +527,7 @@ def create_inspection_atomic(
             id_cidade=id_cidade,
             honorario=honorario,
             atividade_texto=final_atividade_texto,
+            unidade=unidade,
         )
         
         # 4. Commit da transação

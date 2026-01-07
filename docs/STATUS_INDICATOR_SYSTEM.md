@@ -160,7 +160,7 @@ O grid e ordenado por grupos de workflow, cada um com sua propria logica de orde
 | Grupo | Condicao SQL | Ordenacao Interna | Cor Visual |
 |-------|--------------|-------------------|------------|
 | **0** | `ms = 1` (Missao Suspensa) | `dt_inspecao DESC` | - |
-| **1** | `dt_envio IS NULL AND dt_pago IS NULL` | `dt_inspecao ASC` | Laranja/Cinza |
+| **1** | `dt_envio IS NULL AND dt_pago IS NULL` | `prazo DESC` | Laranja/Cinza |
 | **2** | `dt_envio IS NOT NULL AND dt_pago IS NULL` | `prazo DESC` | Vermelho |
 | **3** | `dt_pago IS NOT NULL` + pendencias | `dt_pago DESC` | Lilas Claro |
 | **4** | `dt_pago IS NOT NULL` + sem pendencias | `dt_pago DESC` | Lilas Vibrante |
@@ -183,8 +183,9 @@ WHEN p.dt_pago IS NOT NULL THEN 4
 
 #### Grupo 1 - Em Andamento/Agendado
 
-- **Ordenacao:** `dt_inspecao ASC` (mais antigo primeiro)
+- **Ordenacao:** `prazo DESC` (maior prazo primeiro)
 - **Logica:** Inspecoes mais antigas = maior prazo decorrido = mais urgentes
+- **Campo prazo:** Calculado como `hoje - dt_inspecao` para este grupo
 - **Efeito:** Naturalmente separa "Em Confeccao" (laranja) de "Apenas Agendado" (cinza)
 
 #### Grupo 2 - Vermelho (Cobranca)

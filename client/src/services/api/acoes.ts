@@ -6,6 +6,7 @@ import type {
   UserOption,
   MarkerOption,
   MarkerLevelOption,
+  LocaisResponse,
 } from "@/types/acoes";
 
 // Usar URL relativa - o Vite proxy redireciona para o backend
@@ -92,4 +93,16 @@ export function getMarkerLevels(): MarkerLevelOption[] {
     { level: 2, label: "Amarelo", color: "yellow" },
     { level: 3, label: "Vermelho", color: "red" },
   ];
+}
+
+export async function fetchLocaisInspecao(idPrinc: number): Promise<LocaisResponse> {
+  const response = await fetch(`${BASE_URL}/api/inspections/${idPrinc}/locais`, {
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    throw new Error("Falha ao buscar locais da inspeção");
+  }
+  
+  return await response.json();
 }

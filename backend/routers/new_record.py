@@ -69,8 +69,9 @@ class NewRecordRequest(BaseModel):
     id_uf: int = Field(..., gt=0, description="ID da UF")
     id_cidade: int = Field(..., gt=0, description="ID da cidade")
     
-    # Opcional
+    # Opcionais
     honorario: Optional[float] = Field(None, ge=0, description="Valor do honorário")
+    unidade: Optional[str] = Field(None, description="Unidade do player (ex: Biodiesel)")
     
     @field_validator("dt_inspecao")
     @classmethod
@@ -102,6 +103,7 @@ class LocalAdicionalRequest(BaseModel):
     dt_inspecao: str = Field(..., description="Data da inspeção (YYYY-MM-DD)")
     id_uf: int = Field(..., gt=0, description="ID da UF")
     id_cidade: int = Field(..., gt=0, description="ID da cidade")
+    unidade: Optional[str] = Field(None, description="Unidade do player (ex: Biodiesel)")
     
     @field_validator("dt_inspecao")
     @classmethod
@@ -169,11 +171,12 @@ async def create_new_record(
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
             honorario=request.honorario,
+            unidade=request.unidade,
         )
         
         logger.info(
-            "Registro criado: id_princ=%d | segur=%d | ativi=%d",
-            id_princ, id_segur, id_ativi
+            "Registro criado: id_princ=%d | segur=%d | ativi=%d | unidade=%s",
+            id_princ, id_segur, id_ativi, request.unidade or "(vazio)"
         )
         
         # ═══════════════════════════════════════════════════════════════════
@@ -185,6 +188,7 @@ async def create_new_record(
             dt_acerto=request.dt_inspecao,  # Usar data do formulário
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
+            unidade=request.unidade,
         )
         
         logger.info("Diretórios: %s | created=%s", dir_msg, dirs_created)
@@ -269,6 +273,7 @@ async def add_local_adicional(
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
             id_user_guy=request.id_user_guy,
+            unidade=request.unidade,
         )
         
         # ═══════════════════════════════════════════════════════════════════
@@ -276,7 +281,8 @@ async def add_local_adicional(
         # ═══════════════════════════════════════════════════════════════════
         new_loc = increment_princ_loc(request.id_princ)
         
-        logger.info("Local adicional: princ=%d → loc=%d", request.id_princ, new_loc)
+        logger.info("Local adicional: princ=%d -> loc=%d | unidade=%s", 
+                    request.id_princ, new_loc, request.unidade or "(vazio)")
         
         # ═══════════════════════════════════════════════════════════════════
         # 4. CRIAR DIRETÓRIOS (usando data da inspeção)
@@ -287,6 +293,7 @@ async def add_local_adicional(
             dt_acerto=request.dt_inspecao,  # Usar data do formulário
             id_uf=request.id_uf,
             id_cidade=request.id_cidade,
+            unidade=request.unidade,
         )
         
         return NewRecordResponse(

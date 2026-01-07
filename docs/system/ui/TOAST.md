@@ -111,35 +111,21 @@ toast.error("Título", {
 | Dashboard.tsx | Sonner | ✅ |
 | DataGrid.tsx | Sonner | ✅ |
 | UsersModal.tsx | Sonner | ✅ |
-| ActionCenter.tsx | Radix | ⚠️ Mantido |
+| ActionPanels.tsx | Sonner | ✅ |
+| SidebarActions.tsx | Sonner | ✅ |
+| ExpensesModal.tsx | Sonner | ✅ |
+| use-new-record.ts | Sonner | ✅ |
 
 ---
 
-## ⚠️ ActionCenter
-
-A **Central de Ações** mantém o sistema Radix (`useToast`) conforme decisão de projeto.
-
-```typescript
-// ActionCenter.tsx - MANTÉM Radix
-import { useToast } from "@/hooks/use-toast";
-
-const { toast } = useToast();
-toast({
-  title: "Título",
-  description: "Mensagem",
-  variant: "destructive", // para erros
-});
-```
-
----
-
-## Arquivos Envolvidos
+## Arquivos do Sistema
 
 | Arquivo | Função |
 |---------|--------|
 | `client/src/App.tsx` | Configuração do SonnerToaster |
 | `client/src/index.css` | Estilos glassmorphism |
-| `client/src/pages/Dashboard.tsx` | Usa toast do Sonner |
+
+> **Nota:** O sistema Radix Toast foi removido. Somente Sonner é utilizado.
 
 ---
 

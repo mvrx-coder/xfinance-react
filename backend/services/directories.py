@@ -11,7 +11,7 @@ import platform
 import socket
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
-from typing import Tuple, List
+from typing import Optional, Tuple, List
 
 from services.queries.new_inspection import get_directory_info
 
@@ -270,6 +270,7 @@ def create_directories(
     dt_acerto: str,
     id_uf: int,
     id_cidade: int,
+    unidade: Optional[str] = None,
 ) -> Tuple[str, List[str]]:
     """
     Cria diretórios no NAS (Trabalhos) e no servidor de Fotos.
@@ -284,6 +285,7 @@ def create_directories(
         dt_acerto: Data de acerto (YYYY-MM-DD)
         id_uf: ID da UF
         id_cidade: ID da cidade
+        unidade: Unidade do player (opcional, ex: Biodiesel)
         
     Returns:
         tuple: (mensagem_status, lista_diretorios_criados_display)
@@ -325,8 +327,16 @@ def create_directories(
         cidade_clean = _clean_path_component(cidade_nome)
         player_clean = _clean_path_component(player_name)
         
-        # Nome do diretório: AAMMDD UF CIDADE - SEGURADO
-        name_part = _clean_path_component(f"{aammdd} {uf_sigla} {cidade_clean} - {segurado_clean}")
+        # Se unidade preenchida, concatenar ao segurado: "SEGURADO - UNIDADE"
+        if unidade and unidade.strip():
+            unidade_clean = _clean_path_component(unidade)
+            segurado_com_unidade = f"{segurado_clean} - {unidade_clean}"
+            logger.debug("Usando Segurado - Unidade: %s", segurado_com_unidade)
+        else:
+            segurado_com_unidade = segurado_clean
+        
+        # Nome do diretório: AAMMDD UF CIDADE - SEGURADO (- UNIDADE)
+        name_part = _clean_path_component(f"{aammdd} {uf_sigla} {cidade_clean} - {segurado_com_unidade}")
         
         # Definir caminhos baseado na flag diretorio do contratante
         if flag_dir == 1:

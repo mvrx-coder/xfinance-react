@@ -16,7 +16,7 @@ import {
   MapPin,
   X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import type { Inspection } from "@shared/schema";
 import type { LookupOption } from "@/services/api/lookups";
 import { ACTION_COLOR_CLASSES } from "../action-center/constants";
@@ -39,20 +39,22 @@ export function SidebarActions({
   contrLookup,
   segurLookup,
 }: SidebarActionsProps) {
-  const { toast } = useToast();
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   const canDelete = userRole === "admin";
   const canForward = userRole === "admin" || userRole === "BackOffice";
   const canMark = canForward;
+  const hasMultipleLocations = inspection.loc && inspection.loc > 1;
 
   const handleViewLocations = () => {
-    toast({
-      title: "Demais locais",
-      description: (inspection.loc && inspection.loc > 1) 
-        ? "Esta inspeção possui vários locais" 
-        : "Esta inspeção possui um único local",
-    });
+    if (!hasMultipleLocations) {
+      toast.error("Localização única", {
+        description: "Esta inspeção possui apenas um local, seu mané!",
+      });
+      return;
+    }
+    // Se tem múltiplos locais, abre o painel
+    setActivePanel(activePanel === "locais" ? null : "locais");
   };
 
   const actionButtons = [
@@ -86,7 +88,7 @@ export function SidebarActions({
       label: "Visualizar demais locais",
       color: "green",
       disabled: false,
-      hasPanel: false,
+      hasPanel: true,
       onClick: handleViewLocations,
     },
   ];
@@ -107,10 +109,11 @@ export function SidebarActions({
             size="sm"
             disabled={action.disabled}
             onClick={() => {
-              if (action.hasPanel) {
+              // Se tem onClick customizado, usar ele (caso do locais que verifica LOC)
+              if (action.onClick) {
+                action.onClick();
+              } else if (action.hasPanel) {
                 setActivePanel(activePanel === action.id ? null : action.id);
-              } else {
-                action.onClick?.();
               }
             }}
             data-testid={`sidebar-action-${action.id}`}

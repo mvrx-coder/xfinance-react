@@ -9,7 +9,6 @@
 export { useAuth, type AuthContextValue, type AuthState } from "./use-auth";
 
 // Hooks existentes
-export { useToast } from "./use-toast";
 export { useIsMobile } from "./use-mobile";
 
 // Hooks de dados

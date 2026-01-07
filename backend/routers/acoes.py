@@ -34,7 +34,6 @@ router = APIRouter()
 class EncaminharRequest(BaseModel):
     ids_princ: List[int]
     id_user_destino: int
-    obs: Optional[str] = None
 
 
 class MarcarRequest(BaseModel):

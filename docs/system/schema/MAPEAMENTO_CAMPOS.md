@@ -15,6 +15,7 @@ Este documento mapeia os campos do banco SQLite original para os nomes usados no
 | `meta` | `meta` | `string \| null` |
 | `obs` | `obs` | `string \| null` |
 | `ms` | `ms` | `number` (0 ou 1) |
+| `unidade` | `unidade` | `string \| null` |
 
 ### Campos Renomeados
 
@@ -154,6 +155,34 @@ LIMIT 500;
 
 ---
 
+## 🏢 Campo Unidade (Segurado - Unidade)
+
+O campo `unidade` permite subdividir um trabalho por unidade de negócio do Player.
+
+### Comportamento
+
+| Cenário | Exemplo Nome Diretório |
+|---------|------------------------|
+| Sem unidade | `260107 MT Cuiabá - Fazenda ABC` |
+| Com unidade | `260107 MT Cuiabá - Fazenda ABC - Biodiesel` |
+
+### Tabelas que contêm `unidade`
+
+| Tabela | Campo | Descrição |
+|--------|-------|-----------|
+| `princ` | `unidade` | Unidade do primeiro local |
+| `demais_locais` | `unidade` | Unidade de locais adicionais (pode variar) |
+
+### Uso na Criação de Diretórios
+
+Quando `unidade` está preenchida:
+- Diretório: `<ANO>/<Player>/<AAMMDD UF CIDADE - SEGURADO - UNIDADE>`
+
+Quando `unidade` está vazia:
+- Diretório: `<ANO>/<Player>/<AAMMDD UF CIDADE - SEGURADO>`
+
+---
+
 ## ⚠️ Atenção: Campos que NÃO existem no banco
 
 Estes campos são **calculados** ou **derivados**, não existem como colunas:
@@ -165,5 +194,5 @@ Estes campos são **calculados** ou **derivados**, não existem como colunas:
 
 ---
 
-*Última atualização: Dezembro/2024*
+*Última atualização: Janeiro/2026*
 

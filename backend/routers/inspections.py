@@ -579,3 +579,125 @@ async def delete_inspection(
         detail="Endpoint em desenvolvimento"
     )
 
+
+# =============================================================================
+# GET /api/inspections/{id}/locais - Lista locais adicionais da inspeção
+# =============================================================================
+
+class LocalAdicional(BaseModel):
+    """Representa um local adicional da inspeção."""
+    id_local: int
+    dt_inspecao: Optional[str] = None
+    uf_sigla: Optional[str] = None
+    cidade_nome: Optional[str] = None
+    inspetor_nome: Optional[str] = None
+
+
+class LocaisResponse(BaseModel):
+    """Response com lista de locais da inspeção."""
+    id_princ: int
+    total_locais: int
+    segurado: Optional[str] = None
+    locais: List[LocalAdicional]
+
+
+@router.get("/{id_princ}/locais", response_model=LocaisResponse)
+async def get_locais_inspecao(
+    id_princ: int,
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    """
+    Retorna todos os locais de uma inspeção (principal + demais_locais).
+    
+    🔒 SIGILO: Qualquer usuário autenticado pode visualizar.
+    """
+    logger.info(
+        "GET /inspections/%s/locais | user=%s",
+        id_princ,
+        current_user.email
+    )
+    
+    with get_db() as conn:
+        conn.row_factory = lambda cursor, row: dict(
+            zip([column[0] for column in cursor.description], row)
+        )
+        
+        # Buscar dados da inspeção principal
+        cursor = conn.execute(
+            """
+            SELECT 
+                p.id_princ,
+                p.loc,
+                p.dt_inspecao,
+                p.id_uf,
+                p.id_cidade,
+                p.id_user_guy,
+                s.segur_nome,
+                uf.uf_sigla,
+                c.cidade_nome,
+                u.short_nome as inspetor_nome
+            FROM princ p
+            LEFT JOIN segur s ON p.id_segur = s.id_segur
+            LEFT JOIN uf ON p.id_uf = uf.id_uf
+            LEFT JOIN cidade c ON p.id_cidade = c.id_cidade
+            LEFT JOIN user u ON p.id_user_guy = u.id_user
+            WHERE p.id_princ = ?
+            """,
+            (id_princ,)
+        )
+        princ = cursor.fetchone()
+        
+        if not princ:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Inspeção não encontrada"
+            )
+        
+        locais: List[LocalAdicional] = []
+        
+        # Local #1 (principal)
+        locais.append(LocalAdicional(
+            id_local=1,
+            dt_inspecao=princ["dt_inspecao"],
+            uf_sigla=princ["uf_sigla"],
+            cidade_nome=princ["cidade_nome"],
+            inspetor_nome=princ["inspetor_nome"]
+        ))
+        
+        # Buscar demais locais
+        if princ["loc"] and princ["loc"] > 1:
+            cursor = conn.execute(
+                """
+                SELECT 
+                    dl.id_local_adicional,
+                    dl.dt_inspecao,
+                    uf.uf_sigla,
+                    c.cidade_nome,
+                    u.short_nome as inspetor_nome
+                FROM demais_locais dl
+                LEFT JOIN uf ON dl.id_uf = uf.id_uf
+                LEFT JOIN cidade c ON dl.id_cidade = c.id_cidade
+                LEFT JOIN user u ON dl.guy_demais = u.id_user
+                WHERE dl.id_princ = ?
+                ORDER BY dl.id_local_adicional
+                """,
+                (id_princ,)
+            )
+            demais = cursor.fetchall()
+            
+            for i, local in enumerate(demais, start=2):
+                locais.append(LocalAdicional(
+                    id_local=i,
+                    dt_inspecao=local["dt_inspecao"],
+                    uf_sigla=local["uf_sigla"],
+                    cidade_nome=local["cidade_nome"],
+                    inspetor_nome=local["inspetor_nome"]
+                ))
+        
+        return LocaisResponse(
+            id_princ=id_princ,
+            total_locais=princ["loc"] or 1,
+            segurado=princ["segur_nome"],
+            locais=locais
+        )
+

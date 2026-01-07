@@ -8,7 +8,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,15 +19,20 @@ import {
   Trash2,
   Loader2,
   Check,
+  MapPin,
+  Calendar,
+  User,
 } from "lucide-react";
-import { useToast, useInvalidateKPIs } from "@/hooks";
+import { toast } from "sonner";
+import { useInvalidateKPIs } from "@/hooks";
 import type { Inspection } from "@shared/schema";
-import type { MarkerLevel, MarkerType, UserOption } from "@/types/acoes";
+import type { MarkerLevel, MarkerType, UserOption, LocaisResponse, LocalAdicional } from "@/types/acoes";
 import { 
   excluir, 
   encaminhar, 
   marcar, 
   fetchUsersOptions,
+  fetchLocaisInspecao,
   getMarkerTypes,
   getMarkerLevels
 } from "@/services/api/acoes";
@@ -51,18 +55,17 @@ export function ActionPanels({
   contrLookup,
   segurLookup,
 }: ActionPanelsProps) {
-  const { toast } = useToast();
   const invalidateKPIs = useInvalidateKPIs();
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
-  const [observacao, setObservacao] = useState("");
   const [markers, setMarkers] = useState<Record<MarkerType, MarkerLevel>>({
     state_loc: 0,
     state_dt_envio: 0,
     state_dt_denvio: 0,
     state_dt_pago: 0,
   });
+  const [locaisData, setLocaisData] = useState<LocaisResponse | null>(null);
 
   const idPrinc = inspection.idPrinc;
 
@@ -70,7 +73,14 @@ export function ActionPanels({
     if (panelType === "encaminhar") {
       fetchUsersOptions().then(setUsers);
     }
-  }, [panelType]);
+    if (panelType === "locais" && idPrinc) {
+      setIsLoading(true);
+      fetchLocaisInspecao(idPrinc)
+        .then(setLocaisData)
+        .catch(() => toast.error("Erro ao carregar locais"))
+        .finally(() => setIsLoading(false));
+    }
+  }, [panelType, idPrinc]);
 
   const handleExcluir = async () => {
     if (!idPrinc) return;
@@ -78,18 +88,15 @@ export function ActionPanels({
     try {
       const result = await excluir({ ids_princ: [idPrinc] });
       if (result.success) {
-        toast({
-          title: "Inspeção excluída",
+        toast.success("Inspeção excluída", {
           description: result.message || "Registro removido com sucesso",
         });
         invalidateKPIs(); // Recalcular KPIs após exclusão
         onRefresh?.();
         onClose();
       } else {
-        toast({
-          title: "Erro",
+        toast.error("Erro", {
           description: result.message || "Falha ao excluir",
-          variant: "destructive",
         });
       }
     } finally {
@@ -103,24 +110,19 @@ export function ActionPanels({
     try {
       const result = await encaminhar({ 
         ids_princ: [idPrinc], 
-        id_user_destino: parseInt(selectedUser),
-        obs: observacao || undefined
+        id_user_destino: parseInt(selectedUser)
       });
       if (result.success) {
-        toast({
-          title: "Inspeção encaminhada",
+        toast.success("Inspeção encaminhada", {
           description: result.message || "Registro encaminhado com sucesso",
         });
         invalidateKPIs(); // Recalcular KPIs após encaminhamento
         setSelectedUser("");
-        setObservacao("");
         onRefresh?.();
         onClose();
       } else {
-        toast({
-          title: "Erro",
+        toast.error("Erro", {
           description: result.message || "Falha ao encaminhar",
-          variant: "destructive",
         });
       }
     } finally {
@@ -138,8 +140,7 @@ export function ActionPanels({
         value: level
       });
       if (result.success) {
-        toast({
-          title: level > 0 ? "Marcador aplicado" : "Marcador removido",
+        toast.success(level > 0 ? "Marcador aplicado" : "Marcador removido", {
           description: result.message,
         });
         invalidateKPIs(); // Recalcular KPIs após marcação
@@ -161,6 +162,7 @@ export function ActionPanels({
       className={`mt-2 p-3 rounded-xl bg-slate-900/80 border space-y-3 ${
         panelType === 'excluir' ? 'border-red-500/30' :
         panelType === 'encaminhar' ? 'border-orange-500/30' :
+        panelType === 'locais' ? 'border-green-500/30' :
         'border-yellow-500/30'
       }`}
     >
@@ -217,22 +219,11 @@ export function ActionPanels({
               <SelectContent>
                 {users.map(user => (
                   <SelectItem key={user.value} value={user.value.toString()}>
-                    {user.label} {user.papel && `(${user.papel})`}
+                    {user.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Observação (opcional):</label>
-            <Textarea 
-              value={observacao}
-              onChange={(e) => setObservacao(e.target.value)}
-              placeholder="Digite uma observação..."
-              className="bg-slate-800/50 border-white/10 resize-none text-xs"
-              rows={2}
-              data-testid="textarea-obs-encaminhar"
-            />
           </div>
           <Button
             className="w-full gap-2 bg-orange-500/20 border-orange-500 text-orange-400 text-xs"
@@ -277,6 +268,58 @@ export function ActionPanels({
               </Select>
             </div>
           ))}
+        </>
+      )}
+
+      {/* Painel Locais */}
+      {panelType === 'locais' && (
+        <>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-green-400" />
+            </div>
+          ) : locaisData ? (
+            <div className="p-2.5 rounded-lg bg-green-500/10 border border-green-500/20 max-h-[240px] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-green-500/20">
+                <MapPin className="w-4 h-4 text-green-400" />
+                <span className="text-xs font-medium text-foreground">
+                  Total: {String(locaisData.total_locais).padStart(2, '0')} {locaisData.total_locais === 1 ? 'local' : 'locais'}
+                </span>
+              </div>
+
+              {/* Lista compacta */}
+              <div className="space-y-1.5">
+                {locaisData.locais.map((local) => (
+                  <div key={local.id_local} className="text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-green-400">{local.id_local}</span>
+                      <span className="text-foreground">-</span>
+                      <span className="text-foreground">{local.cidade_nome || "—"}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground ml-4">
+                      {local.dt_inspecao && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(local.dt_inspecao + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                        </span>
+                      )}
+                      {local.inspetor_nome && (
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          {local.inspetor_nome}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-2">
+              Nenhum local encontrado
+            </p>
+          )}
         </>
       )}
     </motion.div>

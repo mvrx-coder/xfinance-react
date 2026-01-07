@@ -14,9 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "./use-toast";
 import { KPIS_QUERY_KEY } from "./use-kpis";
 
 // =============================================================================
@@ -45,8 +45,9 @@ export const newRecordSchema = z.object({
   idUf: z.number().min(1, "UF obrigatória"),
   idCidade: z.number().min(1, "Cidade obrigatória"),
   
-  // Opcional
+  // Opcionais
   honorario: z.number().min(0).optional().nullable(),
+  unidade: z.string().optional().nullable(),
   
   // Multi-local
   variosLocais: z.boolean().optional(),
@@ -122,8 +123,6 @@ export interface UseNewRecordOptions {
 }
 
 export function useNewRecord(options: UseNewRecordOptions = {}) {
-  const { toast } = useToast();
-  
   // Estado multi-local
   const [multiLocal, setMultiLocal] = useState<MultiLocalState>({
     active: false,
@@ -148,6 +147,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       idUf: 0,
       idCidade: 0,
       honorario: null,
+      unidade: null,
       variosLocais: false,
     },
   });
@@ -162,6 +162,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         id_uf: data.idUf,
         id_cidade: data.idCidade,
         honorario: data.honorario || null,
+        unidade: data.unidade || null,
       };
       
       // Segurado
@@ -203,20 +204,18 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
             : null,
         });
         
-        // Limpar apenas campos locais
-        form.setValue("idUserGuy", 0);
+        // Limpar campos locais (Guy persiste mas é editável)
         form.setValue("dtInspecao", undefined as unknown as Date);
         form.setValue("idUf", 0);
         form.setValue("idCidade", 0);
+        form.setValue("unidade", null);
         
-        toast({
-          title: "✅ Primeiro local cadastrado!",
+        toast.success("✅ Primeiro local cadastrado!", {
           description: `${dirsMsg} Insira o próximo local.`,
         });
       } else {
         // Modo normal
-        toast({
-          title: "✅ Registro criado com sucesso!",
+        toast.success("✅ Registro criado com sucesso!", {
           description: dirsMsg || response.message,
         });
         form.reset();
@@ -224,10 +223,8 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       }
     },
     onError: (error: Error) => {
-      toast({
-        title: "❌ Erro ao criar registro",
+      toast.error("❌ Erro ao criar registro", {
         description: error.message || "Tente novamente",
-        variant: "destructive",
       });
     },
   });
@@ -242,6 +239,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
         id_uf: data.idUf,
         id_cidade: data.idCidade,
+        unidade: data.unidade || null,
       };
       
       const response = await apiRequest("POST", "/api/new-record/local", payload);
@@ -260,8 +258,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       
       if (shouldFinalize) {
         // Finalizar: resetar tudo e chamar onSuccess
-        toast({
-          title: `✅ Último local #${response.loc} adicionado!`,
+        toast.success(`✅ Último local #${response.loc} adicionado!`, {
           description: dirsMsg || "Inserção de múltiplos locais concluída.",
         });
         setMultiLocal({
@@ -274,23 +271,20 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         form.reset();
         options.onSuccess?.();
       } else {
-        // Continuar: limpar apenas campos locais
-        form.setValue("idUserGuy", 0);
+        // Continuar: limpar campos locais (Guy persiste mas é editável)
         form.setValue("dtInspecao", undefined as unknown as Date);
         form.setValue("idUf", 0);
         form.setValue("idCidade", 0);
+        form.setValue("unidade", null);
         
-        toast({
-          title: `✅ Local #${response.loc} adicionado!`,
+        toast.success(`✅ Local #${response.loc} adicionado!`, {
           description: `${dirsMsg} Insira o próximo local.`,
         });
       }
     },
     onError: (error: Error) => {
-      toast({
-        title: "❌ Erro ao adicionar local",
+      toast.error("❌ Erro ao adicionar local", {
         description: error.message || "Tente novamente",
-        variant: "destructive",
       });
     },
   });
@@ -351,9 +345,9 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
       });
       setPendingCreation(null);
       form.reset();
-      toast({ title: "ℹ️ Inserção de múltiplos locais encerrada" });
+      toast.info("ℹ️ Inserção de múltiplos locais encerrada");
     }
-  }, [multiLocal.active, form, toast]);
+  }, [multiLocal.active, form]);
   
   // Reset completo
   const resetForm = useCallback(() => {
@@ -397,13 +391,11 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         .map((field) => fieldLabels[field] || field)
         .join(", ");
       
-      toast({
-        title: "⚠️ Campos obrigatórios",
+      toast.warning("⚠️ Campos obrigatórios", {
         description: `Preencha: ${errorLabels}`,
-        variant: "destructive",
       });
     },
-    [toast]
+    []
   );
   
   // Wrapper para handleSubmit com tratamento de erro de validação

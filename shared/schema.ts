@@ -51,6 +51,7 @@ export const inspections = sqliteTable("princ", {
   guyDespesa: real("guy_despesa"),
   atividade: text("atividade"),
   obs: text("obs"),
+  unidade: text("unidade"),  // Unidade do player (ex: Biodiesel)
 });
 
 export const insertInspectionSchema = createInsertSchema(inspections).omit({

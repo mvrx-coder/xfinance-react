@@ -53,10 +53,11 @@ async def get_users(
         )
         cursor = conn.execute(
             """
-            SELECT id_user, nick, papel, ativo
+            SELECT id_user, short_nome, papel, ativo
             FROM user
-            WHERE ativo = 1 OR ativo IS NULL
-            ORDER BY nick
+            WHERE (ativo = 1 OR ativo IS NULL)
+              AND (LOWER(papel) = 'admin' OR LOWER(papel) = 'backoffice')
+            ORDER BY short_nome
             """
         )
         rows = cursor.fetchall()
@@ -64,7 +65,7 @@ async def get_users(
     return [
         UserOption(
             value=row["id_user"],
-            label=row["nick"] or f"User {row['id_user']}",
+            label=row["short_nome"] or f"User {row['id_user']}",
             papel=row["papel"] or "user",
             ativo=bool(row["ativo"]) if row["ativo"] is not None else True
         )
@@ -73,7 +74,7 @@ async def get_users(
 
 
 # =============================================================================
-# GET /api/lookups/inspetores - Somente inspetores ativos
+# GET /api/lookups/inspetores - Somente inspetores e admins ativos
 # =============================================================================
 
 @router.get("/inspetores", response_model=List[UserOption])
@@ -83,6 +84,7 @@ async def get_inspetores(
     """
     Retorna lista de inspetores e admins ATIVOS.
     Usado no dropdown de Guy do formulário de novo registro.
+    Exibe short_nome para identificação rápida.
     """
     logger.info("GET /lookups/inspetores | user=%s", current_user.email)
     
@@ -92,11 +94,11 @@ async def get_inspetores(
         )
         cursor = conn.execute(
             """
-            SELECT id_user, nick, papel, ativo
+            SELECT id_user, short_nome, papel, ativo
             FROM user
             WHERE (ativo = 1 OR ativo IS NULL)
               AND (LOWER(papel) = 'inspetor' OR LOWER(papel) = 'admin')
-            ORDER BY nick
+            ORDER BY short_nome
             """
         )
         rows = cursor.fetchall()
@@ -104,7 +106,7 @@ async def get_inspetores(
     return [
         UserOption(
             value=row["id_user"],
-            label=row["nick"] or f"User {row['id_user']}",
+            label=row["short_nome"] or f"User {row['id_user']}",
             papel=row["papel"] or "Inspetor",
             ativo=True
         )

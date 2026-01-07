@@ -143,12 +143,12 @@ function markerWrapClass(level: number | null | undefined) {
   const lvl = typeof level === "number" ? level : 0;
   if (!lvl) return "";
   return (
-    "inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full border " +
+    "inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full border-2 " +
     (lvl === 1
-      ? "bg-cyan-500/12 border-cyan-500/30"
+      ? "bg-cyan-500/12 border-cyan-500/50"
       : lvl === 2
-      ? "bg-amber-500/12 border-amber-500/30"
-      : "bg-red-500/12 border-red-500/30")
+      ? "bg-amber-500/12 border-amber-500/50"
+      : "bg-red-500/12 border-red-500/50")
   );
 }
 

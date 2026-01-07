@@ -9,7 +9,6 @@ RUN npm ci
 # Código necessário para o build
 COPY client ./client
 COPY shared ./shared
-COPY attached_assets ./attached_assets
 COPY vite.config.ts tailwind.config.ts tsconfig.json postcss.config.js components.json ./
 
 RUN npm run build
