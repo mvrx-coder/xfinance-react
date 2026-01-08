@@ -9,9 +9,13 @@ Endpoints:
 - GET /api/performance/filters     - Opções de filtro (anos)
 - GET /api/performance/kpis        - KPIs agregados
 - GET /api/performance/market      - Market share por contratante
-- GET /api/performance/business    - Honorários por ano/mês
-- GET /api/performance/operational - Honorários por operador/ano
+- GET /api/performance/business    - Honorários/Inspeções por ano/mês
+- GET /api/performance/operational - Honorários/Inspeções por operador/ano
 - GET /api/performance/details     - Grid detalhado
+
+Parâmetro metric:
+- "valor": Soma de honorarios (padrão)
+- "quantidade": Soma de loc (quantidade de inspeções/casos)
 """
 
 import logging
@@ -201,6 +205,7 @@ async def get_market_share(
     base_date: Literal["dt_envio", "dt_pago", "dt_acerto"] = Query("dt_envio"),
     ano_ini: Optional[int] = Query(None, ge=2000, le=2100),
     ano_fim: Optional[int] = Query(None, ge=2000, le=2100),
+    metric: Literal["valor", "quantidade"] = Query("valor", description="Métrica: valor (honorarios) ou quantidade (loc)"),
 ):
     """
     Retorna Market Share por contratante.
@@ -209,20 +214,22 @@ async def get_market_share(
         base_date: Campo de data para filtro
         ano_ini: Ano inicial
         ano_fim: Ano final
+        metric: Métrica - "valor" (honorarios) ou "quantidade" (loc)
         
     Returns:
-        Lista de { name, value (%), honorarios, jobs, color }
+        Lista de { name, value (%), honorarios/inspecoes, jobs, color }
     """
     logger.info(
-        "GET /performance/market | user=%s | base_date=%s | ano=%s-%s",
+        "GET /performance/market | user=%s | base_date=%s | ano=%s-%s | metric=%s",
         current_user.email,
         base_date,
         ano_ini,
         ano_fim,
+        metric,
     )
     
     try:
-        return fetch_market_share(base_date, ano_ini, ano_fim)
+        return fetch_market_share(base_date, ano_ini, ano_fim, metric)
     except Exception as e:
         logger.exception("Erro ao buscar Market Share")
         raise HTTPException(
@@ -242,30 +249,33 @@ async def get_business(
     ano_ini: Optional[int] = Query(None, ge=2000, le=2100),
     ano_fim: Optional[int] = Query(None, ge=2000, le=2100),
     mm12: bool = Query(False, description="Média móvel 12 meses"),
+    metric: Literal["valor", "quantidade"] = Query("valor", description="Métrica: valor (honorarios) ou quantidade (loc)"),
 ):
     """
-    Retorna dados de honorários por ano/mês para gráfico de linhas.
+    Retorna dados de honorários/inspeções por ano/mês para gráfico de linhas.
     
     Args:
         base_date: Campo de data para filtro
         ano_ini: Ano inicial
         ano_fim: Ano final
         mm12: Se True, calcula média móvel 12 meses
+        metric: Métrica - "valor" (honorarios) ou "quantidade" (loc)
         
     Returns:
         { months: [...], series: [{year, color, data: [...]}] }
     """
     logger.info(
-        "GET /performance/business | user=%s | base_date=%s | ano=%s-%s | mm12=%s",
+        "GET /performance/business | user=%s | base_date=%s | ano=%s-%s | mm12=%s | metric=%s",
         current_user.email,
         base_date,
         ano_ini,
         ano_fim,
         mm12,
+        metric,
     )
     
     try:
-        return fetch_business(base_date, ano_ini, ano_fim, mm12)
+        return fetch_business(base_date, ano_ini, ano_fim, mm12, metric)
     except Exception as e:
         logger.exception("Erro ao buscar dados de Business")
         raise HTTPException(
@@ -284,28 +294,31 @@ async def get_operational(
     base_date: Literal["dt_envio", "dt_pago", "dt_acerto"] = Query("dt_envio"),
     ano_ini: Optional[int] = Query(None, ge=2000, le=2100),
     ano_fim: Optional[int] = Query(None, ge=2000, le=2100),
+    metric: Literal["valor", "quantidade"] = Query("valor", description="Métrica: valor (honorarios) ou quantidade (loc)"),
 ):
     """
-    Retorna dados de honorários por operador/ano para gráfico de barras.
+    Retorna dados de honorários/inspeções por operador/ano para gráfico de barras.
     
     Args:
         base_date: Campo de data para filtro
         ano_ini: Ano inicial
         ano_fim: Ano final
+        metric: Métrica - "valor" (honorarios) ou "quantidade" (loc)
         
     Returns:
         Lista de { name, years: [{year, value, percentage}] }
     """
     logger.info(
-        "GET /performance/operational | user=%s | base_date=%s | ano=%s-%s",
+        "GET /performance/operational | user=%s | base_date=%s | ano=%s-%s | metric=%s",
         current_user.email,
         base_date,
         ano_ini,
         ano_fim,
+        metric,
     )
     
     try:
-        return fetch_operational(base_date, ano_ini, ano_fim)
+        return fetch_operational(base_date, ano_ini, ano_fim, metric)
     except Exception as e:
         logger.exception("Erro ao buscar dados Operational")
         raise HTTPException(

@@ -176,7 +176,7 @@ export default function Dashboard() {
       <StatusBar messages={statusMessages} onDismiss={dismissStatus} />
 
       {/* Main Content: Sidebar + Grid */}
-      <div className="flex flex-1 overflow-visible">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar Colapsável */}
         <CollapsibleSidebar 
           filters={filters} 

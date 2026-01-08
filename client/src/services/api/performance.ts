@@ -15,6 +15,8 @@ export interface PerformanceFilters {
   anoIni?: number;
   anoFim?: number;
   mm12?: boolean;
+  /** Métrica: "valor" (honorarios) ou "quantidade" (loc/inspeções) */
+  metric?: "valor" | "quantidade";
 }
 
 export interface FilterOption {
@@ -162,6 +164,7 @@ function buildQueryString(filters?: PerformanceFilters, extra?: Record<string, s
   if (filters?.anoIni) params.append("ano_ini", filters.anoIni.toString());
   if (filters?.anoFim) params.append("ano_fim", filters.anoFim.toString());
   if (filters?.mm12) params.append("mm12", "true");
+  if (filters?.metric) params.append("metric", filters.metric);
   
   if (extra) {
     Object.entries(extra).forEach(([key, value]) => {

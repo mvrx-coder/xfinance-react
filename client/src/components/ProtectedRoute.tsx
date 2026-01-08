@@ -19,6 +19,7 @@ import { type ReactNode } from "react";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLogoSet } from "@/hooks";
 
 // =============================================================================
 // TIPOS
@@ -37,12 +38,14 @@ interface ProtectedRouteProps {
 // =============================================================================
 
 function AuthLoadingScreen() {
+  const { logos } = useLogoSet();
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-depth-gradient">
       <div className="flex flex-col items-center gap-4">
         {/* Logo */}
         <img 
-          src="/logo.png" 
+          src={logos.login} 
           alt="xFinance" 
           className="h-16 w-auto opacity-80"
         />

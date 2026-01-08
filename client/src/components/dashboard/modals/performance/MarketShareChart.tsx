@@ -5,10 +5,14 @@ import type { MarketShareItem } from "@/hooks";
 
 interface MarketShareChartProps {
   data: MarketShareItem[];
+  metric?: "valor" | "quantidade";
 }
 
-export function MarketShareChart({ data }: MarketShareChartProps) {
+export function MarketShareChart({ data, metric = "valor" }: MarketShareChartProps) {
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+  
+  // Subtítulo dinâmico baseado na métrica
+  const subtitle = metric === "quantidade" ? "Inspeções por Player" : "Honorários por Player";
   
   if (!data || data.length === 0) {
     return (
@@ -22,6 +26,9 @@ export function MarketShareChart({ data }: MarketShareChartProps) {
 
   return (
     <div className="space-y-3">
+      <div className="text-center mb-4">
+        <span className="text-xs text-muted-foreground font-medium">{subtitle}</span>
+      </div>
       {data.map((item, index) => {
         const isHovered = hoveredBar === item.name;
         const widthPercent = (item.value / maxValue) * 100;

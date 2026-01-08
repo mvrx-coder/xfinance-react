@@ -5,9 +5,10 @@ import type { BusinessResponse } from "@/hooks";
 
 interface BusinessLineChartProps {
   data: BusinessResponse;
+  metric?: "valor" | "quantidade";
 }
 
-export function BusinessLineChart({ data }: BusinessLineChartProps) {
+export function BusinessLineChart({ data, metric = "valor" }: BusinessLineChartProps) {
   const [hoveredYear, setHoveredYear] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const width = 600;
@@ -112,7 +113,7 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
               alignmentBaseline="middle"
               className="text-[10px] fill-muted-foreground"
             >
-              {formatCurrency(value)}
+              {metric === "quantidade" ? value.toLocaleString("pt-BR") : formatCurrency(value)}
             </text>
           </motion.g>
         ))}
@@ -218,7 +219,9 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <span className="text-xs text-muted-foreground font-medium">Honorários por Mês (R$ mil)</span>
+        <span className="text-xs text-muted-foreground font-medium">
+          {metric === "quantidade" ? "Inspeções por mês e ano" : "Honorários por mês e ano (R$ mil)"}
+        </span>
       </motion.div>
     </div>
   );

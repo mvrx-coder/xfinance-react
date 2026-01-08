@@ -112,3 +112,18 @@ export {
   useDebouncedValue,
   useDebouncedCallback,
 } from "./use-debounce";
+
+// Logo Set (alternância de conjuntos de logo)
+export {
+  useLogoSet,
+  type LogoSet,
+  type UseLogoSetReturn,
+} from "./use-logo-set";
+
+// Weather (dados de clima)
+export {
+  useWeather,
+  type WeatherData,
+  type WeatherCondition,
+  type UseWeatherReturn,
+} from "./use-weather";

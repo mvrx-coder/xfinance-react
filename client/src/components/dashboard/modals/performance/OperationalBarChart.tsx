@@ -5,10 +5,14 @@ import type { OperationalItem } from "@/hooks";
 
 interface OperationalBarChartProps {
   data: OperationalItem[];
+  metric?: "valor" | "quantidade";
 }
 
-export function OperationalBarChart({ data }: OperationalBarChartProps) {
+export function OperationalBarChart({ data, metric = "valor" }: OperationalBarChartProps) {
   const [hoveredPerson, setHoveredPerson] = useState<string | null>(null);
+  
+  // Subtítulo dinâmico baseado na métrica
+  const subtitle = metric === "quantidade" ? "Inspeções por inspetor e ano" : "Honorários por inspetor e ano";
   
   // Extrair anos únicos dos dados
   const allYears = useMemo(() => {
@@ -35,6 +39,9 @@ export function OperationalBarChart({ data }: OperationalBarChartProps) {
 
   return (
     <div className="relative">
+      <div className="text-center mb-2">
+        <span className="text-xs text-muted-foreground font-medium">{subtitle}</span>
+      </div>
       <div className="flex items-center justify-end gap-4 mb-4">
         {allYears.map((year) => (
           <div key={year} className="flex items-center gap-2">
@@ -109,7 +116,11 @@ export function OperationalBarChart({ data }: OperationalBarChartProps) {
           <span className="text-[10px] text-muted-foreground">0</span>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-[10px] text-muted-foreground">500,000</span>
+          <span className="text-[10px] text-muted-foreground">
+            {metric === "quantidade" 
+              ? Math.round(maxValue).toLocaleString("pt-BR")
+              : Math.round(maxValue).toLocaleString("pt-BR")}
+          </span>
         </div>
       </div>
     </div>

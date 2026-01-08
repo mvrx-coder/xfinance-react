@@ -180,33 +180,48 @@ def fetch_market_share(
     base_date: str = "dt_envio",
     ano_ini: Optional[int] = None,
     ano_fim: Optional[int] = None,
+    metric: str = "valor",
 ) -> list[dict]:
     """
-    Busca Market Share: honorários por contratante (player).
+    Busca Market Share: honorários ou inspeções por contratante (player).
     
     Regras:
     - Apenas players ativos (c.ativo = 1)
-    - Apenas players com honorários > 0 no período
-    - Ordenado por honorários DESC
+    - Apenas players com valor > 0 no período
+    - Ordenado por valor DESC
     - Retorna percentual do total
     
+    Args:
+        base_date: Campo de data base
+        ano_ini: Ano inicial
+        ano_fim: Ano final
+        metric: "valor" (honorarios) ou "quantidade" (loc)
+    
     Returns:
-        Lista de {name, value (%), honorarios, jobs, color}
+        Lista de {name, value (%), honorarios/inspecoes, jobs, color}
     """
     where_clause, params = _build_where(base_date, ano_ini, ano_fim)
+    
+    # Definir campo de agregação baseado na métrica
+    if metric == "quantidade":
+        agg_field = "SUM(COALESCE(p.loc, 0))"
+        value_key = "inspecoes"
+    else:
+        agg_field = "SUM(COALESCE(p.honorario, 0))"
+        value_key = "honorarios"
     
     sql = f"""
         SELECT
             COALESCE(c.player, '—') AS contratante,
-            SUM(COALESCE(p.honorario, 0)) AS honorarios,
+            {agg_field} AS valor_agg,
             COUNT(*) AS jobs
         FROM princ p
         {JOINS}
         WHERE {where_clause}
           AND c.ativo = 1
         GROUP BY c.id_contr, c.player
-        HAVING SUM(COALESCE(p.honorario, 0)) > 0
-        ORDER BY honorarios DESC
+        HAVING {agg_field} > 0
+        ORDER BY valor_agg DESC
         LIMIT 12
     """
     
@@ -218,7 +233,7 @@ def fetch_market_share(
         return []
     
     # Calcular total para percentual
-    total = sum(row["honorarios"] for row in rows)
+    total = sum(row["valor_agg"] for row in rows)
     if total == 0:
         total = 1  # Evita divisão por zero
     
@@ -231,13 +246,15 @@ def fetch_market_share(
     
     result = []
     for i, row in enumerate(rows):
-        result.append({
+        item = {
             "name": row["contratante"],
-            "value": round((row["honorarios"] / total) * 100, 1),
-            "honorarios": float(row["honorarios"]),
+            "value": round((row["valor_agg"] / total) * 100, 1),
             "jobs": row["jobs"],
             "color": colors[i % len(colors)],
-        })
+        }
+        # Adicionar campo específico da métrica
+        item[value_key] = float(row["valor_agg"]) if metric == "valor" else int(row["valor_agg"])
+        result.append(item)
     
     return result
 
@@ -251,26 +268,34 @@ def fetch_business(
     ano_ini: Optional[int] = None,
     ano_fim: Optional[int] = None,
     mm12: bool = False,
+    metric: str = "valor",
 ) -> dict:
     """
-    Busca dados para gráfico Business: honorários por ano/mês.
+    Busca dados para gráfico Business: honorários ou inspeções por ano/mês.
     
     Args:
         base_date: Campo de data base
         ano_ini: Ano inicial
         ano_fim: Ano final
         mm12: Se True, calcula média móvel 12 meses
+        metric: "valor" (honorarios) ou "quantidade" (loc)
     
     Returns:
         Dict com 'months' e 'series' (dados por ano)
     """
     where_clause, params = _build_where(base_date, ano_ini, ano_fim, mm12)
     
+    # Definir campo de agregação baseado na métrica
+    if metric == "quantidade":
+        agg_field = "SUM(COALESCE(p.loc, 0))"
+    else:
+        agg_field = "SUM(COALESCE(p.honorario, 0))"
+    
     sql = f"""
         SELECT
             CAST(strftime('%Y', p.{base_date}) AS INTEGER) AS ano,
             CAST(strftime('%m', p.{base_date}) AS INTEGER) AS mes,
-            SUM(COALESCE(p.honorario, 0)) AS honorarios
+            {agg_field} AS valor_agg
         FROM princ p
         {JOINS}
         WHERE {where_clause}
@@ -292,7 +317,7 @@ def fetch_business(
         mes = row["mes"]
         if ano not in anos_data:
             anos_data[ano] = {}
-        anos_data[ano][mes] = float(row["honorarios"])
+        anos_data[ano][mes] = float(row["valor_agg"])
     
     # Se MM12 ativo, calcular soma dos últimos 12 meses
     if mm12:
@@ -341,8 +366,12 @@ def fetch_business(
         data = []
         for mes in range(1, 13):
             valor = anos_data[ano].get(mes, 0)
-            # Converter para milhares para escala do gráfico
-            data.append(round(valor / 1000, 1))
+            # Para valor, converter para milhares para escala do gráfico
+            # Para quantidade, manter valor absoluto
+            if metric == "valor":
+                data.append(round(valor / 1000, 1))
+            else:
+                data.append(int(valor))
         
         series.append({
             "year": ano,
@@ -361,20 +390,34 @@ def fetch_operational(
     base_date: str = "dt_envio",
     ano_ini: Optional[int] = None,
     ano_fim: Optional[int] = None,
+    metric: str = "valor",
 ) -> list[dict]:
     """
-    Busca dados para gráfico Operational: honorários por operador/ano.
+    Busca dados para gráfico Operational: honorários ou inspeções por operador/ano.
     
     Regras:
     - Apenas usuários com id_papel = 1 ou 3 (guys)
     - Apenas registros onde princ.id_user_guy não é nulo/zero
+    - Apenas inspetores com mais de 10 casos (SUM(loc) > 10) no período total
     - Agrupado por ano e usuário
     - Ordenado alfabeticamente por short_nome
+    
+    Args:
+        base_date: Campo de data base
+        ano_ini: Ano inicial
+        ano_fim: Ano final
+        metric: "valor" (honorarios) ou "quantidade" (loc)
     
     Returns:
         Lista de operadores com seus dados por ano
     """
     where_clause, params = _build_where(base_date, ano_ini, ano_fim)
+    
+    # Definir campo de agregação baseado na métrica
+    if metric == "quantidade":
+        agg_field = "SUM(COALESCE(p.loc, 0))"
+    else:
+        agg_field = "SUM(COALESCE(p.honorario, 0))"
     
     # Adicionar filtros específicos
     extra_clauses = """
@@ -383,17 +426,31 @@ def fetch_operational(
         AND uy.id_papel IN (1, 3)
     """
     
+    # Primeiro, buscar inspetores com mais de 10 casos no período total
+    inspetores_sql = f"""
+        SELECT uy2.id_user
+        FROM princ p2
+        LEFT JOIN user uy2 ON p2.id_user_guy = uy2.id_user
+        WHERE p2.{base_date} IS NOT NULL
+        AND p2.id_user_guy IS NOT NULL
+        AND p2.id_user_guy != 0
+        AND uy2.id_papel IN (1, 3)
+        GROUP BY uy2.id_user
+        HAVING SUM(COALESCE(p2.loc, 0)) > 10
+    """
+    
     sql = f"""
         SELECT
             COALESCE(uy.short_nome, uy.nick) AS operador,
             CAST(strftime('%Y', p.{base_date}) AS INTEGER) AS ano,
-            SUM(COALESCE(p.honorario, 0)) AS honorarios
+            {agg_field} AS valor_agg
         FROM princ p
         {JOINS}
         WHERE {where_clause}
         {extra_clauses}
+        AND uy.id_user IN ({inspetores_sql})
         GROUP BY uy.id_user, COALESCE(uy.short_nome, uy.nick), ano
-        HAVING SUM(COALESCE(p.honorario, 0)) > 0
+        HAVING {agg_field} > 0
         ORDER BY operador ASC, ano ASC
     """
     
@@ -408,23 +465,23 @@ def fetch_operational(
     totais_ano: dict[int, float] = {}
     for row in rows:
         ano = row["ano"]
-        totais_ano[ano] = totais_ano.get(ano, 0) + row["honorarios"]
+        totais_ano[ano] = totais_ano.get(ano, 0) + row["valor_agg"]
     
     # Organizar por operador
     operadores_data: dict[str, list[dict]] = {}
     for row in rows:
         operador = row["operador"]
         ano = row["ano"]
-        honorarios = float(row["honorarios"])
+        valor = float(row["valor_agg"]) if metric == "valor" else int(row["valor_agg"])
         total_ano = totais_ano.get(ano, 1)
-        percentual = round((honorarios / total_ano) * 100, 1)
+        percentual = round((row["valor_agg"] / total_ano) * 100, 1)
         
         if operador not in operadores_data:
             operadores_data[operador] = []
         
         operadores_data[operador].append({
             "year": ano,
-            "value": honorarios,
+            "value": valor,
             "percentage": percentual,
         })
     

@@ -25,6 +25,8 @@ interface PerformanceHeaderProps {
   anoFim?: number;
   onAnoIniChange: (value: number | undefined) => void;
   onAnoFimChange: (value: number | undefined) => void;
+  metric: "valor" | "quantidade";
+  onMetricChange: (value: "valor" | "quantidade") => void;
   use12Months: boolean;
   onUse12MonthsChange: (value: boolean) => void;
   anosDisponiveis: { value: number; label: string }[];
@@ -56,6 +58,8 @@ export function PerformanceHeader({
   anoFim,
   onAnoIniChange,
   onAnoFimChange,
+  metric,
+  onMetricChange,
   use12Months,
   onUse12MonthsChange,
   anosDisponiveis,
@@ -142,6 +146,41 @@ export function PerformanceHeader({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Switch Valor/Quantidade */}
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900/50 border border-white/5">
+              <span 
+                className={`text-xs cursor-pointer transition-all px-2 py-0.5 rounded ${
+                  metric === "valor" 
+                    ? "text-[#CE62D9] font-medium bg-[#CE62D9]/20" 
+                    : "text-slate-400 hover:text-slate-300"
+                }`}
+                onClick={() => onMetricChange("valor")}
+              >
+                Valor
+              </span>
+              <div 
+                className="w-9 h-5 rounded-full bg-slate-800 relative cursor-pointer border border-white/10"
+                onClick={() => onMetricChange(metric === "valor" ? "quantidade" : "valor")}
+                data-testid="switch-metric"
+              >
+                <div 
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#CE62D9] shadow-lg shadow-[#CE62D9]/30 transition-all duration-200 ${
+                    metric === "quantidade" ? "left-[18px]" : "left-0.5"
+                  }`}
+                />
+              </div>
+              <span 
+                className={`text-xs cursor-pointer transition-all px-2 py-0.5 rounded ${
+                  metric === "quantidade" 
+                    ? "text-[#CE62D9] font-medium bg-[#CE62D9]/20" 
+                    : "text-slate-400 hover:text-slate-300"
+                }`}
+                onClick={() => onMetricChange("quantidade")}
+              >
+                Qtde
+              </span>
             </div>
 
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900/50 border border-white/5">

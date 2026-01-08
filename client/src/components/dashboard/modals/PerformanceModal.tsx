@@ -23,6 +23,7 @@ import {
 import {
   usePerformance,
   usePerformanceFilters,
+  useLogoSet,
   type PerformanceFilters,
 } from "@/hooks";
 
@@ -50,9 +51,12 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
   const [dateFilter, setDateFilter] = useState<"dt_envio" | "dt_pago" | "dt_acerto">("dt_envio");
   const [anoIni, setAnoIni] = useState<number | undefined>(undefined);
   const [anoFim, setAnoFim] = useState<number | undefined>(undefined);
+  const [metric, setMetric] = useState<"valor" | "quantidade">("valor");
   const [use12Months, setUse12Months] = useState(false);
   const [detailsPage, setDetailsPage] = useState(1);
   const detailsPageSize = 10;
+  
+  const { logos } = useLogoSet();
 
   // Buscar opções de filtro (anos disponíveis)
   const { data: filterOptions } = usePerformanceFilters(isOpen);
@@ -63,7 +67,8 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
     anoIni,
     anoFim,
     mm12: use12Months,
-  }), [dateFilter, anoIni, anoFim, use12Months]);
+    metric,
+  }), [dateFilter, anoIni, anoFim, use12Months, metric]);
 
   // Buscar dados de performance
   const {
@@ -151,7 +156,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
           {/* Logo - altura harmonizada com duas linhas */}
           <div className="flex items-center justify-center shrink-0">
             <img 
-              src="/logo1.png" 
+              src={logos.toolbar} 
               alt="MVRX Logo" 
               className="h-14 w-auto object-contain"
             />
@@ -227,6 +232,42 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Switch Valor/Quantidade */}
+              <div className="flex items-center gap-1 ml-2 px-2 py-1 rounded-md border border-white/20 bg-white/5">
+                <span 
+                  className={`text-xs cursor-pointer transition-colors px-1.5 py-0.5 rounded ${
+                    metric === "valor" 
+                      ? "text-primary font-medium bg-primary/20" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={() => setMetric("valor")}
+                >
+                  Valor
+                </span>
+                <div 
+                  className="w-8 h-4 rounded-full bg-white/10 relative cursor-pointer"
+                  onClick={() => setMetric(metric === "valor" ? "quantidade" : "valor")}
+                  data-testid="switch-metric"
+                >
+                  <div 
+                    className={`absolute top-0.5 w-3 h-3 rounded-full bg-primary shadow-md transition-all duration-200 ${
+                      metric === "quantidade" ? "left-4" : "left-0.5"
+                    }`}
+                  />
+                </div>
+                <span 
+                  className={`text-xs cursor-pointer transition-colors px-1.5 py-0.5 rounded ${
+                    metric === "quantidade" 
+                      ? "text-primary font-medium bg-primary/20" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={() => setMetric("quantidade")}
+                >
+                  Qtde
+                </span>
+              </div>
+              
               <div className="flex items-center gap-2 ml-2 px-3 py-1.5 rounded-md border border-white/20 bg-white/5">
                 <Checkbox 
                   id="12months" 
@@ -319,7 +360,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                           ))}
                         </div>
                       ) : (
-                        <MarketShareChart data={marketShare ?? []} />
+                        <MarketShareChart data={marketShare ?? []} metric={metric} />
                       )}
                     </motion.div>
                   )}
@@ -335,7 +376,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                       {isLoadingBusiness ? (
                         <Skeleton className="h-[280px] w-full rounded-lg" />
                       ) : (
-                        <BusinessLineChart data={business ?? { months: [], series: [] }} />
+                        <BusinessLineChart data={business ?? { months: [], series: [] }} metric={metric} />
                       )}
                     </motion.div>
                   )}
@@ -351,7 +392,7 @@ export function PerformanceModal({ isOpen, onClose }: PerformanceModalProps) {
                       {isLoadingOperational ? (
                         <Skeleton className="h-[280px] w-full rounded-lg" />
                       ) : (
-                        <OperationalBarChart data={operational ?? []} />
+                        <OperationalBarChart data={operational ?? []} metric={metric} />
                       )}
                     </motion.div>
                   )}

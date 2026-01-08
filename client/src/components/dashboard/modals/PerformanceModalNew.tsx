@@ -51,6 +51,7 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
   const [dateFilter, setDateFilter] = useState<"dt_envio" | "dt_pago" | "dt_acerto">("dt_envio");
   const [anoIni, setAnoIni] = useState<number | undefined>(undefined);
   const [anoFim, setAnoFim] = useState<number | undefined>(undefined);
+  const [metric, setMetric] = useState<"valor" | "quantidade">("valor");
   const [use12Months, setUse12Months] = useState(false);
   const [detailsPage, setDetailsPage] = useState(1);
   const detailsPageSize = 10;
@@ -102,7 +103,8 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
     anoIni,
     anoFim,
     mm12: use12Months,
-  }), [dateFilter, anoIni, anoFim, use12Months]);
+    metric,
+  }), [dateFilter, anoIni, anoFim, use12Months, metric]);
 
   const detailsOffset = (detailsPage - 1) * detailsPageSize;
 
@@ -146,10 +148,12 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
   // Transformações de dados para os gráficos
   const transformedMarketShare = useMemo(() => {
     if (!marketShare) return [];
-    return marketShare.map((item) => ({
+    return marketShare.map((item: any) => ({
       name: item.name,
       value: item.value,
       color: item.color,
+      // Incluir valor absoluto (honorarios ou inspecoes)
+      absoluteValue: item.honorarios ?? item.inspecoes ?? 0,
     }));
   }, [marketShare]);
 
@@ -171,6 +175,8 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
       const obj: Record<string, any> = { name: person.name };
       person.years.forEach((y) => {
         obj[y.year] = y.value;
+        // Incluir percentual como chave separada (ex: "2024_pct")
+        obj[`${y.year}_pct`] = y.percentage;
       });
       return obj;
     });
@@ -302,6 +308,8 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
           anoFim={anoFim}
           onAnoIniChange={setAnoIni}
           onAnoFimChange={setAnoFim}
+          metric={metric}
+          onMetricChange={setMetric}
           use12Months={use12Months}
           onUse12MonthsChange={setUse12Months}
           anosDisponiveis={anosDisponiveis}
@@ -430,6 +438,7 @@ export function PerformanceModalNew({ isOpen, onClose }: PerformanceModalProps) 
                         chartType={heroChartId} 
                         data={getChartData(heroChartId)} 
                         businessRawData={heroChartId === "business" ? business : undefined}
+                        metric={metric}
                       />
                     )}
                   </motion.div>

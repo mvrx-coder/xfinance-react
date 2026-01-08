@@ -8,11 +8,12 @@
 import { useState, useEffect } from "react";
 import { useLocation, Redirect } from "wouter";
 import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { useAuth } from "@/hooks";
+import { useAuth, useLogoSet } from "@/hooks";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { login, isLoading: isAuthLoading, isAuthenticated, error: authError, clearError } = useAuth();
+  const { logos } = useLogoSet();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -105,7 +106,7 @@ export default function Login() {
             {/* Logo */}
             <div className="flex justify-center mb-6">
               <img 
-                src="/logo.png" 
+                src={logos.login} 
                 alt="xFinance Logo" 
                 className="h-20 w-auto object-contain"
               />

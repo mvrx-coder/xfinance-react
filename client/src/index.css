@@ -1764,31 +1764,63 @@ textarea:focus {
   84%, 100% { --glow-hue: 295; }
 }
 
-/* TopBar Premium - Glassmorphism Header com Gradiente */
+/* ========================================
+   TOPBAR PREMIUM V2 - Deep Navy Glassmorphism
+   3 Camadas: Glass Base + Gradiente + Grid Pattern
+   ======================================== */
+
+/* Container Principal - Glass Card */
 .topbar-premium {
-  background: 
-    linear-gradient(90deg, 
-      rgba(2, 6, 23, 0.95) 0%,
-      rgba(2, 6, 23, 0.92) 40%,
-      rgba(2, 6, 23, 0.92) 60%,
-      rgba(0, 188, 212, 0.04) 100%
-    ),
-    linear-gradient(180deg,
-      rgba(206, 98, 217, 0.06) 0%,
-      rgba(2, 6, 23, 0.95) 50%,
-      rgba(2, 6, 23, 0.98) 100%
-    );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
-  border-bottom: 2px solid transparent;
   position: relative;
+  z-index: 100;  /* Bem acima do grid e outros elementos */
+  flex-shrink: 0;  /* Não encolher no layout flex */
+  background: rgba(15, 23, 42, 0.6);  /* #0f172a @ 60% */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(206, 98, 217, 0.15);  /* Borda lilás 15% apenas embaixo */
+  /* Glow fica visível abaixo, mas não expande o container */
 }
 
-/* Border Glow Chromatic Animado */
+/* Camada 1: Gradiente Horizontal - Iluminação Central */
+.topbar-premium-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right,
+    rgba(15, 23, 42, 0.5) 0%,      /* slate-900 @ 50% - esquerda */
+    rgba(30, 41, 59, 0.3) 50%,     /* slate-800 @ 30% - centro mais claro */
+    rgba(15, 23, 42, 0.5) 100%     /* slate-900 @ 50% - direita */
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Camada 2: Grid Pattern - Textura Técnica */
+.topbar-premium-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.03;  /* 3% - extremamente sutil */
+  background-image: 
+    linear-gradient(rgba(206, 98, 217, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(206, 98, 217, 0.1) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Camada 3: Conteúdo - Acima das camadas decorativas */
+.topbar-premium-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Border Glow Chromatic Animado (mantido) */
 .topbar-premium::before {
   content: '';
   position: absolute;
@@ -1805,9 +1837,10 @@ textarea:focus {
   );
   animation: chromatic-border-hue 48s linear infinite;
   pointer-events: none;
+  z-index: 10;
 }
 
-/* Glow Diffuso Chromatic */
+/* Glow Diffuso Chromatic (mantido) */
 .topbar-premium::after {
   content: '';
   position: absolute;
@@ -1819,6 +1852,93 @@ textarea:focus {
   filter: blur(6px);
   animation: chromatic-border-hue 48s linear infinite;
   pointer-events: none;
+  z-index: 10;
+}
+
+/* ========================================
+   KPI CARD GLOW - Cards com Borda Gradiente
+   ======================================== */
+
+.kpi-card-glow {
+  position: relative;
+  background: rgba(15, 23, 42, 0.8);  /* Mais opaco que container */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  overflow: hidden;
+}
+
+/* Borda Gradiente Animada via pseudo-elemento */
+.kpi-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;  /* Espessura da borda */
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(206, 98, 217, 0.4) 0%,   /* Lilás 40% */
+    rgba(34, 211, 238, 0.2) 100%  /* Ciano 20% */
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Variante: KPI com glow mais intenso (Express) */
+.kpi-card-glow-express {
+  position: relative;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  overflow: hidden;
+  box-shadow: 
+    0 0 20px rgba(206, 98, 217, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.kpi-card-glow-express::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;  /* Borda um pouco mais grossa */
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(206, 98, 217, 0.5) 0%,   /* Lilás 50% */
+    rgba(206, 98, 217, 0.3) 50%,
+    rgba(34, 211, 238, 0.3) 100%  /* Ciano 30% */
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* KPI Card para Recebíveis (verde) */
+.kpi-card-glow-success::before {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.4) 0%,   /* Emerald 40% */
+    rgba(34, 211, 238, 0.2) 100%  /* Ciano 20% */
+  );
+}
+
+/* KPI Card para Pagamentos (âmbar) */
+.kpi-card-glow-warning::before {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.4) 0%,   /* Amber 40% */
+    rgba(251, 191, 36, 0.2) 100%  /* Yellow 20% */
+  );
 }
 
 /* T2: Separadores Gradient */

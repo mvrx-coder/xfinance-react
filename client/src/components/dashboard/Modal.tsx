@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLogoSet } from "@/hooks";
 
 interface ModalProps {
   id: string;
@@ -75,6 +76,7 @@ export function Modal({
   fullscreen = false,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { logos } = useLogoSet();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -138,7 +140,7 @@ export function Modal({
               <div className="flex items-start justify-between px-6 py-5 border-b border-white/10 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10">
-                    <img src="/logo1.png" alt="Logo" className="w-7 h-7 object-contain" />
+                    <img src={logos.toolbar} alt="Logo" className="w-7 h-7 object-contain" />
                   </div>
                   <div>
                     <h2
