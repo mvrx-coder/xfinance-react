@@ -35,6 +35,7 @@ import {
   Loader2,
   ArrowRight,
   CalendarIcon,
+  Building,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -155,7 +156,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
           ? `Registro #${multiLocal.idPrinc} | Próximo local`
           : "Preencha os dados do novo registro"
       }
-      maxWidth="5xl"
+      maxWidth="6xl"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button
@@ -259,13 +260,17 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
             initial="hidden"
             animate="visible"
           >
-            <div className="grid grid-cols-12 gap-4">
+            {/* LINHA 1: Player, Segurado, Unidade, Atividade */}
+            <div 
+              className="grid gap-4"
+              style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}
+            >
               {/* Player (Contratante) - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idContr"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem style={{ gridColumn: "span 2" }}>
                     <ModalFormField label="Player" required>
                       <FormControl>
                         <HeadlessCombobox
@@ -289,7 +294,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 control={form.control}
                 name="idSegur"
                 render={({ field }) => (
-                  <FormItem className="col-span-4">
+                  <FormItem style={{ gridColumn: "span 4" }}>
                     <ModalFormField label="Segurado" required>
                       <FormControl>
                         <ServerSearchHeadlessCombobox
@@ -307,12 +312,38 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
+              {/* Unidade (texto) - 4 colunas (mesma largura do Segurado) */}
+              {/* Permanece habilitado no modo multi-local - pode variar por local */}
+              <FormField
+                control={form.control}
+                name="unidade"
+                render={({ field }) => (
+                  <FormItem style={{ gridColumn: "span 4" }}>
+                    <ModalFormField label="Unidade">
+                      <FormControl>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                          <Input
+                            type="text"
+                            placeholder="Digite a unidade..."
+                            className="pl-10"
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value || null)}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
               {/* Atividade (Server Search) - 4 colunas */}
               <FormField
                 control={form.control}
                 name="idAtivi"
                 render={({ field }) => (
-                  <FormItem className="col-span-4">
+                  <FormItem style={{ gridColumn: "span 4" }}>
                     <ModalFormField label="Atividade" required>
                       <FormControl>
                         <ServerSearchHeadlessCombobox
@@ -323,37 +354,6 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           disabled={multiLocal.active}
                           icon={<Briefcase className="w-4 h-4 text-primary" />}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </ModalFormField>
-                  </FormItem>
-                )}
-              />
-              
-              {/* Honorário - 2 colunas */}
-              <FormField
-                control={form.control}
-                name="honorario"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <ModalFormField label="Honorários">
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
-                          <span className="absolute left-8 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                            R$
-                          </span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0,00"
-                            className="pl-14 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            disabled={multiLocal.active}
-                            value={field.value || ""}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
-                          />
-                        </div>
                       </FormControl>
                       <FormMessage />
                     </ModalFormField>
@@ -383,13 +383,17 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               </div>
             )}
             
-            <div className="grid grid-cols-12 gap-4">
+            {/* LINHA 2: Guy, Data, Honorários, UF, Cidade */}
+            <div 
+              className="grid gap-4"
+              style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}
+            >
               {/* Inspetor (Guy) - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idUserGuy"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem style={{ gridColumn: "span 2" }}>
                     <ModalFormField label="Guy" required>
                       <FormControl>
                         <HeadlessCombobox
@@ -412,7 +416,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 control={form.control}
                 name="dtInspecao"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem style={{ gridColumn: "span 2" }}>
                     <ModalFormField label="Data" required>
                       <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                         <PopoverTrigger asChild>
@@ -439,7 +443,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                             selected={field.value}
                             onSelect={(date) => {
                               field.onChange(date);
-                              setDatePickerOpen(false); // Fecha ao selecionar
+                              setDatePickerOpen(false);
                             }}
                             locale={ptBR}
                             initialFocus
@@ -452,12 +456,43 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 )}
               />
               
+              {/* Honorários - 2 colunas */}
+              <FormField
+                control={form.control}
+                name="honorario"
+                render={({ field }) => (
+                  <FormItem style={{ gridColumn: "span 2" }}>
+                    <ModalFormField label="Honorários">
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                          <span className="absolute left-8 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            R$
+                          </span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0,00"
+                            className="pl-14 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            disabled={multiLocal.active}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </ModalFormField>
+                  </FormItem>
+                )}
+              />
+              
               {/* UF - 2 colunas */}
               <FormField
                 control={form.control}
                 name="idUf"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem style={{ gridColumn: "span 2" }}>
                     <ModalFormField label="UF" required>
                       <FormControl>
                         <HeadlessCombobox
@@ -480,7 +515,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                 control={form.control}
                 name="idCidade"
                 render={({ field }) => (
-                  <FormItem className="col-span-6">
+                  <FormItem style={{ gridColumn: "span 6" }}>
                     <ModalFormField label="Cidade" required>
                       <FormControl>
                         <HeadlessCombobox
