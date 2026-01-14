@@ -339,6 +339,7 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
               />
               
               {/* Atividade (Server Search) - 4 colunas */}
+              {/* Permanece habilitado no modo multi-local - pode variar por local */}
               <FormField
                 control={form.control}
                 name="idAtivi"
@@ -351,7 +352,6 @@ export function NewRecordModal({ isOpen, onClose, onSuccess }: NewRecordModalPro
                           value={field.value || null}
                           onChange={field.onChange}
                           placeholder="Digite para buscar..."
-                          disabled={multiLocal.active}
                           icon={<Briefcase className="w-4 h-4 text-primary" />}
                         />
                       </FormControl>

@@ -182,6 +182,8 @@ def insert_demais_local(
     id_cidade: int,
     id_user_guy: int,
     unidade: Optional[str] = None,
+    id_ativi: Optional[int] = None,
+    atividade: Optional[str] = None,
 ) -> int:
     """
     Insere registro de local adicional na tabela demais_locais.
@@ -193,6 +195,8 @@ def insert_demais_local(
         id_cidade: FK cidade
         id_user_guy: FK usuário (inspetor deste local)
         unidade: Unidade do player (opcional)
+        id_ativi: FK atividade (opcional, pode diferir do principal)
+        atividade: Texto da atividade (opcional)
         
     Returns:
         ID do novo registro local
@@ -201,17 +205,17 @@ def insert_demais_local(
         cursor = conn.execute(
             """
             INSERT INTO demais_locais (
-                id_princ, dt_inspecao, id_uf, id_cidade, guy_demais, unidade
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                id_princ, dt_inspecao, id_uf, id_cidade, guy_demais, unidade, id_ativi, atividade
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (id_princ, dt_inspecao, id_uf, id_cidade, id_user_guy, unidade)
+            (id_princ, dt_inspecao, id_uf, id_cidade, id_user_guy, unidade, id_ativi, atividade)
         )
         conn.commit()
         new_id = cursor.lastrowid
         
         logger.info(
-            "Local adicional criado: id=%d | princ=%d | uf=%d | cidade=%d | unidade=%s",
-            new_id, id_princ, id_uf, id_cidade, unidade or "(vazio)"
+            "Local adicional criado: id=%d | princ=%d | uf=%d | cidade=%d | unidade=%s | ativi=%s",
+            new_id, id_princ, id_uf, id_cidade, unidade or "(vazio)", atividade or "(padrão)"
         )
         return new_id
 

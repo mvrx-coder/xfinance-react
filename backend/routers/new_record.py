@@ -105,6 +105,10 @@ class LocalAdicionalRequest(BaseModel):
     id_cidade: int = Field(..., gt=0, description="ID da cidade")
     unidade: Optional[str] = Field(None, description="Unidade do player (ex: Biodiesel)")
     
+    # Atividade: ID existente OU texto para criar nova (pode variar por local)
+    id_ativi: Optional[int] = Field(None, description="ID da atividade existente")
+    atividade: Optional[str] = Field(None, description="Texto para criar nova atividade")
+    
     @field_validator("dt_inspecao")
     @classmethod
     def validate_date(cls, v: str) -> str:
@@ -113,6 +117,14 @@ class LocalAdicionalRequest(BaseModel):
         if len(v) == 10 and v[4] == "-" and v[7] == "-":
             return v
         raise ValueError("Data deve estar no formato YYYY-MM-DD")
+    
+    @field_validator("atividade")
+    @classmethod
+    def clean_create_prefix(cls, v: Optional[str]) -> Optional[str]:
+        """Remove prefixo '➕ Criar: ' se presente."""
+        if v and v.startswith("➕ Criar: "):
+            return v.replace("➕ Criar: ", "").strip()
+        return v.strip() if v else None
 
 
 class NewRecordResponse(BaseModel):
@@ -246,11 +258,11 @@ async def add_local_adicional(
     
     try:
         # ═══════════════════════════════════════════════════════════════════
-        # 1. VERIFICAR REGISTRO PRINCIPAL
+        # 1. VERIFICAR REGISTRO PRINCIPAL E OBTER ATIVIDADE PADRÃO
         # ═══════════════════════════════════════════════════════════════════
         with get_db() as conn:
             cursor = conn.execute(
-                "SELECT id_contr, id_segur FROM princ WHERE id_princ = ?",
+                "SELECT id_contr, id_segur, id_ativi, atividade FROM princ WHERE id_princ = ?",
                 (request.id_princ,)
             )
             row = cursor.fetchone()
@@ -263,9 +275,27 @@ async def add_local_adicional(
             
             id_contr = row[0]
             id_segur = row[1]
+            default_id_ativi = row[2]
+            default_atividade = row[3]
         
         # ═══════════════════════════════════════════════════════════════════
-        # 2. INSERIR LOCAL ADICIONAL
+        # 2. RESOLVER ATIVIDADE (pode ser diferente do principal)
+        # ═══════════════════════════════════════════════════════════════════
+        if request.id_ativi and request.id_ativi > 0:
+            # Atividade existente selecionada
+            final_id_ativi = request.id_ativi
+            final_atividade = get_atividade_texto(request.id_ativi)
+        elif request.atividade:
+            # Criar nova atividade
+            final_id_ativi = get_or_create_ativi(request.atividade)
+            final_atividade = request.atividade
+        else:
+            # Usar atividade do registro principal
+            final_id_ativi = default_id_ativi
+            final_atividade = default_atividade
+        
+        # ═══════════════════════════════════════════════════════════════════
+        # 3. INSERIR LOCAL ADICIONAL
         # ═══════════════════════════════════════════════════════════════════
         insert_demais_local(
             id_princ=request.id_princ,
@@ -274,15 +304,17 @@ async def add_local_adicional(
             id_cidade=request.id_cidade,
             id_user_guy=request.id_user_guy,
             unidade=request.unidade,
+            id_ativi=final_id_ativi,
+            atividade=final_atividade,
         )
         
         # ═══════════════════════════════════════════════════════════════════
-        # 3. INCREMENTAR LOC
+        # 4. INCREMENTAR LOC
         # ═══════════════════════════════════════════════════════════════════
         new_loc = increment_princ_loc(request.id_princ)
         
-        logger.info("Local adicional: princ=%d -> loc=%d | unidade=%s", 
-                    request.id_princ, new_loc, request.unidade or "(vazio)")
+        logger.info("Local adicional: princ=%d -> loc=%d | unidade=%s | ativi=%s", 
+                    request.id_princ, new_loc, request.unidade or "(vazio)", final_atividade or "(padrão)")
         
         # ═══════════════════════════════════════════════════════════════════
         # 4. CRIAR DIRETÓRIOS (usando data da inspeção)

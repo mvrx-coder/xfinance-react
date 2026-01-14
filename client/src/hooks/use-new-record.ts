@@ -233,7 +233,7 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
   type AddLocalVariables = NewRecordFormData & { finalize?: boolean };
   const addLocalMutation = useMutation({
     mutationFn: async (data: AddLocalVariables): Promise<NewRecordResponse> => {
-      const payload = {
+      const payload: Record<string, unknown> = {
         id_princ: multiLocal.idPrinc,
         id_user_guy: data.idUserGuy,
         dt_inspecao: format(data.dtInspecao, "yyyy-MM-dd"),
@@ -241,6 +241,13 @@ export function useNewRecord(options: UseNewRecordOptions = {}) {
         id_cidade: data.idCidade,
         unidade: data.unidade || null,
       };
+      
+      // Atividade (pode variar por local)
+      if (typeof data.idAtivi === "number") {
+        payload.id_ativi = data.idAtivi;
+      } else if (typeof data.idAtivi === "string") {
+        payload.atividade = cleanCreatePrefix(data.idAtivi);
+      }
       
       const response = await apiRequest("POST", "/api/new-record/local", payload);
       return response.json();

@@ -121,9 +121,13 @@ CREATE TABLE "demais_locais" (
     id_uf INTEGER NOT NULL,
     id_cidade INTEGER NOT NULL,
     guy_demais INTEGER,
+    unidade TEXT,           -- Unidade do player (pode variar por local)
+    id_ativi INTEGER,       -- FK atividade (pode variar por local)
+    atividade TEXT,         -- Texto da atividade
     CONSTRAINT FK_pla_princ FOREIGN KEY (id_princ) REFERENCES princ(id_princ),
     CONSTRAINT FK_pla_uf FOREIGN KEY (id_uf) REFERENCES uf(id_uf),
-    CONSTRAINT FK_pla_cidade FOREIGN KEY (id_cidade) REFERENCES cidade(id_cidade)
+    CONSTRAINT FK_pla_cidade FOREIGN KEY (id_cidade) REFERENCES cidade(id_cidade),
+    CONSTRAINT FK_pla_ativi FOREIGN KEY (id_ativi) REFERENCES ativi(id_ativi)
 );
 
 CREATE TABLE "papel" (

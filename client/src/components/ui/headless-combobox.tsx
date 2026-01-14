@@ -58,6 +58,14 @@ export function HeadlessCombobox({
 }: HeadlessComboboxProps) {
   const [query, setQuery] = useState("");
 
+  // Limpar query quando valor externo muda (ex: reset do form)
+  useEffect(() => {
+    // Se valor foi limpo (0, null, undefined), limpar query também
+    if (!value || value === 0) {
+      setQuery("");
+    }
+  }, [value]);
+
   // Encontrar opção selecionada
   const selectedOption = options.find((opt) => opt.value === value) || null;
 
@@ -196,6 +204,13 @@ export function CreatableHeadlessCombobox({
   allowCreate = true,
 }: CreatableHeadlessComboboxProps) {
   const [query, setQuery] = useState("");
+
+  // Limpar query quando valor externo muda (ex: reset do form)
+  useEffect(() => {
+    if (!value || value === 0) {
+      setQuery("");
+    }
+  }, [value]);
 
   // Encontrar opção selecionada (se for número)
   const selectedOption =
@@ -382,6 +397,13 @@ export function ServerSearchHeadlessCombobox({
   const [loading, setLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Limpar query quando valor externo muda (ex: reset do form)
+  useEffect(() => {
+    if (!value || value === 0) {
+      setQuery("");
+    }
+  }, [value]);
 
   // Função para buscar dados
   const fetchOptions = async (searchQuery: string) => {
