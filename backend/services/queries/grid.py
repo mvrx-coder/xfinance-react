@@ -128,6 +128,12 @@ def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
     dt_envio = row.get("dt_envio")
     dt_inspecao = row.get("dt_inspecao")
     
+    # Verificar campos de data primeiro (necessário para decidir se usa prazo do DB)
+    has_pago = _is_valid_date(dt_pago)
+    has_entregue = _is_valid_date(dt_entregue)
+    has_envio = _is_valid_date(dt_envio)
+    has_inspecao = _is_valid_date(dt_inspecao)
+    
     # Verificar se prazo já existe no DB
     prazo_existente = None
     if prazo_db is not None:
@@ -138,15 +144,14 @@ def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:
         except (ValueError, TypeError):
             pass
     
-    # Regra 0: Se prazo já existe no DB, usar esse valor
-    if prazo_existente is not None:
+    # Regra 0: Usar prazo gravado APENAS se dt_pago preenchido (registro finalizado)
+    # Para grupos 1/2 (dt_pago vazio), SEMPRE recalcular dinamicamente
+    # Isso evita que prazo antigo "travado" seja exibido quando o registro voltou
+    # para um estado anterior (ex: dt_pago foi limpo após ser preenchido)
+    if prazo_existente is not None and has_pago:
         return (prazo_existente, False)
     
-    # Verificar campos de data
-    has_pago = _is_valid_date(dt_pago)
-    has_entregue = _is_valid_date(dt_entregue)
-    has_envio = _is_valid_date(dt_envio)
-    has_inspecao = _is_valid_date(dt_inspecao)
+    # (has_pago, has_entregue, has_envio, has_inspecao já verificados acima)
     
     # BLOQUEIO: dt_pago preenchido E dt_entregue vazio (caso anômalo)
     if has_pago and not has_entregue:

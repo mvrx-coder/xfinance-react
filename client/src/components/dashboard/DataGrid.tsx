@@ -36,6 +36,7 @@ import {
   fetchUsersOptions as fetchUsersLookup,
   type LookupOption,
 } from "@/services/api/lookups";
+import { formatDateWithYear } from "@/services/domain/formatters";
 import { updateInspectionField } from "@/services/api/inspections";
 import { EditableCell } from "./EditableCell";
 import { AlertCell } from "./AlertCell";
@@ -54,6 +55,7 @@ import {
 } from "./alertRules";
 import { toast } from "sonner";
 import { useDataGrid } from "@/hooks/useDataGrid";
+import { useInvalidateKPIs } from "@/hooks/use-kpis";
 import { flexRender, Column } from "@tanstack/react-table";
 
 interface DataGridProps {
@@ -75,15 +77,8 @@ function formatCurrency(value: number | null | undefined): string {
   }).format(value);
 }
 
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  // Formatar de yyyy-mm-dd para dd/mm (visual apenas - ordenação usa valor original)
-  const parts = dateStr.split("-");
-  if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}`;
-  }
-  return dateStr;
-}
+// formatDate: usar função centralizada formatDateWithYear de services/domain/formatters.ts
+// que formata como DD/MM/AA para evitar ambiguidade de ano durante edição
 
 // Ícone de Meta: check verde (1) ou X vermelho (0)
 function MetaIcon({ meta }: { meta: number | null | undefined }) {
@@ -254,6 +249,9 @@ export function DataGrid({
   const [usersLookup, setUsersLookup] = useState<LookupOption[]>([]);
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
+  
+  // Hook para invalidar cache de KPIs após edição inline
+  const invalidateKPIs = useInvalidateKPIs();
 
   // TanStack Table
   const {
@@ -284,6 +282,8 @@ export function DataGrid({
         toast.success("Campo atualizado", {
           description: result.message,
         });
+        // Invalidar cache de KPIs (especialmente para campos financeiros/datas de pagamento)
+        invalidateKPIs();
         onRefresh?.();
         return true;
       }
@@ -294,7 +294,7 @@ export function DataGrid({
       });
       return false;
     }
-  }, [onRefresh]);
+  }, [onRefresh, invalidateKPIs]);
 
   // Helper para obter coluna
   const getColumn = (id: string) => table.getColumn(id);
@@ -642,7 +642,7 @@ export function DataGrid({
                               <TableCell className="w-[80px] min-w-[80px] max-w-[80px] text-xs text-muted-foreground text-center p-0">
                                 <AlertCell
                                   value={row.dtInspecao}
-                                  displayValue={formatDate(row.dtInspecao)}
+                                  displayValue={formatDateWithYear(row.dtInspecao)}
                                   alertLevel={getInspecaoAlert(row.dtInspecao, row.dtEntregue)}
                                   field="dt_inspecao"
                                   idPrinc={row.idPrinc}
@@ -653,7 +653,7 @@ export function DataGrid({
                               <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center p-0">
                                 <EditableCell
                                   value={row.dtEntregue}
-                                  displayValue={formatDate(row.dtEntregue)}
+                                  displayValue={formatDateWithYear(row.dtEntregue)}
                                   field="dt_entregue"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -677,7 +677,7 @@ export function DataGrid({
                               <TableCell className="w-[70px] min-w-[70px] max-w-[70px] text-xs text-muted-foreground text-center p-0">
                                 <AlertCell
                                   value={row.dtAcerto}
-                                  displayValue={formatDate(row.dtAcerto)}
+                                  displayValue={formatDateWithYear(row.dtAcerto)}
                                   alertLevel={getAcertoAlert(row.dtEnvio, row.dtPago, row.honorario)}
                                   field="dt_acerto"
                                   idPrinc={row.idPrinc}
@@ -689,7 +689,7 @@ export function DataGrid({
                                 <div className={`${markerWrapClass(row.stateDtEnvio)} mx-auto`}>
                                   <EditableCell
                                     value={row.dtEnvio}
-                                    displayValue={formatDate(row.dtEnvio)}
+                                    displayValue={formatDateWithYear(row.dtEnvio)}
                                     field="dt_envio"
                                     idPrinc={row.idPrinc}
                                     type="date"
@@ -701,7 +701,7 @@ export function DataGrid({
                                 <div className={`${markerWrapClass(row.stateDtPago)} mx-auto`}>
                                   <EditableCell
                                     value={row.dtPago}
-                                    displayValue={formatDate(row.dtPago)}
+                                    displayValue={formatDateWithYear(row.dtPago)}
                                     field="dt_pago"
                                     idPrinc={row.idPrinc}
                                     type="date"
@@ -731,7 +731,7 @@ export function DataGrid({
                                 <div className={`${markerWrapClass(row.stateDtDenvio)} mx-auto`}>
                                   <AlertCell
                                     value={row.dtDenvio}
-                                    displayValue={formatDate(row.dtDenvio)}
+                                    displayValue={formatDateWithYear(row.dtDenvio)}
                                     alertLevel={getDEnvioAlert(row.dtDenvio, row.dtDpago, row.despesa)}
                                     field="dt_denvio"
                                     idPrinc={row.idPrinc}
@@ -743,7 +743,7 @@ export function DataGrid({
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
                                 <EditableCell
                                   value={row.dtDpago}
-                                  displayValue={formatDate(row.dtDpago)}
+                                  displayValue={formatDateWithYear(row.dtDpago)}
                                   field="dt_dpago"
                                   idPrinc={row.idPrinc}
                                   type="date"
@@ -775,7 +775,7 @@ export function DataGrid({
                               <TableCell className="w-[65px] min-w-[65px] max-w-[65px] text-xs text-muted-foreground text-center p-0">
                                 <AlertCell
                                   value={row.dtGuyPago}
-                                  displayValue={formatDate(row.dtGuyPago)}
+                                  displayValue={formatDateWithYear(row.dtGuyPago)}
                                   alertLevel={getGPagoAlert(row.dtEntregue, row.dtGuyPago, row.guyHonorario)}
                                   field="dt_guy_pago"
                                   idPrinc={row.idPrinc}
@@ -797,7 +797,7 @@ export function DataGrid({
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
                                 <AlertCell
                                   value={row.dtGuyDpago}
-                                  displayValue={formatDate(row.dtGuyDpago)}
+                                  displayValue={formatDateWithYear(row.dtGuyDpago)}
                                   alertLevel={getGDPagoAlert(row.dtEntregue, row.dtGuyDpago, row.guyDespesa)}
                                   field="dt_guy_dpago"
                                   idPrinc={row.idPrinc}

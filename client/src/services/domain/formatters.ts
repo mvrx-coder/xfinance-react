@@ -99,6 +99,7 @@ export function formatPercent(
 
 /**
  * Formata data no padrão DD/MM.
+ * @deprecated Use formatDateWithYear para evitar ambiguidade de ano
  */
 export function formatDateShort(dateStr: string | null | undefined): string {
   if (!dateStr) return "-";
@@ -116,6 +117,49 @@ export function formatDateShort(dateStr: string | null | undefined): string {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     return `${day}/${month}`;
+  } catch {
+    return dateStr;
+  }
+}
+
+/**
+ * Formata data no padrão DD/MM/AA (ano com 2 dígitos).
+ * Formato preferido para evitar ambiguidade de ano durante edição.
+ */
+export function formatDateWithYear(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-";
+  
+  // Se já está no formato DD/MM/AA ou DD/MM/AAAA, converte para DD/MM/AA
+  const matchShortYear = /^(\d{2})\/(\d{2})\/(\d{2})$/.exec(dateStr);
+  if (matchShortYear) {
+    return dateStr;
+  }
+  
+  const matchFullYear = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dateStr);
+  if (matchFullYear) {
+    const [, day, month, year] = matchFullYear;
+    return `${day}/${month}/${year.slice(-2)}`;
+  }
+
+  // Se está no formato ISO (YYYY-MM-DD), converte
+  try {
+    // Parse manual para evitar problemas de timezone
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      const year = parts[0].slice(-2); // Últimos 2 dígitos
+      const month = parts[1];
+      const day = parts[2].substring(0, 2); // Ignora hora se houver
+      return `${day}/${month}/${year}`;
+    }
+    
+    // Fallback para Date()
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2);
+    return `${day}/${month}/${year}`;
   } catch {
     return dateStr;
   }

@@ -50,17 +50,8 @@ export function formatCurrencyShort(value: number): string {
   }).format(value);
 }
 
-export function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  
-  // Se já está no formato DD/MM/YY ou DD/MM/YYYY
-  if (dateStr.includes("/")) return dateStr;
-  
-  // Se está no formato YYYY-MM-DD
-  try {
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year.slice(-2)}`;
-  } catch {
-    return dateStr;
-  }
-}
+/**
+ * Formata data DD/MM/AA.
+ * Re-exporta função centralizada para manter compatibilidade.
+ */
+export { formatDateWithYear as formatDate } from "@/services/domain/formatters";

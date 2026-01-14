@@ -90,17 +90,7 @@ export function formatCurrencyFull(value: number | undefined | null): string {
 }
 
 /**
- * Formata data DD/MM.
+ * Formata data DD/MM/AA.
+ * Re-exporta função centralizada para manter compatibilidade.
  */
-export function formatDateShort(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  try {
-    const parts = dateStr.split("-");
-    if (parts.length >= 3) {
-      return `${parts[2].substring(0, 2)}/${parts[1]}`;
-    }
-    return dateStr;
-  } catch {
-    return dateStr || "-";
-  }
-}
+export { formatDateWithYear as formatDateShort } from "@/services/domain/formatters";

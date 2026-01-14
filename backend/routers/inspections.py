@@ -415,6 +415,11 @@ EDITABLE_FIELDS = {
     "obs": "text",
 }
 
+# Campos que afetam o cálculo de prazo - ao editar, limpar prazo para forçar recálculo
+PRAZO_CRITICAL_FIELDS = {
+    "dt_inspecao", "dt_entregue", "dt_envio", "dt_pago"
+}
+
 # Campos restritos a admin
 ADMIN_ONLY_FIELDS = {
     "honorario", "despesa", "guy_honorario", "guy_despesa",
@@ -427,26 +432,45 @@ def _convert_value(value: Any, field_type: str) -> Any:
     Converte valor do frontend para formato do banco.
     
     Baseado em: x_main/app/callbacks/helpers.py > process_edited_value
+    
+    Formatos de data aceitos:
+    - YYYY-MM-DD (ISO)
+    - DD/MM/AA (preferido - evita ambiguidade)
+    - DD/MM/AAAA
+    - DD/MM (assume ano atual)
     """
     if value is None or value == "" or value == "-":
         return None
     
     if field_type == "date":
-        # Aceita DD/MM, DD/MM/AA, DD/MM/AAAA ou YYYY-MM-DD
         val_str = str(value).strip()
         
         # Já está no formato ISO?
         if re.match(r"^\d{4}-\d{2}-\d{2}$", val_str):
             return val_str
         
-        # DD/MM/AA ou DD/MM/AAAA
+        # DD/MM/AA ou DD/MM/AAAA ou DD/MM
         match = re.match(r"^(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?$", val_str)
         if match:
             day, month, year = match.groups()
             if year is None:
+                # Sem ano: usar ano atual
                 year = datetime.now().year
             elif len(str(year)) == 2:
+                # Ano com 2 dígitos: converter para 4 dígitos
+                # Assumir 2000-2099 (ex: 25 -> 2025, 99 -> 2099)
                 year = 2000 + int(year)
+            else:
+                year = int(year)
+            
+            # Validar dia e mês
+            try:
+                # Validar se a data é válida
+                date(int(year), int(month), int(day))
+            except ValueError:
+                logger.warning("Data inválida: %s/%s/%s", day, month, year)
+                return None
+            
             return f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
         
         return None
@@ -539,6 +563,16 @@ async def update_inspection(
                 f"UPDATE princ SET {field} = ? WHERE id_princ = ?",
                 (converted_value, id_princ)
             )
+            
+            # Se campo afeta cálculo de prazo, limpar prazo para forçar recálculo
+            # Isso evita que o prazo antigo (gravado) bloqueie o cálculo dinâmico
+            if field in PRAZO_CRITICAL_FIELDS:
+                conn.execute(
+                    "UPDATE princ SET prazo = NULL WHERE id_princ = ?",
+                    (id_princ,)
+                )
+                logger.info("Prazo limpo para id_princ=%s (campo crítico %s editado)", id_princ, field)
+            
             conn.commit()
             
             return {
