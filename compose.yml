@@ -13,10 +13,14 @@ services:
       # Caminhos montados para NAS e Fotos (Linux)
       XF_NAS_MOUNT: /mnt/trabalhos
       XF_PHOTOS_MOUNT: /mnt/fotos
+      XF_BACKUP_MOUNT: /mnt/backup
+      # Habilitar backups automáticos em produção
+      XF_ENABLE_SCHEDULER: "true"
     volumes:
       - ./x_db:/app/x_db
       - nas_trabalhos:/mnt/trabalhos
       - nas_fotos:/mnt/fotos
+      - nas_backup:/mnt/backup
     restart: unless-stopped
 
   web:
@@ -44,5 +48,12 @@ volumes:
       # Share administrativo Dados$ na máquina MVRDESKTOP (192.168.1.50)
       o: "username=Marcus Vinicius,password=123456,uid=1000,gid=1000,file_mode=0775,dir_mode=0775"
       device: "//192.168.1.50/Dados$/Fotos"
+  nas_backup:
+    driver: local
+    driver_opts:
+      type: cifs
+      # Share para backups do banco de dados
+      o: "username=xfinance_svc,password=Aa25101208*,uid=1000,gid=1000,file_mode=0775,dir_mode=0775"
+      device: "//192.168.1.35/mvrx_nas/xFinance_backup"
 
 

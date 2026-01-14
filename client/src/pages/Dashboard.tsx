@@ -5,10 +5,10 @@
  * A proteção de rota é feita pelo ProtectedRoute no App.tsx.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TopBarPremium } from "@/components/dashboard/TopBarPremium";
+import { TopBarPremium, type TaskStats } from "@/components/dashboard/TopBarPremium";
 import { CollapsibleSidebar } from "@/components/dashboard/CollapsibleSidebar";
 import { DataGrid } from "@/components/dashboard/DataGrid";
 import { StatusBar } from "@/components/dashboard/StatusBar";
@@ -18,6 +18,7 @@ import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal
 import { PerformanceModalNew as PerformanceModal } from "@/components/dashboard/modals/PerformanceModalNew";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
+import { BackupModal } from "@/components/dashboard/modals/BackupModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
 import { fetchContrOptions, fetchSegurOptions, type LookupOption } from "@/services/api/lookups";
 import { useAuth, useKPIs } from "@/hooks";
@@ -50,6 +51,7 @@ export default function Dashboard() {
     financial: false,
     guyPay: false,
     expenses: false,
+    backup: false,
   });
 
   // Inspeção selecionada para ações na sidebar
@@ -99,6 +101,70 @@ export default function Dashboard() {
     despesas: 0, 
     guyDespesa: 0 
   }} = useKPIs();
+
+  // Calcular stats de tarefas do usuário (grupos 1 e 2 filtrados por guilty)
+  const taskStats = useMemo<TaskStats>(() => {
+    const userNick = user?.nick;
+    if (!userNick || !inspections.length) {
+      return { totalCases: 0, startedCases: 0, urgentCases: 0 };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Função auxiliar para verificar se data é válida e preenchida
+    const isFilled = (v: string | null | undefined): boolean => {
+      const s = (v || "").trim();
+      return s !== "" && s !== "-";
+    };
+
+    // Função auxiliar para verificar se inspeção <= hoje
+    const isInspectionDone = (dtInspecao: string | null | undefined): boolean => {
+      if (!isFilled(dtInspecao)) return false;
+      const s = (dtInspecao || "").trim();
+      // Formato ISO: YYYY-MM-DD
+      if (s.includes("-") && s.length >= 10) {
+        const dt = new Date(s.slice(0, 10));
+        return dt <= today;
+      }
+      return false;
+    };
+
+    let totalCases = 0;
+    let startedCases = 0;
+    let urgentCases = 0;
+
+    for (const insp of inspections) {
+      // Filtrar apenas casos do usuário (por guilty)
+      if (insp.guilty !== userNick) continue;
+
+      const hasEnvio = isFilled(insp.dtEnvio);
+      const hasPago = isFilled(insp.dtPago);
+      const hasDenvio = isFilled(insp.dtDenvio);
+
+      // Grupos 1 e 2 (em andamento - ainda não pago)
+      // Grupo 1: dt_envio IS NULL AND dt_pago IS NULL
+      // Grupo 2: dt_envio IS NOT NULL AND dt_pago IS NULL
+      const isGroup1or2 = !hasPago;
+
+      if (!isGroup1or2) continue;
+
+      totalCases++;
+
+      // Casos iniciados: inspeção <= hoje E (envio ou denvio preenchidos)
+      const inspDone = isInspectionDone(insp.dtInspecao);
+      if (inspDone && (hasEnvio || hasDenvio)) {
+        startedCases++;
+      }
+
+      // Urgentes: dot vermelho = grupo 2 (envio preenchido, pago vazio)
+      if (hasEnvio && !hasPago) {
+        urgentCases++;
+      }
+    }
+
+    return { totalCases, startedCases, urgentCases };
+  }, [inspections, user?.nick]);
 
   // Handlers
   const dismissStatus = useCallback((id: string) => {
@@ -161,7 +227,9 @@ export default function Dashboard() {
       {/* Top Bar Premium */}
       <TopBarPremium
         userName={displayName}
+        userRole={papel ?? undefined}
         kpis={kpis}
+        taskStats={taskStats}
         onSearch={handleSearch}
         onNewRecord={() => handleOpenModal("newRecord")}
         onOpenUsers={() => handleOpenModal("users")}
@@ -169,6 +237,7 @@ export default function Dashboard() {
         onOpenFinancial={() => handleOpenModal("financial")}
         onOpenGuyPay={() => handleOpenModal("guyPay")}
         onOpenExpenses={() => handleOpenModal("expenses")}
+        onOpenBackup={() => handleOpenModal("backup")}
         onLogout={handleLogout}
       />
 
@@ -232,6 +301,11 @@ export default function Dashboard() {
       <ExpensesModal
         isOpen={modals.expenses}
         onClose={() => handleCloseModal("expenses")}
+      />
+
+      <BackupModal
+        isOpen={modals.backup}
+        onClose={() => handleCloseModal("backup")}
       />
     </div>
   );

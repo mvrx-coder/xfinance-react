@@ -100,7 +100,7 @@ const WEATHER_API_BASE = "https://api.weatherapi.com/v1";
  * Busca dados de clima para uma localização
  * @param location - Cidade ou coordenadas (ex: "São Paulo" ou "-23.55,-46.63")
  */
-export async function fetchWeather(location: string = "São Paulo"): Promise<WeatherData> {
+export async function fetchWeather(location: string = "Nova Iguaçu, RJ"): Promise<WeatherData> {
   // Se não há API key, retorna dados mockados
   if (!WEATHER_API_KEY) {
     console.warn("[Weather] API key não configurada. Usando dados mockados.");

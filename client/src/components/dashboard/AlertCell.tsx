@@ -19,6 +19,20 @@ interface AlertCellProps {
   onSave?: (idPrinc: number, field: string, newValue: string) => Promise<boolean>;
 }
 
+// Converte data de YYYY-MM-DD para DD/MM/AA
+function toEditFormat(dateStr: string | null | undefined): string {
+  const raw = dateStr?.toString() || "";
+  if (raw && raw.includes("-")) {
+    const parts = raw.split("-");
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      const shortYear = year.slice(-2);
+      return `${day}/${month}/${shortYear}`;
+    }
+  }
+  return "";
+}
+
 export function AlertCell({
   value,
   displayValue,
@@ -30,13 +44,16 @@ export function AlertCell({
   onSave,
 }: AlertCellProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(value || "");
+  const [inputValue, setInputValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isEditing) setInputValue(value || "");
-  }, [value, isEditing]);
+    if (!isEditing) {
+      // Para datas, converter para formato DD/MM/AA
+      setInputValue(type === "date" ? toEditFormat(value) : (value || ""));
+    }
+  }, [value, isEditing, type]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -62,9 +79,10 @@ export function AlertCell({
   }, [onSave, idPrinc, field, inputValue, value]);
 
   const handleCancel = useCallback(() => {
-    setInputValue(value || "");
+    // Para datas, converter para formato DD/MM/AA
+    setInputValue(type === "date" ? toEditFormat(value) : (value || ""));
     setIsEditing(false);
-  }, [value]);
+  }, [value, type]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -95,13 +113,18 @@ export function AlertCell({
       <div className="relative flex items-center justify-center h-full w-full">
         <input
           ref={inputRef}
-          type={type === "date" ? "date" : "text"}
+          type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           disabled={isSaving}
-          className={cn("w-full h-full bg-transparent focus:outline-none px-2 py-1 text-xs", className)}
+          placeholder={type === "date" ? "DD/MM/AA" : ""}
+          className={cn(
+            "w-full h-full bg-transparent focus:outline-none px-2 py-1 text-xs",
+            type === "date" && "text-center min-w-[80px]",
+            className
+          )}
           autoFocus
         />
         <div className="absolute -top-8 right-0 flex gap-1 bg-slate-800/80 backdrop-blur-sm p-1 rounded-md border border-white/10 shadow-lg z-10">

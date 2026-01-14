@@ -69,20 +69,32 @@ def _compute_delivery_status(dt_entregue: Optional[str], dt_envio: Optional[str]
 # CÁLCULO DO CAMPO PRAZO
 # =============================================================================
 
-def _is_valid_date(date_str: Optional[str]) -> bool:
-    """Verifica se uma string de data é válida (não vazia/nula)."""
-    if not date_str:
-        return False
-    s = str(date_str).strip()
-    return s not in ("", "None", "nan", "NaN", "null")
-
-
 def _parse_date(date_str: str) -> Optional[date]:
-    """Converte string para date. Retorna None se inválida."""
+    """Converte string para date (formato YYYY-MM-DD). Retorna None se inválida."""
     try:
         return datetime.strptime(str(date_str)[:10], "%Y-%m-%d").date()
     except (ValueError, TypeError):
         return None
+
+
+def _is_valid_date(date_str: Optional[str]) -> bool:
+    """
+    Verifica se uma string de data é válida (não vazia/nula).
+    
+    Retorna False para:
+    - None, "", valores falsy
+    - Strings conhecidas como "vazio": "None", "nan", "NaN", "null", "NULL"
+    - Placeholders numéricos: "0", "0000-00-00"
+    - Valores que não podem ser parseados como data YYYY-MM-DD
+    """
+    if not date_str:
+        return False
+    s = str(date_str).strip()
+    # Lista expandida de valores inválidos
+    if s in ("", "None", "nan", "NaN", "null", "NULL", "0", "0000-00-00"):
+        return False
+    # Verifica se pode ser parseado como data válida
+    return _parse_date(s) is not None
 
 
 def _compute_prazo(row: dict) -> tuple[Optional[int], bool]:

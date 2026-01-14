@@ -74,6 +74,8 @@ Set-Location '$backendPath'
 if (-not `$env:XF_BASE_DIR -or `$env:XF_BASE_DIR.Trim() -eq "") {
     `$env:XF_BASE_DIR = '$(Split-Path -Parent $ProjectRoot)'
 }
+# Desabilitar scheduler de backup em DEV (evita backup da base de desenvolvimento)
+`$env:XF_ENABLE_SCHEDULER = 'false'
 Write-Host ''
 Write-Host '  ========================================' -ForegroundColor Green
 Write-Host '  FastAPI Backend - xFinance 3.0' -ForegroundColor Green

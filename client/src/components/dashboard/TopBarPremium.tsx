@@ -2,12 +2,13 @@
  * TopBarPremium - Header premium com glassmorphism
  * 
  * Layout horizontal único:
- * Logo | Saudação Dinâmica | Clima | Badges Tarefas | KPIs | Botões (2x3) | Ações
+ * Logo | Saudação Dinâmica | Clima | Badges Tarefas | KPIs | Busca | Botões (2x3) | Ações
  */
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLogoSet, useWeather, type WeatherCondition } from "@/hooks";
 import { 
@@ -32,7 +33,8 @@ import {
   Calendar,
   CheckCircle2,
   AlertCircle,
-  Clock
+  Clock,
+  Search
 } from "lucide-react";
 import type { KPIs } from "@shared/schema";
 
@@ -71,9 +73,21 @@ const conditionLabels = {
 // INTERFACE
 // ============================================
 
+// Stats para badges de tarefas do usuário
+export interface TaskStats {
+  /** Total de casos do usuário nos grupos 1 e 2 */
+  totalCases: number;
+  /** Casos iniciados (inspeção <= hoje E envio ou denvio preenchidos) */
+  startedCases: number;
+  /** Casos urgentes (dot vermelho - cobrança enviada, aguardando pagamento) */
+  urgentCases: number;
+}
+
 interface TopBarPremiumProps {
   userName?: string;
+  userRole?: string;
   kpis: KPIs;
+  taskStats?: TaskStats;
   onSearch?: (query?: string) => void;
   onNewRecord: () => void;
   onOpenUsers: () => void;
@@ -81,6 +95,7 @@ interface TopBarPremiumProps {
   onOpenFinancial: () => void;
   onOpenGuyPay: () => void;
   onOpenExpenses: () => void;
+  onOpenBackup?: () => void;
   onLogout: () => void;
 }
 
@@ -90,17 +105,23 @@ interface TopBarPremiumProps {
 
 export function TopBarPremium({
   userName = "Usuário",
+  userRole,
   kpis,
+  taskStats,
+  onSearch,
   onNewRecord,
   onOpenUsers,
   onOpenInvestments,
   onOpenFinancial,
   onOpenGuyPay,
   onOpenExpenses,
+  onOpenBackup,
   onLogout,
 }: TopBarPremiumProps) {
+  const isAdmin = userRole === "admin";
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sessionStart] = useState(() => new Date()); // Momento do login (reseta a cada montagem)
+  const [searchQuery, setSearchQuery] = useState("");
   const { logos, cycleLogo } = useLogoSet();
 
   // Atualiza a cada minuto (para tempo logado e relógio)
@@ -172,11 +193,11 @@ export function TopBarPremium({
 
   const WeatherIcon = weatherIcons[weather.condition];
 
-  // TODO: Integrar com dados reais do backend
-  const stats = {
-    todayInspections: 5,
-    pendingTasks: 8,
-    urgentItems: 2,
+  // Stats de tarefas do usuário (grupos 1 e 2 filtrados por guilty)
+  const stats = taskStats ?? {
+    totalCases: 0,
+    startedCases: 0,
+    urgentCases: 0,
   };
 
   // Estilo base dos botões (largura fixa para uniformidade - baseada em "Performance")
@@ -317,46 +338,46 @@ export function TopBarPremium({
 
             {/* ====== 4. BADGES DE TAREFAS ====== */}
             <div className="hidden md:flex flex-col gap-1">
-              {/* Inspeções Hoje */}
+              {/* Total de casos nos grupos 1 e 2 */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] transition-colors cursor-pointer">
                     <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span className="text-sm text-slate-300 tabular-nums font-semibold">{stats.todayInspections}</span>
-                    <span className="text-xs text-slate-400">hoje</span>
+                    <span className="text-sm text-slate-300 tabular-nums font-semibold">{stats.totalCases}</span>
+                    <span className="text-xs text-slate-400">total</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="bg-slate-800 border-slate-700">
-                  <p>Inspeções agendadas para hoje</p>
+                  <p>Total de casos seus em andamento</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* Pendentes */}
+              {/* Casos iniciados */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] transition-colors cursor-pointer">
                     <Zap className="h-4 w-4 text-amber-400" />
-                    <span className="text-sm text-slate-300 tabular-nums font-semibold">{stats.pendingTasks}</span>
-                    <span className="text-xs text-slate-400">pendentes</span>
+                    <span className="text-sm text-slate-300 tabular-nums font-semibold">{stats.startedCases}</span>
+                    <span className="text-xs text-slate-400">iniciados</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="bg-slate-800 border-slate-700">
-                  <p>Tarefas pendentes de conclusão</p>
+                  <p>Casos com inspeção realizada e cobrança ou despesa enviada</p>
                 </TooltipContent>
               </Tooltip>
 
               {/* Urgentes (só aparece se > 0) */}
-              {stats.urgentItems > 0 && (
+              {stats.urgentCases > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-destructive/10 border border-destructive/30 cursor-pointer animate-pulse">
                       <AlertCircle className="h-4 w-4 text-destructive" />
-                      <span className="text-sm text-destructive tabular-nums font-semibold">{stats.urgentItems}</span>
-                      <span className="text-xs text-destructive/80">urgentes</span>
+                      <span className="text-sm text-destructive tabular-nums font-semibold">{stats.urgentCases}</span>
+                      <span className="text-xs text-destructive/80">URGENTES</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="bg-slate-800 border-slate-700">
-                    <p>Itens que requerem atenção imediata</p>
+                    <p>Cobrança enviada, aguardando pagamento</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -413,10 +434,32 @@ export function TopBarPremium({
               </div>
             </div>
 
+            <div className="separator-gradient h-14 hidden lg:block" />
+
+            {/* ====== 6. CAMPO DE BUSCA ====== */}
+            <div className="hidden lg:flex items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Input
+                  type="text"
+                  placeholder="Buscar inspeções..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && onSearch) {
+                      onSearch(searchQuery || undefined);
+                    }
+                  }}
+                  className="w-[200px] pl-9 pr-3 h-9 bg-slate-900/60 border-white/10 text-sm placeholder:text-slate-500 focus:border-primary/50 focus:ring-primary/20"
+                  data-testid="search-input"
+                />
+              </div>
+            </div>
+
             {/* Spacer */}
             <div className="flex-1" />
 
-            {/* ====== 6. BOTÕES (2 linhas x 3 colunas) ====== */}
+            {/* ====== 7. BOTÕES (2 linhas x 3 colunas) ====== */}
             <div className="flex flex-col gap-1.5">
               {/* Linha 1: Novo, Usuários, Aportes */}
               <div className="flex items-center gap-1.5">
@@ -488,7 +531,7 @@ export function TopBarPremium({
 
             <div className="separator-gradient h-12" />
 
-            {/* ====== 7. AÇÕES (sino, engrenagem, sair) ====== */}
+            {/* ====== 8. AÇÕES (sino, engrenagem/backup, sair) ====== */}
             <div className="flex items-center gap-1.5">
               <Button 
                 variant="ghost" 
@@ -498,14 +541,24 @@ export function TopBarPremium({
               >
                 <Bell className="h-4 w-4" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
-                data-testid="button-settings"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
+              {isAdmin && onOpenBackup && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
+                      onClick={onOpenBackup}
+                      data-testid="button-backup"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-slate-800 border-slate-700">
+                    <p>Backup do Banco de Dados</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <Button
                 variant="ghost"
                 size="icon"

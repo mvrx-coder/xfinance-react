@@ -11,7 +11,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings, resolve_sqlite_path
-from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis
+from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis, backup
+from scheduler import start_scheduler, stop_scheduler
 
 # Configurar logging
 logging.basicConfig(
@@ -41,6 +42,9 @@ async def lifespan(app: FastAPI):
         logger.error("❌ Banco de dados não encontrado: %s", e)
         raise
     
+    # Iniciar agendador de backups
+    start_scheduler()
+    
     logger.info("✅ API pronta para receber requisições")
     logger.info("=" * 60)
     
@@ -48,6 +52,7 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("🛑 Encerrando xFinance API")
+    stop_scheduler()
 
 
 # =============================================================================
@@ -87,6 +92,7 @@ app.include_router(kpis.router, prefix="/api/kpis", tags=["KPIs"])
 app.include_router(performance.router, prefix="/api/performance", tags=["Performance"])
 app.include_router(investments.router)
 app.include_router(new_record.router, prefix="/api/new-record", tags=["New Record"])
+app.include_router(backup.router)
 
 
 # =============================================================================

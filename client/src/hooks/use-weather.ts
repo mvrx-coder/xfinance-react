@@ -14,7 +14,7 @@ import { fetchWeather, getUserLocation, type WeatherData, type WeatherCondition 
 
 const CACHE_KEY = "xfinance_weather_cache";
 const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutos
-const DEFAULT_LOCATION = "São Paulo";
+const DEFAULT_LOCATION = "Nova Iguaçu, RJ";
 
 // ============================================
 // TIPOS

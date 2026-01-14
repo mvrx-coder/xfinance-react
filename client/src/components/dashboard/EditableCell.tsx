@@ -37,9 +37,23 @@ export function EditableCell({
 
   // Iniciar edição
   const startEdit = useCallback(() => {
-    // Para datas, começar com valor vazio para facilitar digitação
     if (type === "date") {
-      setEditValue(display === "-" ? "" : display);
+      // Para datas existentes, converter de YYYY-MM-DD para DD/MM/AA
+      const rawValue = value?.toString() || "";
+      if (rawValue && rawValue.includes("-")) {
+        // Formato banco: YYYY-MM-DD → DD/MM/AA
+        const parts = rawValue.split("-");
+        if (parts.length === 3) {
+          const [year, month, day] = parts;
+          const shortYear = year.slice(-2); // Últimos 2 dígitos do ano
+          setEditValue(`${day}/${month}/${shortYear}`);
+        } else {
+          setEditValue("");
+        }
+      } else {
+        // Sem valor ou formato desconhecido
+        setEditValue("");
+      }
     } else if (type === "currency") {
       // Para moeda, usar valor numérico
       setEditValue(value?.toString() || "");
@@ -47,7 +61,7 @@ export function EditableCell({
       setEditValue(value?.toString() || "");
     }
     setIsEditing(true);
-  }, [display, value, type]);
+  }, [value, type]);
 
   // Cancelar edição
   const cancelEdit = useCallback(() => {
@@ -126,9 +140,9 @@ export function EditableCell({
             "w-full h-6 px-1 text-xs bg-background border border-primary rounded",
             "focus:outline-none focus:ring-1 focus:ring-primary",
             type === "currency" && "text-right font-mono",
-            type === "date" && "text-center",
+            type === "date" && "text-center min-w-[80px]",
           )}
-          placeholder={type === "date" ? "DD/MM" : ""}
+          placeholder={type === "date" ? "DD/MM/AA" : ""}
           disabled={isSaving}
         />
       </div>
