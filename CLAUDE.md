@@ -6,6 +6,85 @@ Este documento define regras **OBRIGATÓRIAS** para qualquer agente AI que traba
 
 ---
 
+## 🚀 INÍCIO DE SESSÃO (OBRIGATÓRIO)
+
+Ao iniciar qualquer sessão de trabalho neste projeto:
+
+1. **Este arquivo (`CLAUDE.md`) deve ser lido primeiro** - contém todas as regras críticas
+2. **Para tarefas envolvendo sigilo/permissões** - leia também `docs/system/SIGILO.md`
+3. **Para entender a arquitetura** - leia `docs/system/ARCHITECTURE.md`
+4. **Para padrões de UI** - consulte `docs/system/ui/`
+
+### Contexto do Projeto
+
+- **Sistema:** xFinance 3.0 - Sistema de gestão de inspeções veiculares
+- **Stack:** React + Vite (frontend) | FastAPI + SQLite (backend)
+- **Banco:** SQLite legado (`xFinance.db`) - NUNCA alterar nomes de campos
+- **Repo Git:** Este workspace é um repositório Git ativo
+
+### Preferências do Desenvolvedor
+
+```
+✅ Toda comunicação deve ser em Português do Brasil
+✅ Sempre apresentar plano curto + lista de arquivos ANTES de escrever código
+✅ Preferir alterações mínimas (diffs pequenos)
+✅ Nunca inventar caminhos de arquivos - sempre verificar primeiro
+✅ Para alterações de schema do banco, apresentar estratégia de migração segura
+```
+
+---
+
+## 🔄 ROTINA DE GIT
+
+### Fluxo Padrão de Commits
+
+Quando solicitado a fazer commit, seguir esta sequência:
+
+```bash
+# 1. Verificar estado atual
+git status
+git diff --staged
+git diff
+
+# 2. Verificar histórico recente para manter estilo de mensagens
+git log --oneline -5
+
+# 3. Adicionar arquivos (NUNCA usar git add . cegamente)
+git add <arquivos_específicos>
+
+# 4. Commit com mensagem descritiva em português
+git commit -m "tipo: descrição concisa do que foi feito"
+```
+
+### Convenção de Mensagens de Commit
+
+```
+feat:     Nova funcionalidade
+fix:      Correção de bug
+refactor: Refatoração sem mudança de comportamento
+style:    Formatação, ponto e vírgula, etc.
+docs:     Documentação
+chore:    Manutenção, configs, deps
+```
+
+### Regras de Segurança Git
+
+```
+⚠️ NUNCA fazer push sem confirmação explícita do usuário
+⚠️ NUNCA usar --force em branches compartilhadas
+⚠️ NUNCA commitar arquivos sensíveis (.env, credentials, etc.)
+⚠️ NUNCA alterar git config
+⚠️ NUNCA usar --amend em commits já enviados ao remote
+```
+
+### Branch Atual e Remote
+
+- O agente tem acesso ao terminal e pode executar comandos git
+- Verificar `git branch` e `git remote -v` quando necessário
+- O repositório principal está configurado no workspace
+
+---
+
 ## 🚨 REGRAS CRÍTICAS (NÃO NEGOCIÁVEIS)
 
 ### 1. SIGILO DE DADOS - PRIORIDADE MÁXIMA
@@ -271,6 +350,73 @@ Antes de trabalhar no projeto, leia **nesta ordem**:
 
 ---
 
-*Última atualização: 23/12/2024*
+## 🛠️ AMBIENTE E FERRAMENTAS
+
+### Sistema Operacional e Paths
+
+- **OS:** Windows 10/11
+- **Shell:** PowerShell
+- **Workspace:** Caminho absoluto do projeto (detectado automaticamente)
+
+### Comandos Úteis do Projeto
+
+```powershell
+# Iniciar ambiente de desenvolvimento
+.\start.bat                    # Backend + Frontend
+
+# Apenas backend
+cd backend && python -m uvicorn main:app --reload
+
+# Apenas frontend
+npm run dev
+
+# Scripts disponíveis
+.\scripts\start.ps1            # Iniciar dev servers
+.\scripts\stop_dev.ps1         # Parar dev servers
+```
+
+### Estrutura de Pastas Importantes
+
+```
+/                              # Raiz do projeto
+├── CLAUDE.md                  # Este arquivo (instruções AI)
+├── backend/                   # API FastAPI
+│   ├── main.py               # Entrypoint
+│   └── routers/              # Endpoints por domínio
+├── client/                    # Frontend React + Vite
+│   └── src/
+├── docs/system/               # Documentação técnica
+├── shared/                    # Tipos compartilhados
+│   └── schema.ts             # Schema TypeScript
+├── scripts/                   # Scripts de automação
+└── xFinance.db               # Banco SQLite (produção local)
+```
+
+### Banco de Dados
+
+- **Tipo:** SQLite
+- **Arquivo:** `xFinance.db` na raiz do projeto
+- **Schema DDL:** `docs/system/schema/db_ddl.txt`
+- **Mapeamento:** `docs/system/schema/MAPEAMENTO_CAMPOS.md`
+
+---
+
+## 📝 RESUMO PARA INÍCIO RÁPIDO
+
+```
+1. Leia este arquivo (CLAUDE.md) - você está aqui ✅
+2. Comunicação sempre em Português do Brasil
+3. Plano curto ANTES de codificar
+4. Diffs pequenos, alterações mínimas
+5. Respeite o sigilo de dados (docs/system/SIGILO.md)
+6. Nunca altere: ui/, index.ts (stubs), schema do banco
+7. Limite de 400 linhas por arquivo
+8. Git: nunca push sem confirmação, mensagens em português
+```
+
+---
+
+*Última atualização: 15/01/2026*
 *Projeto: xFinance 3.0 - Migração React + FastAPI*
+*Compatível com: Cursor AI, Claude Code (VS Code), Claude CLI*
 
