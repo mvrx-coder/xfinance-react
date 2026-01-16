@@ -1299,17 +1299,92 @@ textarea:focus {
 }
 
 .login-first-access-notice {
-  background: rgba(206, 98, 217, 0.1);
-  border: 1px solid rgba(206, 98, 217, 0.3);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(206, 98, 217, 0.15), rgba(206, 98, 217, 0.05));
+  border: 1px solid rgba(206, 98, 217, 0.4);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
 }
 
-.login-first-access-notice p {
-  font-size: 0.85rem;
+.login-first-access-notice svg {
   color: #CE62D9;
+  flex-shrink: 0;
+}
+
+.login-first-access-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #CE62D9;
+  margin: 0 0 0.25rem 0;
+}
+
+.login-first-access-email {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
+}
+
+.login-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #34D399;
+}
+
+.login-password-mismatch {
+  font-size: 0.75rem;
+  color: #F87171;
+  margin: 0.25rem 0 0 0;
+}
+
+.login-button-first-access {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #CE62D9, #9D4EDD);
+}
+
+.login-button-first-access:hover:not(:disabled) {
+  background: linear-gradient(135deg, #D87AE3, #A85EE7);
+}
+
+.login-button-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.75rem;
+}
+
+.login-button-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.login-button-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .login-footer {

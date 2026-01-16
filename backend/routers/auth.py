@@ -5,6 +5,8 @@ Endpoints:
 - POST /api/auth/login - Login com email/senha
 - POST /api/auth/logout - Logout (invalida cookie)
 - GET /api/auth/me - Retorna usuário atual
+- POST /api/auth/check-email - Verifica status do email (primeiro acesso)
+- POST /api/auth/set-password - Define senha no primeiro acesso
 """
 
 from typing import Optional
@@ -14,8 +16,11 @@ from pydantic import BaseModel, EmailStr
 
 from services.auth import (
     verify_login,
+    check_email_status,
+    set_missing_password,
     create_access_token,
     get_current_user_from_token,
+    LoginStatus,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -31,10 +36,30 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class CheckEmailRequest(BaseModel):
+    """Request para verificar status do email."""
+    email: EmailStr
+
+
+class CheckEmailResponse(BaseModel):
+    """Response da verificação de email."""
+    status: str
+    message: Optional[str] = None
+    requires_password_setup: bool = False
+
+
+class SetPasswordRequest(BaseModel):
+    """Request para definir senha no primeiro acesso."""
+    email: EmailStr
+    password: str
+    confirm_password: str
+
+
 class LoginResponse(BaseModel):
     """Response de login bem-sucedido."""
     success: bool
     message: str
+    status: Optional[str] = None
     user: Optional[dict] = None
 
 
@@ -95,6 +120,87 @@ def get_current_user_optional(
 # ENDPOINTS
 # =============================================================================
 
+@router.post("/check-email", response_model=CheckEmailResponse)
+def check_email(request: CheckEmailRequest):
+    """
+    Verifica status do email antes do login.
+    
+    Usado para detectar primeiro acesso e mostrar formulário apropriado.
+    
+    Returns:
+        CheckEmailResponse com status do email
+    """
+    result = check_email_status(request.email)
+    
+    return CheckEmailResponse(
+        status=result.status.value,
+        message=result.message,
+        requires_password_setup=result.status == LoginStatus.MISSING_PASSWORD,
+    )
+
+
+@router.post("/set-password", response_model=LoginResponse)
+def set_password(request: SetPasswordRequest, response: Response):
+    """
+    Define senha no primeiro acesso.
+    
+    - Só funciona se hash_senha estiver vazio
+    - Após definir, retorna usuário autenticado
+    
+    Returns:
+        LoginResponse com dados do usuário
+    """
+    # Validar confirmação de senha
+    if request.password != request.confirm_password:
+        raise HTTPException(
+            status_code=400,
+            detail="As senhas não coincidem"
+        )
+    
+    result = set_missing_password(request.email, request.password)
+    
+    if result.status != LoginStatus.SUCCESS:
+        # Mapear status para código HTTP apropriado
+        status_code = 400
+        if result.status == LoginStatus.EMAIL_NOT_FOUND:
+            status_code = 404
+        elif result.status == LoginStatus.USER_INACTIVE:
+            status_code = 403
+        
+        raise HTTPException(
+            status_code=status_code,
+            detail=result.message
+        )
+    
+    # Criar token JWT e definir cookie
+    user = result.user
+    token_data = {
+        "sub": user.email,
+        "id_user": user.id_user,
+        "papel": user.papel,
+        "nome": user.nome,
+        "nick": user.nick,
+        "short_nome": user.short_nome,
+    }
+    access_token = create_access_token(token_data)
+    
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=60 * 60 * 8,
+    )
+    
+    return LoginResponse(
+        success=True,
+        message=result.message or "Senha definida com sucesso!",
+        status=result.status.value,
+        user=user.to_dict(),
+    )
+
+
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, response: Response):
     """
@@ -105,15 +211,28 @@ def login(request: LoginRequest, response: Response):
     - Define cookie httponly com o token
     
     Returns:
-        LoginResponse com dados do usuário
+        LoginResponse com dados do usuário e status específico
     """
-    user = verify_login(request.email, request.password)
+    result = verify_login(request.email, request.password)
     
-    if not user:
+    # Se não foi sucesso, retornar erro com status específico
+    if result.status != LoginStatus.SUCCESS:
+        # Para primeiro acesso, retornar 200 com status específico (não é erro)
+        if result.status == LoginStatus.MISSING_PASSWORD:
+            return LoginResponse(
+                success=False,
+                message=result.message or "Primeiro acesso detectado. Defina sua senha.",
+                status=result.status.value,
+                user=None,
+            )
+        
+        # Outros erros
         raise HTTPException(
             status_code=401,
-            detail="Email ou senha incorretos"
+            detail=result.message or "Email ou senha incorretos"
         )
+    
+    user = result.user
     
     # Criar token JWT com dados do usuário
     token_data = {
@@ -139,6 +258,7 @@ def login(request: LoginRequest, response: Response):
     return LoginResponse(
         success=True,
         message=f"Bem-vindo, {user.nick or user.nome or user.email}!",
+        status=result.status.value,
         user=user.to_dict(),
     )
 

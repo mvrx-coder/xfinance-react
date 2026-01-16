@@ -31,8 +31,12 @@ import {
   login as apiLogin,
   logout as apiLogout,
   getCurrentUser,
+  checkEmail as apiCheckEmail,
+  setFirstPassword as apiSetFirstPassword,
+  LoginStatus,
   type LoginRequest,
   type UserData,
+  type SetPasswordRequest,
 } from "@/services/api/auth";
 
 // =============================================================================
@@ -48,18 +52,34 @@ export interface AuthState {
   isAuthenticated: boolean;
   /** Erro da última operação de auth */
   error: string | null;
+  /** True se é primeiro acesso (senha não definida) */
+  isFirstAccess: boolean;
+  /** Email sendo usado para primeiro acesso */
+  firstAccessEmail: string | null;
 }
 
 export interface AuthContextValue extends AuthState {
   /** 
    * Realiza login com email e senha.
-   * @returns true se sucesso, false se falha
+   * @returns true se sucesso, false se falha, "first_access" se primeiro acesso
    */
-  login: (credentials: LoginRequest) => Promise<boolean>;
+  login: (credentials: LoginRequest) => Promise<boolean | "first_access">;
   /** Realiza logout e limpa estado */
   logout: () => Promise<void>;
   /** Limpa erro atual */
   clearError: () => void;
+  /**
+   * Verifica status do email (detecta primeiro acesso).
+   * @returns "ok" | "first_access" | string (mensagem de erro)
+   */
+  checkEmail: (email: string) => Promise<"ok" | "first_access" | string>;
+  /**
+   * Define senha no primeiro acesso.
+   * @returns true se sucesso
+   */
+  setFirstPassword: (password: string, confirmPassword: string) => Promise<boolean>;
+  /** Cancela fluxo de primeiro acesso */
+  cancelFirstAccess: () => void;
   /** Papel do usuário (shortcut) */
   papel: string | null;
   /** Verifica se usuário é admin */
@@ -89,6 +109,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFirstAccess, setIsFirstAccess] = useState(false);
+  const [firstAccessEmail, setFirstAccessEmail] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
   // Verificação inicial do token
@@ -143,22 +165,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // ---------------------------------------------------------------------------
+  // Check Email (detecta primeiro acesso)
+  // ---------------------------------------------------------------------------
+  const checkEmail = useCallback(async (email: string): Promise<"ok" | "first_access" | string> => {
+    setError(null);
+
+    try {
+      const response = await apiCheckEmail(email);
+      
+      if (response.requires_password_setup) {
+        setIsFirstAccess(true);
+        setFirstAccessEmail(email);
+        return "first_access";
+      }
+      
+      if (response.status === LoginStatus.EMAIL_NOT_FOUND) {
+        return response.message || "Email não cadastrado no sistema";
+      }
+      
+      if (response.status === LoginStatus.USER_INACTIVE) {
+        return response.message || "Usuário desativado";
+      }
+      
+      if (response.status === LoginStatus.USER_LOCKED) {
+        return response.message || "Usuário bloqueado";
+      }
+      
+      return "ok";
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao verificar email";
+      return message;
+    }
+  }, []);
+
+  // ---------------------------------------------------------------------------
   // Login
   // ---------------------------------------------------------------------------
-  const login = useCallback(async (credentials: LoginRequest): Promise<boolean> => {
+  const login = useCallback(async (credentials: LoginRequest): Promise<boolean | "first_access"> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await apiLogin(credentials);
 
+      // Detectar primeiro acesso
+      if (response.status === LoginStatus.MISSING_PASSWORD) {
+        setIsFirstAccess(true);
+        setFirstAccessEmail(credentials.email);
+        setError(response.message || "Primeiro acesso detectado. Defina sua senha.");
+        return "first_access";
+      }
+
       if (response.success && response.user) {
         setUser(response.user);
+        setIsFirstAccess(false);
+        setFirstAccessEmail(null);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(response.user));
         return true;
       }
 
-      setError("Credenciais inválidas");
+      setError(response.message || "Credenciais inválidas");
       return false;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login";
@@ -167,6 +233,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Set First Password
+  // ---------------------------------------------------------------------------
+  const setFirstPassword = useCallback(async (password: string, confirmPassword: string): Promise<boolean> => {
+    if (!firstAccessEmail) {
+      setError("Email não informado. Tente novamente.");
+      return false;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiSetFirstPassword({
+        email: firstAccessEmail,
+        password,
+        confirm_password: confirmPassword,
+      });
+
+      if (response.success && response.user) {
+        setUser(response.user);
+        setIsFirstAccess(false);
+        setFirstAccessEmail(null);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(response.user));
+        return true;
+      }
+
+      setError(response.message || "Erro ao definir senha");
+      return false;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao definir senha";
+      setError(message);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [firstAccessEmail]);
+
+  // ---------------------------------------------------------------------------
+  // Cancel First Access
+  // ---------------------------------------------------------------------------
+  const cancelFirstAccess = useCallback(() => {
+    setIsFirstAccess(false);
+    setFirstAccessEmail(null);
+    setError(null);
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -210,14 +323,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       isAuthenticated,
       error,
+      isFirstAccess,
+      firstAccessEmail,
       login,
       logout,
       clearError,
+      checkEmail,
+      setFirstPassword,
+      cancelFirstAccess,
       papel,
       isAdmin,
       isBackofficeOrAdmin,
     }),
-    [user, isLoading, isAuthenticated, error, login, logout, clearError, papel, isAdmin, isBackofficeOrAdmin]
+    [user, isLoading, isAuthenticated, error, isFirstAccess, firstAccessEmail, login, logout, clearError, checkEmail, setFirstPassword, cancelFirstAccess, papel, isAdmin, isBackofficeOrAdmin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

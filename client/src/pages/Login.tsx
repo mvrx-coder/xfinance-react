@@ -3,34 +3,55 @@
  * 
  * Usa o hook useAuth do contexto centralizado.
  * Redireciona para Dashboard se já autenticado.
+ * Suporta fluxo de primeiro acesso (definição de senha).
  */
 
 import { useState, useEffect } from "react";
 import { useLocation, Redirect } from "wouter";
-import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Zap, TrendingUp, Shield, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, KeyRound } from "lucide-react";
 import { useAuth, useLogoSet } from "@/hooks";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login, isLoading: isAuthLoading, isAuthenticated, error: authError, clearError } = useAuth();
+  const { 
+    login, 
+    checkEmail,
+    setFirstPassword,
+    cancelFirstAccess,
+    isLoading: isAuthLoading, 
+    isAuthenticated, 
+    error: authError, 
+    clearError,
+    isFirstAccess,
+    firstAccessEmail,
+  } = useAuth();
   const { logos } = useLogoSet();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
-  // Estados para primeiro acesso (fluxo futuro)
-  const [isFirstAccess, setIsFirstAccess] = useState(false);
+  // Estados para primeiro acesso
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Limpar erros ao digitar
   useEffect(() => {
     if (localError) setLocalError(null);
+    if (successMessage) setSuccessMessage(null);
     if (authError) clearError();
-  }, [email, password]);
+  }, [email, password, newPassword, confirmPassword]);
+  
+  // Sincronizar email com primeiro acesso
+  useEffect(() => {
+    if (firstAccessEmail && !email) {
+      setEmail(firstAccessEmail);
+    }
+  }, [firstAccessEmail]);
 
   // Redirecionar se já autenticado
   if (isAuthenticated && !isAuthLoading) {
@@ -57,9 +78,15 @@ export default function Login() {
     setLocalError(null);
     
     try {
-      const success = await login({ email, password });
+      const result = await login({ email, password });
       
-      if (success) {
+      if (result === "first_access") {
+        // Primeiro acesso detectado - o AuthContext já configurou o estado
+        // O formulário de primeiro acesso será exibido automaticamente
+        return;
+      }
+      
+      if (result === true) {
         // Redirecionamento é feito automaticamente pelo Redirect acima
         // quando isAuthenticated muda para true
         setLocation("/");
@@ -72,17 +99,80 @@ export default function Login() {
     }
   };
 
+  const handleCheckEmail = async () => {
+    if (!email.trim()) {
+      setLocalError("Informe o email");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setLocalError(null);
+    
+    try {
+      const result = await checkEmail(email);
+      
+      if (result === "first_access") {
+        // Primeiro acesso - o estado já foi configurado
+        setSuccessMessage("Primeiro acesso detectado. Defina sua senha.");
+        return;
+      }
+      
+      if (result !== "ok") {
+        // Erro específico retornado
+        setLocalError(result);
+      }
+      // Se "ok", o usuário pode continuar com o login normal
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : "Erro ao verificar email");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSetNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!newPassword.trim()) {
+      setLocalError("Informe a nova senha");
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setLocalError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    
     if (newPassword !== confirmPassword) {
       setLocalError("As senhas não coincidem");
       return;
     }
+    
     setIsSubmitting(true);
-    // TODO: Implementar fluxo de primeiro acesso
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsFirstAccess(false);
+    setLocalError(null);
+    
+    try {
+      const success = await setFirstPassword(newPassword, confirmPassword);
+      
+      if (success) {
+        setSuccessMessage("Senha definida com sucesso!");
+        // Redirecionamento será automático via isAuthenticated
+        setLocation("/");
+      }
+      // Se falhou, o erro já está no contexto (authError)
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : "Erro ao definir senha");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelFirstAccess = () => {
+    cancelFirstAccess();
+    setNewPassword("");
+    setConfirmPassword("");
+    setPassword("");
+    setLocalError(null);
+    setSuccessMessage(null);
   };
 
   // Loading inicial do contexto de auth
@@ -190,11 +280,18 @@ export default function Login() {
                     <span>{displayError}</span>
                   </div>
                 )}
+                {successMessage && (
+                  <div className="login-success">
+                    <KeyRound className="w-4 h-4" />
+                    <span>{successMessage}</span>
+                  </div>
+                )}
                 <div className="login-input-group">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={handleCheckEmail}
                     placeholder="mvrxxx@gmail.com"
                     className="login-input"
                     required
@@ -247,7 +344,11 @@ export default function Login() {
             ) : (
               <form onSubmit={handleSetNewPassword} className="login-form">
                 <div className="login-first-access-notice">
-                  <p>Primeiro acesso detectado. Defina sua nova senha.</p>
+                  <KeyRound className="w-5 h-5" />
+                  <div>
+                    <p className="login-first-access-title">Primeiro Acesso</p>
+                    <p className="login-first-access-email">{firstAccessEmail}</p>
+                  </div>
                 </div>
                 
                 {displayError && (
@@ -257,45 +358,86 @@ export default function Login() {
                   </div>
                 )}
                 
+                {successMessage && (
+                  <div className="login-success">
+                    <KeyRound className="w-4 h-4" />
+                    <span>{successMessage}</span>
+                  </div>
+                )}
+                
                 <div className="login-input-group">
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Nova senha"
-                    className="login-input"
-                    required
-                    minLength={8}
-                    disabled={isSubmitting}
-                    data-testid="input-new-password"
-                  />
+                  <div className="login-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Nova senha (mínimo 6 caracteres)"
+                      className="login-input login-input-password"
+                      required
+                      minLength={6}
+                      disabled={isSubmitting}
+                      autoFocus
+                      data-testid="input-new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="login-password-toggle"
+                      disabled={isSubmitting}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="login-input-group">
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirmar senha"
-                    className="login-input"
-                    required
-                    minLength={8}
-                    disabled={isSubmitting}
-                    data-testid="input-confirm-password"
-                  />
+                  <div className="login-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirmar nova senha"
+                      className="login-input login-input-password"
+                      required
+                      minLength={6}
+                      disabled={isSubmitting}
+                      data-testid="input-confirm-password"
+                    />
+                  </div>
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <p className="login-password-mismatch">As senhas não coincidem</p>
+                  )}
                 </div>
                 
                 <button
                   type="submit"
-                  disabled={isSubmitting || newPassword !== confirmPassword}
-                  className="login-button"
+                  disabled={isSubmitting || newPassword.length < 6 || newPassword !== confirmPassword}
+                  className="login-button login-button-first-access"
                   data-testid="button-set-password"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    "Definir nova senha"
+                    <>
+                      <KeyRound className="w-4 h-4" />
+                      Definir Senha e Entrar
+                    </>
                   )}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleCancelFirstAccess}
+                  disabled={isSubmitting}
+                  className="login-button-secondary"
+                  data-testid="button-cancel-first-access"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar ao login
                 </button>
               </form>
             )}

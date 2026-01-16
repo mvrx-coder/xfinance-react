@@ -4,8 +4,6 @@
  * Integração com backend FastAPI
  */
 
-import { apiRequest } from "@/lib/queryClient";
-
 // =============================================================================
 // TIPOS
 // =============================================================================
@@ -15,9 +13,22 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface CheckEmailResponse {
+  status: string;
+  message: string | null;
+  requires_password_setup: boolean;
+}
+
+export interface SetPasswordRequest {
+  email: string;
+  password: string;
+  confirm_password: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
+  status?: string;
   user: UserData | null;
 }
 
@@ -28,6 +39,18 @@ export interface UserData {
   nick: string | null;
   short_nome: string | null;
 }
+
+/** Status possíveis retornados pelo backend */
+export const LoginStatus = {
+  SUCCESS: "success",
+  EMAIL_NOT_FOUND: "email_not_found",
+  WRONG_PASSWORD: "wrong_password",
+  MISSING_PASSWORD: "missing_password",
+  USER_INACTIVE: "user_inactive",
+  USER_LOCKED: "user_locked",
+} as const;
+
+export type LoginStatusType = typeof LoginStatus[keyof typeof LoginStatus];
 
 // =============================================================================
 // API BASE URL
@@ -41,10 +64,57 @@ const API_BASE = "";
 // =============================================================================
 
 /**
+ * Verifica status do email antes do login.
+ * 
+ * Detecta primeiro acesso (usuário sem senha definida).
+ * 
+ * @param email Email a verificar
+ * @returns Status do email
+ */
+export async function checkEmail(email: string): Promise<CheckEmailResponse> {
+  const response = await fetch(`${API_BASE}/api/auth/check-email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Erro ao verificar email");
+  }
+  
+  return response.json();
+}
+
+/**
+ * Define senha no primeiro acesso.
+ * 
+ * @param request Email e senhas
+ * @returns Dados do usuário após definir senha
+ * @throws Error se falhar
+ */
+export async function setFirstPassword(request: SetPasswordRequest): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE}/api/auth/set-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Erro ao definir senha");
+  }
+  
+  return response.json();
+}
+
+/**
  * Realiza login no sistema.
  * 
  * @param credentials Email e senha
- * @returns Dados do usuário logado
+ * @returns Dados do usuário logado (ou status de primeiro acesso)
  * @throws Error se credenciais inválidas
  */
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
@@ -55,6 +125,8 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
     credentials: "include", // Importante: envia e recebe cookies
   });
   
+  // Para primeiro acesso, o backend retorna 200 com success=false
+  // Então precisamos verificar o status ao invés de response.ok
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || "Erro ao fazer login");
