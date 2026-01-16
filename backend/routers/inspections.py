@@ -37,6 +37,7 @@ from services.queries.new_inspection import (
     get_atividade_texto,
 )
 from services.directories import create_directories
+from services.audit import log_operation
 
 logger = logging.getLogger(__name__)
 
@@ -274,6 +275,15 @@ async def create_inspection(
             "Inspeção criada: id_princ=%d | dirs=%s",
             id_princ,
             dirs_created
+        )
+        
+        # Registrar auditoria
+        log_operation(
+            id_user=current_user.id_user,
+            user_nome=current_user.short_nome or current_user.nick or current_user.email,
+            id_princ=id_princ,
+            operacao="CREATE",
+            valor_novo=f"contr={request.id_contr}, uf={request.id_uf}, cidade={request.id_cidade}",
         )
         
         return CreateInspectionResponse(
@@ -547,16 +557,24 @@ async def update_inspection(
     
     try:
         with get_db() as conn:
-            # Verificar se registro existe
+            # Verificar se registro existe e buscar valor atual para auditoria
             cursor = conn.execute(
-                "SELECT id_princ FROM princ WHERE id_princ = ?",
+                f"SELECT id_princ, {field} FROM princ WHERE id_princ = ?",
                 (id_princ,)
             )
-            if not cursor.fetchone():
+            row = cursor.fetchone()
+            if not row:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Inspeção não encontrada"
                 )
+            
+            # Guardar valor anterior para log
+            old_value = row[field]
+            logger.info(
+                "AUDIT DEBUG: id_princ=%s, field=%s, old_value=%s (type=%s)",
+                id_princ, field, old_value, type(old_value).__name__
+            )
             
             # Atualizar campo
             conn.execute(
@@ -574,6 +592,17 @@ async def update_inspection(
                 logger.info("Prazo limpo para id_princ=%s (campo crítico %s editado)", id_princ, field)
             
             conn.commit()
+            
+            # Registrar auditoria
+            log_operation(
+                id_user=current_user.id_user,
+                user_nome=current_user.short_nome or current_user.nick or current_user.email,
+                id_princ=id_princ,
+                operacao="UPDATE",
+                campo=field,
+                valor_anterior=old_value,
+                valor_novo=converted_value,
+            )
             
             return {
                 "success": True,

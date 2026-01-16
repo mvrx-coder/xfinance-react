@@ -21,6 +21,7 @@ from dependencies import (
     get_current_user,
     require_admin,
 )
+from services.audit import log_operation
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +110,17 @@ async def encaminhar_inspecoes(
             
             updated = cursor.rowcount
             conn.commit()
+            
+            # Registrar auditoria para cada registro encaminhado
+            for id_princ in request.ids_princ:
+                log_operation(
+                    id_user=current_user.id_user,
+                    user_nome=current_user.short_nome or current_user.nick or current_user.email,
+                    id_princ=id_princ,
+                    operacao="ENCAMINHAR",
+                    campo="id_user_guilty",
+                    valor_novo=f"{nick_destino} (id={request.id_user_destino})",
+                )
             
             return AcaoResponse(
                 success=True,
@@ -274,6 +286,15 @@ async def excluir_inspecoes(
             
             deleted = cursor.rowcount
             conn.commit()
+            
+            # Registrar auditoria para cada registro excluído
+            for id_princ in request.ids_princ:
+                log_operation(
+                    id_user=current_user.id_user,
+                    user_nome=current_user.short_nome or current_user.nick or current_user.email,
+                    id_princ=id_princ,
+                    operacao="DELETE",
+                )
             
             return AcaoResponse(
                 success=True,

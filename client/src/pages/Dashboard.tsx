@@ -18,7 +18,7 @@ import { InvestmentsModal } from "@/components/dashboard/modals/InvestmentsModal
 import { PerformanceModalNew as PerformanceModal } from "@/components/dashboard/modals/PerformanceModalNew";
 import { GuyPayModal } from "@/components/dashboard/modals/GuyPayModal";
 import { ExpensesModal } from "@/components/dashboard/modals/ExpensesModal";
-import { BackupModal } from "@/components/dashboard/modals/BackupModal";
+import { SettingsModal } from "@/components/dashboard/modals/SettingsModal";
 import { fetchInspections, type InspectionsResponse, type FetchOptions } from "@/services/api/inspections";
 import { fetchContrOptions, fetchSegurOptions, type LookupOption } from "@/services/api/lookups";
 import { useAuth, useKPIs } from "@/hooks";
@@ -303,9 +303,11 @@ export default function Dashboard() {
         onClose={() => handleCloseModal("expenses")}
       />
 
-      <BackupModal
+      <SettingsModal
         isOpen={modals.backup}
         onClose={() => handleCloseModal("backup")}
+        selectedIdPrinc={selectedInspection?.idPrinc}
+        selectedSegurado={selectedInspection?.segurado}
       />
     </div>
   );

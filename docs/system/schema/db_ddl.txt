@@ -162,6 +162,35 @@ CREATE TABLE "tempstate" (
 );
 
 -- =============================================================================
+-- TABELA DE AUDITORIA: audit_log (Histórico de operações)
+-- =============================================================================
+-- Registra alterações na tabela princ para rastreamento.
+-- Retenção: 14 meses (limpeza manual via endpoint /api/audit/cleanup)
+
+CREATE TABLE "audit_log" (
+    id_log INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    -- Quem realizou a operação
+    id_user INTEGER NOT NULL,
+    user_email TEXT NOT NULL,
+    
+    -- O que foi alterado
+    id_princ INTEGER NOT NULL,           -- Registro afetado (tabela princ)
+    operacao TEXT NOT NULL,              -- CREATE, UPDATE, DELETE, ENCAMINHAR
+    campo TEXT,                          -- Campo alterado (para UPDATE)
+    
+    -- Valores (antes/depois)
+    valor_anterior TEXT,
+    valor_novo TEXT,
+    
+    -- Quando
+    dt_operacao TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    
+    -- Limpeza automática
+    dt_expira TEXT                       -- Data para limpeza (dt_operacao + 14 meses)
+);
+
+-- =============================================================================
 -- ÍNDICES - TABELA PRINCIPAL (princ)
 -- =============================================================================
 
@@ -199,4 +228,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_tempstate_id_princ ON tempstate (state_id_
 
 -- Índice para FK em demais_locais
 CREATE INDEX IF NOT EXISTS idx_demais_locais_id_princ ON demais_locais (id_princ);
+
+-- =============================================================================
+-- ÍNDICES - TABELA DE AUDITORIA
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_audit_princ ON audit_log (id_princ);
+CREATE INDEX IF NOT EXISTS idx_audit_data ON audit_log (dt_operacao);
+CREATE INDEX IF NOT EXISTS idx_audit_expira ON audit_log (dt_expira);
 

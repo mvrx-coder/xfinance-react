@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings, resolve_sqlite_path
-from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis, backup
+from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis, backup, audit
 from scheduler import start_scheduler, stop_scheduler
 
 # Configurar logging
@@ -93,6 +93,7 @@ app.include_router(performance.router, prefix="/api/performance", tags=["Perform
 app.include_router(investments.router)
 app.include_router(new_record.router, prefix="/api/new-record", tags=["New Record"])
 app.include_router(backup.router)
+app.include_router(audit.router)
 
 
 # =============================================================================

@@ -1772,7 +1772,7 @@ textarea:focus {
 /* Container Principal - Glass Card */
 .topbar-premium {
   position: relative;
-  z-index: 100;  /* Bem acima do grid e outros elementos */
+  z-index: 40;  /* Abaixo dos modais (z-50) mas acima do grid */
   flex-shrink: 0;  /* Não encolher no layout flex */
   background: rgba(15, 23, 42, 0.6);  /* #0f172a @ 60% */
   backdrop-filter: blur(24px);
