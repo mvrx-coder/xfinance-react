@@ -127,3 +127,9 @@ export {
   type WeatherCondition,
   type UseWeatherReturn,
 } from "./use-weather";
+
+// Login KPIs (público, sem autenticação)
+export {
+  useLoginKpis,
+  type LoginKPIs,
+} from "./use-login-kpis";

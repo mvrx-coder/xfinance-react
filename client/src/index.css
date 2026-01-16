@@ -1092,66 +1092,222 @@ textarea:focus {
   flex-shrink: 0;
 }
 
+/* ====================================
+   KPI Cards Premium (v0.dev style)
+   ==================================== */
+
 .login-kpis {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
 .login-kpi {
-  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: rgba(21, 21, 37, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.75rem;
-  padding: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(21, 21, 37, 0.5);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.login-kpi-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: kpiFloat 3s ease-in-out infinite;
+.login-kpi:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.login-kpi-icon-yellow {
+/* Gradient overlay */
+.login-kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.login-kpi:hover::before {
+  opacity: 0.8;
+}
+
+/* Glow effect */
+.login-kpi::after {
+  content: '';
+  position: absolute;
+  top: -96px;
+  right: -96px;
+  width: 192px;
+  height: 192px;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.2;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.login-kpi:hover::after {
+  opacity: 0.4;
+}
+
+/* Color variants - Cyan */
+.login-kpi--cyan {
+  border: 1px solid rgba(0, 188, 212, 0.2);
+  box-shadow: 0 0 20px rgba(0, 188, 212, 0.1);
+}
+.login-kpi--cyan::before {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.15) 0%, transparent 60%);
+}
+.login-kpi--cyan::after {
+  background: rgba(0, 188, 212, 0.3);
+}
+.login-kpi--cyan .login-kpi-icon {
+  background: rgba(0, 188, 212, 0.2);
+  border: 1px solid rgba(0, 188, 212, 0.3);
+  color: #00BCD4;
+}
+.login-kpi--cyan .login-kpi-accent {
+  background: #00BCD4;
+}
+
+/* Color variants - Amber */
+.login-kpi--amber {
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+}
+.login-kpi--amber::before {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, transparent 60%);
+}
+.login-kpi--amber::after {
+  background: rgba(245, 158, 11, 0.3);
+}
+.login-kpi--amber .login-kpi-icon {
   background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
   color: #F59E0B;
 }
-
-.login-kpi-icon-cyan {
-  background: rgba(0, 188, 212, 0.2);
-  color: #00BCD4;
-  animation-delay: -1s;
+.login-kpi--amber .login-kpi-accent {
+  background: #F59E0B;
 }
 
-.login-kpi-icon-purple {
-  background: rgba(206, 98, 217, 0.2);
-  color: #CE62D9;
-  animation-delay: -2s;
+/* Color variants - Rose */
+.login-kpi--rose {
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.1);
+}
+.login-kpi--rose::before {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, transparent 60%);
+}
+.login-kpi--rose::after {
+  background: rgba(244, 63, 94, 0.3);
+}
+.login-kpi--rose .login-kpi-icon {
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #F43F5E;
+}
+.login-kpi--rose .login-kpi-accent {
+  background: #F43F5E;
 }
 
-@keyframes kpiFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+/* Color variants - Emerald */
+.login-kpi--emerald {
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+}
+.login-kpi--emerald::before {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, transparent 60%);
+}
+.login-kpi--emerald::after {
+  background: rgba(16, 185, 129, 0.3);
+}
+.login-kpi--emerald .login-kpi-icon {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10B981;
+}
+.login-kpi--emerald .login-kpi-accent {
+  background: #10B981;
+}
+
+/* KPI Content */
+.login-kpi-content {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .login-kpi-value {
-  display: block;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   color: #FFFFFF;
+  line-height: 1;
+}
+
+.login-kpi-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .login-kpi-label {
-  display: block;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.55);
-  margin-top: 2px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.login-kpi-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* KPI Icon */
+.login-kpi-icon {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+}
+
+.login-kpi:hover .login-kpi-icon {
+  transform: scale(1.1);
+}
+
+.login-kpi-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Bottom accent line */
+.login-kpi-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 0 1rem 1rem;
+}
+
+.login-kpi:hover .login-kpi-accent {
+  width: 100%;
 }
 
 /* Login Card */
@@ -1391,18 +1547,22 @@ textarea:focus {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  text-align: center;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .login-mfa-notice {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .login-status {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5);
+  margin: 0;
 }
 
 .login-status-online {
@@ -1419,6 +1579,14 @@ textarea:focus {
   border-radius: 50%;
   margin-right: 0.35rem;
   animation: pulse 2s ease-in-out infinite;
+}
+
+.login-created-by {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  margin-top: 0.25rem;
+  font-style: italic;
 }
 
 @keyframes pulse {
@@ -1496,7 +1664,11 @@ textarea:focus {
   }
   
   .login-kpis {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+  
+  .login-kpi {
+    min-height: 120px;
   }
   
   .login-title {

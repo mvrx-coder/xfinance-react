@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings, resolve_sqlite_path
-from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis, backup, audit
+from routers import auth, inspections, acoes, lookups, performance, investments, new_record, kpis, backup, audit, public
 from scheduler import start_scheduler, stop_scheduler
 
 # Configurar logging
@@ -85,6 +85,7 @@ app.add_middleware(
 # =============================================================================
 
 app.include_router(auth.router)
+app.include_router(public.router)  # Rotas públicas (sem auth)
 app.include_router(inspections.router, prefix="/api/inspections", tags=["Inspections"])
 app.include_router(acoes.router, prefix="/api/acoes", tags=["Ações"])
 app.include_router(lookups.router, prefix="/api/lookups", tags=["Lookups"])
