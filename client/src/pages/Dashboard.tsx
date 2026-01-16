@@ -28,6 +28,9 @@ export default function Dashboard() {
   // Autenticação via contexto global
   const { user, logout: authLogout, papel } = useAuth();
   
+  // 🔒 SIGILO: Apenas admin pode ver colunas de recebíveis e pagamentos
+  const isAdmin = papel === "admin";
+  
   const [filters, setFilters] = useState<FilterState>({
     player: false,
     myJob: false,
@@ -39,6 +42,16 @@ export default function Dashboard() {
       pagamentos: true,
     },
   });
+  
+  // 🔒 SIGILO: Filtros efetivos - força recebíveis e pagamentos = false para não-admin
+  const effectiveFilters = useMemo<FilterState>(() => ({
+    ...filters,
+    columnGroups: {
+      ...filters.columnGroups,
+      recebiveis: isAdmin && filters.columnGroups.recebiveis,
+      pagamentos: isAdmin && filters.columnGroups.pagamentos,
+    },
+  }), [filters, isAdmin]);
 
   const [statusMessages, setStatusMessages] = useState<
     Array<{ id: string; type: "success" | "error" | "warning" | "info"; message: string }>
@@ -93,14 +106,14 @@ export default function Dashboard() {
     enabled: !!selectedInspection,
   });
 
-  // KPIs Express (totais financeiros pendentes)
+  // 🔒 SIGILO: KPIs Express apenas para admin
   const { data: kpis = { 
     express: 0, 
     honorarios: 0, 
     guyHonorario: 0, 
     despesas: 0, 
     guyDespesa: 0 
-  }} = useKPIs();
+  }} = useKPIs(isAdmin); // Não buscar se não for admin
 
   // Calcular stats de tarefas do usuário (grupos 1 e 2 filtrados por guilty)
   const taskStats = useMemo<TaskStats>(() => {
@@ -262,7 +275,7 @@ export default function Dashboard() {
         <main className="flex-1 overflow-hidden">
           <DataGrid
             data={inspections}
-            filters={filters}
+            filters={effectiveFilters}
             isLoading={isLoadingInspections}
             onRowClick={handleRowClick}
             onRefresh={handleSearch}

@@ -66,7 +66,7 @@ export function CollapsibleSidebar({
         isCollapsed && "opacity-0 pointer-events-none"
       )}>
         {/* Filtros - Sempre visíveis */}
-        <SidebarFilters filters={filters} onFiltersChange={onFiltersChange} />
+        <SidebarFilters filters={filters} onFiltersChange={onFiltersChange} userRole={userRole} />
 
         {/* Ações - Aparecem quando linha selecionada */}
         <AnimatePresence>

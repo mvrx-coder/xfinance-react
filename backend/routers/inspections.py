@@ -83,12 +83,16 @@ async def list_inspections(
     )
     
     try:
+        # 🔒 SIGILO: Inspetor vê apenas seus casos (atribuídos como guy)
+        is_inspetor = current_user.papel == "Inspetor"
+        
         # Carregar dados respeitando permissões
         data = load_grid(
             papel=current_user.papel,
             modo_ordenacao=order,
             limit=limit,
             my_job_user_id=current_user.id_user if my_job else None,
+            my_guy_user_id=current_user.id_user if is_inspetor else None,
         )
         
         # Total de registros (sem limite)

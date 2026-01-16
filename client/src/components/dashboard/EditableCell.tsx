@@ -16,6 +16,8 @@ interface EditableCellProps {
   type?: "text" | "date" | "currency" | "number";
   className?: string;
   onSave: (idPrinc: number, field: string, value: string) => Promise<boolean>;
+  /** Se false, desabilita edição (apenas exibe valor) */
+  editable?: boolean;
 }
 
 export function EditableCell({
@@ -26,6 +28,7 @@ export function EditableCell({
   type = "text",
   className,
   onSave,
+  editable = true,
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -152,15 +155,17 @@ export function EditableCell({
   return (
     <span
       onDoubleClick={(e) => {
+        if (!editable) return;
         e.stopPropagation();
         startEdit();
       }}
       className={cn(
-        "block w-full px-2 py-1 truncate cursor-pointer",
-        "hover:bg-primary/10 hover:text-primary transition-colors rounded",
+        "block w-full px-2 py-1 truncate",
+        editable && "cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors rounded",
+        !editable && "cursor-default",
         className
       )}
-      title="Duplo clique para editar"
+      title={editable ? "Duplo clique para editar" : undefined}
     >
       {display}
     </span>

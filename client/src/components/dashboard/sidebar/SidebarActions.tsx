@@ -41,9 +41,10 @@ export function SidebarActions({
 }: SidebarActionsProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
-  const canDelete = userRole === "admin";
-  const canForward = userRole === "admin" || userRole === "BackOffice";
-  const canMark = canForward;
+  const isAdmin = userRole === "admin";
+  const canDelete = isAdmin;
+  const canForward = true; // Todos podem encaminhar
+  const canMark = isAdmin; // Apenas admin pode marcar
   const hasMultipleLocations = inspection.loc && inspection.loc > 1;
 
   const handleViewLocations = () => {
@@ -57,31 +58,38 @@ export function SidebarActions({
     setActivePanel(activePanel === "locais" ? null : "locais");
   };
 
+  // 🔒 SIGILO: Montar lista de ações baseado nas permissões
+  // - Encaminhar e Ver Locais: todos podem
+  // - Excluir e Marcadores: apenas admin
   const actionButtons = [
-    {
+    // Excluir - apenas admin
+    ...(canDelete ? [{
       id: "excluir",
       icon: Trash2,
       label: "Excluir inspeção",
       color: "red",
-      disabled: !canDelete,
+      disabled: false,
       hasPanel: true,
-    },
+    }] : []),
+    // Encaminhar - todos podem
     {
       id: "encaminhar",
       icon: Send,
       label: "Encaminhar inspeção",
       color: "orange",
-      disabled: !canForward,
+      disabled: false,
       hasPanel: true,
     },
-    {
+    // Marcadores - apenas admin
+    ...(canMark ? [{
       id: "marcadores",
       icon: AlertTriangle,
       label: "Marcador de alerta",
       color: "yellow",
-      disabled: !canMark,
+      disabled: false,
       hasPanel: true,
-    },
+    }] : []),
+    // Ver locais - todos podem
     {
       id: "locais",
       icon: MapPin,

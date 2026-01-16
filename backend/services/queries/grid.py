@@ -455,6 +455,7 @@ def load_grid(
     modo_ordenacao: str = "normal",
     limit: Optional[int] = None,
     my_job_user_id: Optional[int] = None,
+    my_guy_user_id: Optional[int] = None,
 ) -> list[dict]:
     """
     Carrega dados do grid principal conforme permissões.
@@ -466,6 +467,7 @@ def load_grid(
         modo_ordenacao: Modo de ordenação (normal, player, prazo)
         limit: Limite de registros (opcional)
         my_job_user_id: Se fornecido, filtra por id_user_guilty = este ID
+        my_guy_user_id: Se fornecido, filtra por id_user_guy = este ID (para Inspetor)
         
     Returns:
         Lista de dicionários com dados filtrados por permissão
@@ -534,13 +536,19 @@ def load_grid(
     
     joins_sql = "\n        ".join(joins)
     
-    # Montar cláusula WHERE (para filtro My Job)
+    # Montar cláusula WHERE (para filtros)
     where_clauses = []
     query_params = []
     
+    # Filtro My Job (por guilty - colaborador responsável)
     if my_job_user_id is not None:
         where_clauses.append("p.id_user_guilty = ?")
         query_params.append(my_job_user_id)
+    
+    # 🔒 SIGILO: Filtro para Inspetor (ver apenas seus casos atribuídos como guy)
+    if my_guy_user_id is not None:
+        where_clauses.append("p.id_user_guy = ?")
+        query_params.append(my_guy_user_id)
     
     where_sql = ""
     if where_clauses:
@@ -594,6 +602,53 @@ def load_grid(
     # Enriquecer com status calculados (para cores condicionais)
     rows = _enrich_with_status(rows)
     
+    # 🔒 SIGILO: Remover campos auxiliares que foram incluídos apenas para cálculo
+    # mas que o usuário não tem permissão para ver
+    rows = _remove_auxiliary_fields(rows, permissoes)
+    
+    return rows
+
+
+def _remove_auxiliary_fields(rows: list[dict], permissoes: frozenset[str]) -> list[dict]:
+    """
+    Remove campos que foram incluídos apenas para cálculos internos
+    mas que o usuário não tem permissão para ver.
+    
+    🔒 CRÍTICO: Garante que dados sigilosos não vazem na resposta.
+    """
+    # Campos que podem ter sido incluídos para cálculo de prazo
+    prazo_aux_fields = {"dt_inspecao", "dt_entregue", "dt_envio", "dt_pago", "prazo", "id_princ"}
+    
+    # Identificar campos que devem ser removidos
+    # (estão na lista auxiliar mas não nas permissões do papel)
+    fields_to_remove = prazo_aux_fields - set(permissoes)
+    
+    # Campos de status calculados são sempre permitidos (não são dados do banco)
+    # mas campos de status dependem de outros campos
+    status_fields_to_remove = set()
+    
+    # dt_guy_pago__status só deve aparecer se dt_guy_pago está nas permissões
+    if "dt_guy_pago" not in permissoes:
+        status_fields_to_remove.add("dt_guy_pago__status")
+    if "dt_guy_dpago" not in permissoes:
+        status_fields_to_remove.add("dt_guy_dpago__status")
+    if "dt_dpago" not in permissoes:
+        status_fields_to_remove.add("dt_dpago__status")
+    # delivery_status depende de dt_entregue e dt_envio
+    if "dt_entregue" not in permissoes and "dt_envio" not in permissoes:
+        status_fields_to_remove.add("delivery_status")
+    
+    fields_to_remove = fields_to_remove | status_fields_to_remove
+    
+    if not fields_to_remove:
+        return rows
+    
+    # Remover campos de cada row
+    for row in rows:
+        for field in fields_to_remove:
+            row.pop(field, None)
+    
+    logger.debug("Campos auxiliares removidos: %s", fields_to_remove)
     return rows
 
 

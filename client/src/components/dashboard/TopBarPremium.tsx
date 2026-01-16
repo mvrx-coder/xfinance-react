@@ -385,56 +385,60 @@ export function TopBarPremium({
 
             <div className="separator-gradient h-14 hidden md:block" />
 
-            {/* ====== 5. KPIs - Layout Vertical 3 Linhas (compacto) ====== */}
-            <div className="hidden lg:flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-slate-900/40 border border-white/[0.06]">
-              {/* Linha 1: EXPRESS */}
-              <div className="flex items-center gap-2 pb-1.5 border-b border-white/10">
-                <Badge 
-                  variant="outline" 
-                  className="bg-primary/20 text-primary border-primary/40 text-[10px] font-semibold px-1.5"
-                >
-                  <Zap className="w-3 h-3 mr-0.5" />
-                  EXPRESS
-                </Badge>
-                <span className="font-mono text-primary text-xl font-bold tabular-nums">
-                  {formatCurrency(kpis.express)}
-                </span>
-              </div>
+            {/* ====== 5. KPIs - Layout Vertical 3 Linhas (compacto) - 🔒 ADMIN ONLY ====== */}
+            {isAdmin && (
+              <>
+                <div className="hidden lg:flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-slate-900/40 border border-white/[0.06]">
+                  {/* Linha 1: EXPRESS */}
+                  <div className="flex items-center gap-2 pb-1.5 border-b border-white/10">
+                    <Badge 
+                      variant="outline" 
+                      className="bg-primary/20 text-primary border-primary/40 text-[10px] font-semibold px-1.5"
+                    >
+                      <Zap className="w-3 h-3 mr-0.5" />
+                      EXPRESS
+                    </Badge>
+                    <span className="font-mono text-primary text-xl font-bold tabular-nums">
+                      {formatCurrency(kpis.express)}
+                    </span>
+                  </div>
 
-              {/* Linha 2: Honorários + Despesas (verde) - só ícone + valor */}
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="h-4 w-4 text-success" />
-                  <span className="font-mono text-success text-sm font-semibold tabular-nums">
-                    {formatCurrency(kpis.honorarios)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Receipt className="h-4 w-4 text-success" />
-                  <span className="font-mono text-success text-sm font-semibold tabular-nums">
-                    {formatCurrency(kpis.despesas)}
-                  </span>
-                </div>
-              </div>
+                  {/* Linha 2: Honorários + Despesas (verde) - só ícone + valor */}
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp className="h-4 w-4 text-success" />
+                      <span className="font-mono text-success text-sm font-semibold tabular-nums">
+                        {formatCurrency(kpis.honorarios)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Receipt className="h-4 w-4 text-success" />
+                      <span className="font-mono text-success text-sm font-semibold tabular-nums">
+                        {formatCurrency(kpis.despesas)}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Linha 3: Guy Hon + Guy Desp (âmbar) - só ícone + valor */}
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-1.5">
-                  <Wallet className="h-4 w-4 text-amber-500" />
-                  <span className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
-                    {formatCurrency(kpis.guyHonorario)}
-                  </span>
+                  {/* Linha 3: Guy Hon + Guy Desp (âmbar) - só ícone + valor */}
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-1.5">
+                      <Wallet className="h-4 w-4 text-amber-500" />
+                      <span className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
+                        {formatCurrency(kpis.guyHonorario)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CreditCard className="h-4 w-4 text-amber-500" />
+                      <span className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
+                        {formatCurrency(kpis.guyDespesa)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <CreditCard className="h-4 w-4 text-amber-500" />
-                  <span className="font-mono text-amber-500 text-sm font-semibold tabular-nums">
-                    {formatCurrency(kpis.guyDespesa)}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            <div className="separator-gradient h-14 hidden lg:block" />
+                <div className="separator-gradient h-14 hidden lg:block" />
+              </>
+            )}
 
             {/* ====== 6. CAMPO DE BUSCA ====== */}
             <div className="hidden lg:flex items-center">
@@ -459,77 +463,81 @@ export function TopBarPremium({
             {/* Spacer */}
             <div className="flex-1" />
 
-            {/* ====== 7. BOTÕES (2 linhas x 3 colunas) ====== */}
-            <div className="flex flex-col gap-1.5">
-              {/* Linha 1: Novo, Usuários, Aportes */}
-              <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onNewRecord}
-                  className={btnGreenClass}
-                  data-testid="button-new-record"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Novo
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onOpenUsers}
-                  className={btnPurpleClass}
-                  data-testid="button-users"
-                >
-                  <Users className="h-3.5 w-3.5" />
-                  Usuários
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onOpenInvestments}
-                  className={btnPurpleClass}
-                  data-testid="button-investments"
-                >
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Aportes
-                </Button>
-              </div>
-              {/* Linha 2: Performance, Guy Pay, Despesas */}
-              <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onOpenFinancial}
-                  className={btnPurpleClass}
-                  data-testid="button-financial"
-                >
-                  <Zap className="h-3.5 w-3.5" />
-                  Performance
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onOpenGuyPay}
-                  className={btnPurpleClass}
-                  data-testid="button-guypay"
-                >
-                  <Wallet className="h-3.5 w-3.5" />
-                  Guy Pay
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onOpenExpenses}
-                  className={btnPurpleClass}
-                  data-testid="button-expenses"
-                >
-                  <Receipt className="h-3.5 w-3.5" />
-                  Despesas
-                </Button>
-              </div>
-            </div>
+            {/* ====== 7. BOTÕES (2 linhas x 3 colunas) - 🔒 ADMIN ONLY ====== */}
+            {isAdmin && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  {/* Linha 1: Novo, Usuários, Aportes */}
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onNewRecord}
+                      className={btnGreenClass}
+                      data-testid="button-new-record"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Novo
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onOpenUsers}
+                      className={btnPurpleClass}
+                      data-testid="button-users"
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      Usuários
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onOpenInvestments}
+                      className={btnPurpleClass}
+                      data-testid="button-investments"
+                    >
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      Aportes
+                    </Button>
+                  </div>
+                  {/* Linha 2: Performance, Guy Pay, Despesas */}
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onOpenFinancial}
+                      className={btnPurpleClass}
+                      data-testid="button-financial"
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      Performance
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onOpenGuyPay}
+                      className={btnPurpleClass}
+                      data-testid="button-guypay"
+                    >
+                      <Wallet className="h-3.5 w-3.5" />
+                      Guy Pay
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onOpenExpenses}
+                      className={btnPurpleClass}
+                      data-testid="button-expenses"
+                    >
+                      <Receipt className="h-3.5 w-3.5" />
+                      Despesas
+                    </Button>
+                  </div>
+                </div>
 
-            <div className="separator-gradient h-12" />
+                <div className="separator-gradient h-12" />
+              </>
+            )}
 
             {/* ====== 8. AÇÕES (sino, engrenagem/backup, sair) ====== */}
             <div className="flex items-center gap-1.5">

@@ -40,9 +40,12 @@ function SwitchPillGlow({ checked, onChange, testId, color }: {
 interface SidebarFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
+  userRole?: string;
 }
 
-export function SidebarFilters({ filters, onFiltersChange }: SidebarFiltersProps) {
+export function SidebarFilters({ filters, onFiltersChange, userRole }: SidebarFiltersProps) {
+  // 🔒 SIGILO: Apenas admin pode ver/alterar colunas de recebíveis e pagamentos
+  const isAdmin = userRole === "admin";
   const toggleFilter = (key: keyof Omit<FilterState, "columnGroups">) => {
     onFiltersChange({ ...filters, [key]: !filters[key] });
   };
@@ -141,31 +144,36 @@ export function SidebarFilters({ filters, onFiltersChange }: SidebarFiltersProps
             />
           </div>
 
-          <div className="flex items-center justify-between group">
-            <div className="flex items-center gap-2 text-sm text-success group-hover:text-success/80 transition-colors">
-              <DollarSign className="h-3.5 w-3.5" />
-              <span>Recebíveis</span>
-            </div>
-            <SwitchPillGlow
-              checked={filters.columnGroups.recebiveis}
-              onChange={() => toggleColumnGroup("recebiveis")}
-              testId="switch-column-recebiveis"
-              color="green"
-            />
-          </div>
+          {/* 🔒 SIGILO: Recebíveis e Pagamentos apenas para admin */}
+          {isAdmin && (
+            <>
+              <div className="flex items-center justify-between group">
+                <div className="flex items-center gap-2 text-sm text-success group-hover:text-success/80 transition-colors">
+                  <DollarSign className="h-3.5 w-3.5" />
+                  <span>Recebíveis</span>
+                </div>
+                <SwitchPillGlow
+                  checked={filters.columnGroups.recebiveis}
+                  onChange={() => toggleColumnGroup("recebiveis")}
+                  testId="switch-column-recebiveis"
+                  color="green"
+                />
+              </div>
 
-          <div className="flex items-center justify-between group">
-            <div className="flex items-center gap-2 text-sm text-warning group-hover:text-warning/80 transition-colors">
-              <CreditCard className="h-3.5 w-3.5" />
-              <span>Pagamentos</span>
-            </div>
-            <SwitchPillGlow
-              checked={filters.columnGroups.pagamentos}
-              onChange={() => toggleColumnGroup("pagamentos")}
-              testId="switch-column-pagamentos"
-              color="amber"
-            />
-          </div>
+              <div className="flex items-center justify-between group">
+                <div className="flex items-center gap-2 text-sm text-warning group-hover:text-warning/80 transition-colors">
+                  <CreditCard className="h-3.5 w-3.5" />
+                  <span>Pagamentos</span>
+                </div>
+                <SwitchPillGlow
+                  checked={filters.columnGroups.pagamentos}
+                  onChange={() => toggleColumnGroup("pagamentos")}
+                  testId="switch-column-pagamentos"
+                  color="amber"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -48,12 +48,16 @@ async function fetchKPIs(): Promise<KPIs> {
 
 /**
  * Hook para buscar KPIs do backend.
+ * 
+ * 🔒 SIGILO: Apenas admin deve ter enabled=true.
+ * Para não-admin, retorna valores zerados sem chamar API.
  */
-export function useKPIs() {
+export function useKPIs(enabled: boolean = true) {
   return useQuery<KPIs>({
     queryKey: KPIS_QUERY_KEY,
     queryFn: fetchKPIs,
     staleTime: CACHE_CONFIG.KPIS_STALE_TIME,
+    enabled, // 🔒 Não buscar se não for admin
     // KPIs começam com valores zerados enquanto carrega
     placeholderData: {
       express: 0,

@@ -250,6 +250,9 @@ export function DataGrid({
   const [ufLookup, setUfLookup] = useState<LookupOption[]>([]);
   const [ativiLookup, setAtiviLookup] = useState<LookupOption[]>([]);
   
+  // 🔒 SIGILO: Apenas admin pode editar inline
+  const canEdit = userRole === "admin";
+  
   // Hook para invalidar cache de KPIs após edição inline
   const invalidateKPIs = useInvalidateKPIs();
 
@@ -658,6 +661,7 @@ export function DataGrid({
                                   idPrinc={row.idPrinc}
                                   type="date"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-xs text-center tabular-nums">
@@ -694,6 +698,7 @@ export function DataGrid({
                                     idPrinc={row.idPrinc}
                                     type="date"
                                     onSave={handleCellEdit}
+                                    editable={canEdit}
                                   />
                                 </div>
                               </TableCell>
@@ -706,6 +711,7 @@ export function DataGrid({
                                     idPrinc={row.idPrinc}
                                     type="date"
                                     onSave={handleCellEdit}
+                                    editable={canEdit}
                                   />
                                 </div>
                               </TableCell>
@@ -718,6 +724,7 @@ export function DataGrid({
                                   type="currency"
                                   className="text-right text-success currency-value"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               
@@ -748,6 +755,7 @@ export function DataGrid({
                                   idPrinc={row.idPrinc}
                                   type="date"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               <TableCell className="w-[85px] min-w-[85px] max-w-[85px] text-xs p-0">
@@ -759,6 +767,7 @@ export function DataGrid({
                                   type="currency"
                                   className="text-right text-emerald-400 currency-value"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               
@@ -792,6 +801,7 @@ export function DataGrid({
                                   type="currency"
                                   className="text-right text-warning currency-value"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               <TableCell className="w-[60px] min-w-[60px] max-w-[60px] text-xs text-muted-foreground text-center p-0">
@@ -814,6 +824,7 @@ export function DataGrid({
                                   type="currency"
                                   className="text-right text-warning currency-value"
                                   onSave={handleCellEdit}
+                                  editable={canEdit}
                                 />
                               </TableCell>
                               
@@ -838,6 +849,7 @@ export function DataGrid({
                               idPrinc={row.idPrinc}
                               type="text"
                               onSave={handleCellEdit}
+                              editable={canEdit}
                             />
                           </TableCell>
                           <TableCell className="w-[80px] min-w-[80px] max-w-[80px] leading-tight">
