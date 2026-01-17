@@ -363,12 +363,12 @@ async def search_segurados(
     """
     with get_db() as conn:
         if q.strip():
-            # Com filtro: busca por LIKE
+            # Com filtro: busca por LIKE (normalizado para ignorar acentos e case)
             cursor = conn.execute(
                 """
                 SELECT id_segur, segur_nome
                 FROM segur
-                WHERE segur_nome LIKE ?
+                WHERE normalize(segur_nome) LIKE normalize(?)
                 ORDER BY segur_nome
                 LIMIT ?
                 """,
@@ -417,12 +417,12 @@ async def search_atividades(
     """
     with get_db() as conn:
         if q.strip():
-            # Com filtro: busca por LIKE
+            # Com filtro: busca por LIKE (normalizado para ignorar acentos e case)
             cursor = conn.execute(
                 """
                 SELECT id_ativi, atividade
                 FROM ativi
-                WHERE atividade LIKE ?
+                WHERE normalize(atividade) LIKE normalize(?)
                 ORDER BY atividade
                 LIMIT ?
                 """,
