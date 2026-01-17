@@ -1015,12 +1015,13 @@ textarea:focus {
 
 .login-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1100px;
+  grid-template-columns: 1.96fr 1fr;
+  gap: 2rem;
+  max-width: 1400px;
   width: 100%;
   z-index: 1;
   animation: loginFadeIn 0.6s ease-out;
+  align-items: stretch; /* Equaliza altura dos cards */
 }
 
 @keyframes loginFadeIn {
@@ -1031,15 +1032,27 @@ textarea:focus {
 /* Hero Section */
 .login-hero {
   display: flex;
-  align-items: center;
+  align-items: stretch; /* Altura total */
 }
 
 .login-hero-card {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.25rem;
-  padding: 2.5rem;
+  padding: 2rem;
   backdrop-filter: blur(6px);
+}
+
+/* Coluna esquerda do hero: texto */
+.login-hero-text {
+  flex: 1.35;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .login-eyebrow {
@@ -1070,10 +1083,11 @@ textarea:focus {
 .login-benefits {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1; /* Ocupa espaço restante */
 }
 
 .login-benefits li {
@@ -1096,25 +1110,28 @@ textarea:focus {
    KPI Cards Premium (v0.dev style)
    ==================================== */
 
+/* Coluna direita do hero: KPIs */
 .login-kpis {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
+  align-content: start;
+  align-self: center;
+  flex-shrink: 0;
+  min-width: 340px;
 }
 
 .login-kpi {
   position: relative;
   overflow: hidden;
-  min-height: 140px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   background: rgba(21, 21, 37, 0.5);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border-radius: 1rem;
-  padding: 1.25rem;
+  border-radius: 0.875rem;
+  padding: 1rem;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1236,50 +1253,60 @@ textarea:focus {
   background: #10B981;
 }
 
-/* KPI Content */
+/* KPI Content - Nova estrutura: número+ícone em cima, labels embaixo */
 .login-kpi-content {
   position: relative;
   z-index: 10;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   min-width: 0;
+  width: 100%;
+}
+
+/* Linha superior: número + ícone */
+.login-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .login-kpi-value {
-  font-size: 2.25rem;
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   color: #FFFFFF;
   line-height: 1;
 }
 
+/* Linha inferior: labels */
 .login-kpi-labels {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.125rem;
 }
 
 .login-kpi-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
+  line-height: 1.3;
 }
 
 .login-kpi-sub {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* KPI Icon */
+/* KPI Icon - agora dentro do kpi-top */
 .login-kpi-icon {
   position: relative;
   z-index: 10;
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 0.75rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1291,8 +1318,8 @@ textarea:focus {
 }
 
 .login-kpi-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Bottom accent line */
@@ -1313,16 +1340,18 @@ textarea:focus {
 /* Login Card */
 .login-form-section {
   display: flex;
-  align-items: center;
+  align-items: stretch; /* Altura total para igualar com hero */
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
+  display: flex;
+  flex-direction: column;
   background: rgba(21, 21, 37, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.25rem;
-  padding: 2.5rem;
+  padding: 2rem;
   backdrop-filter: blur(12px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: cardSlideIn 0.5s ease-out 0.2s backwards;
@@ -1353,6 +1382,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1; /* Ocupa espaço disponível */
 }
 
 .login-error {
@@ -1544,7 +1574,7 @@ textarea:focus {
 }
 
 .login-footer {
-  margin-top: 1.5rem;
+  margin-top: auto; /* Empurra para o final do card */
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: left;
@@ -1553,16 +1583,22 @@ textarea:focus {
   gap: 0.35rem;
 }
 
-.login-mfa-notice {
+.login-status {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5);
   margin: 0;
 }
 
-.login-status {
+.login-link {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5);
-  margin: 0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-link:hover {
+  color: #CE62D9;
+  text-decoration: underline;
 }
 
 .login-status-online {
@@ -1583,7 +1619,7 @@ textarea:focus {
 
 .login-created-by {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: #CE62D9;
   margin: 0;
   margin-top: 0.25rem;
   font-style: italic;
@@ -1629,6 +1665,17 @@ textarea:focus {
 }
 
 /* Responsive */
+@media (max-width: 1100px) {
+  .login-hero-card {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .login-kpis {
+    width: 100%;
+  }
+}
+
 @media (max-width: 960px) {
   .login-content {
     grid-template-columns: 1fr;
@@ -1642,10 +1689,16 @@ textarea:focus {
   .login-form-section {
     order: 1;
     justify-content: center;
+    align-items: center;
   }
   
   .login-hero-card {
+    flex-direction: column;
     padding: 2rem;
+  }
+  
+  .login-kpis {
+    width: 100%;
   }
   
   .login-title {
@@ -1665,10 +1718,11 @@ textarea:focus {
   
   .login-kpis {
     grid-template-columns: 1fr;
+    width: 100%;
   }
   
   .login-kpi {
-    min-height: 120px;
+    min-height: 100px;
   }
   
   .login-title {

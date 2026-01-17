@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, Redirect } from "wouter";
-import { BarChart3, Trophy, Timer, MapPin, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, KeyRound } from "lucide-react";
+import { BarChart3, TrendingUp, Trophy, Timer, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, KeyRound } from "lucide-react";
 import { useAuth, useLogoSet, useLoginKpis } from "@/hooks";
 
 export default function Login() {
@@ -194,77 +194,77 @@ export default function Login() {
       <div className="login-content">
         <div className="login-hero">
           <div className="login-hero-card">
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <img 
-                src={logos.login} 
-                alt="xFinance Logo" 
-                className="h-20 w-auto object-contain"
-              />
+            {/* Coluna esquerda: Texto */}
+            <div className="login-hero-text">
+              {/* Logo */}
+              <div className="flex justify-start mb-4">
+                <img 
+                  src={logos.login} 
+                  alt="xFinance Logo" 
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
+              
+              <span className="login-eyebrow">
+                PLANEJAMENTO &bull; PERFORMANCE &bull; PREVISIBILIDADE
+              </span>
+              
+              <h1 className="login-title">xFinance</h1>
+              
+              <p className="login-description">
+                Gerencie Workflow, recebíveis e repasses em um cockpit único, com insights em tempo real e storytelling visual.
+              </p>
+              
+              <ul className="login-benefits">
+                <li>
+                  <span className="login-bullet" />
+                  Mapeamento completo do andamento das inspeções
+                </li>
+                <li>
+                  <span className="login-bullet" />
+                  Monitoramento ativo de cobranças
+                </li>
+                <li>
+                  <span className="login-bullet" />
+                  Suporte direto aos repasses da equipe de associados
+                </li>
+              </ul>
             </div>
             
-            <span className="login-eyebrow">
-              PLANEJAMENTO &bull; PERFORMANCE &bull; PREVISIBILIDADE
-            </span>
-            
-            <h1 className="login-title">xFinance</h1>
-            
-            <p className="login-description">
-              Gerencie Workflow, recebíveis e repasses em um cockpit único, com insights em tempo real e storytelling visual.
-            </p>
-            
-            <ul className="login-benefits">
-              <li>
-                <span className="login-bullet" />
-                Mapeamento completo do andamento das inspeções
-              </li>
-              <li>
-                <span className="login-bullet" />
-                Monitoramento ativo de cobranças
-              </li>
-              <li>
-                <span className="login-bullet" />
-                Suporte direto aos repasses da equipe de associados
-              </li>
-            </ul>
-            
+            {/* Coluna direita: KPIs */}
             <div className="login-kpis">
               {/* KPI 1: Volume Anual - Cyan */}
               <div className="login-kpi login-kpi--cyan">
                 <div className="login-kpi-content">
-                  <span className="login-kpi-value">
-                    {isKpisLoading ? "..." : kpis?.total_inspecoes_12m ?? 0}
-                  </span>
+                  <div className="login-kpi-top">
+                    <span className="login-kpi-value">
+                      {isKpisLoading ? "..." : kpis?.total_inspecoes_12m ?? 0}
+                    </span>
+                    <div className="login-kpi-icon">
+                      <BarChart3 />
+                    </div>
+                  </div>
                   <div className="login-kpi-labels">
                     <span className="login-kpi-label">Inspeções | 12 meses</span>
-                    <span className="login-kpi-sub">
-                      {isKpisLoading ? "Carregando..." : `${kpis?.total_loc_12m ?? 0} locais ativos`}
-                    </span>
                   </div>
-                </div>
-                <div className="login-kpi-icon">
-                  <BarChart3 />
                 </div>
                 <div className="login-kpi-accent" />
               </div>
               
-              {/* KPI 2: Performance / Mês Atual - Amber */}
+              {/* KPI 2: Inspeções Mês Atual - Amber */}
               <div className="login-kpi login-kpi--amber">
                 <div className="login-kpi-content">
-                  <span className="login-kpi-value">
-                    {isKpisLoading ? "..." : kpis?.inspecoes_mes_atual ?? 0}
-                  </span>
-                  <div className="login-kpi-labels">
-                    <span className="login-kpi-label">
-                      {isKpisLoading ? "Este mês" : kpis?.mes_atual ?? "Este mês"}
+                  <div className="login-kpi-top">
+                    <span className="login-kpi-value">
+                      {isKpisLoading ? "..." : kpis?.inspecoes_mes_atual ?? 0}
                     </span>
-                    <span className="login-kpi-sub">
-                      {isKpisLoading ? "Carregando..." : `Recorde: ${kpis?.mes_recorde} (${kpis?.recorde_qtd})`}
-                    </span>
+                    <div className="login-kpi-icon">
+                      <TrendingUp />
+                    </div>
                   </div>
-                </div>
-                <div className="login-kpi-icon">
-                  <Trophy />
+                  <div className="login-kpi-labels">
+                    <span className="login-kpi-label">Inspeções no mês atual</span>
+                  </div>
                 </div>
                 <div className="login-kpi-accent" />
               </div>
@@ -272,37 +272,41 @@ export default function Login() {
               {/* KPI 3: Prazo Médio - Rose */}
               <div className="login-kpi login-kpi--rose">
                 <div className="login-kpi-content">
-                  <span className="login-kpi-value">
-                    {isKpisLoading ? "..." : kpis?.prazo_medio_12m ? `${kpis.prazo_medio_12m}d` : "—"}
-                  </span>
+                  <div className="login-kpi-top">
+                    <span className="login-kpi-value">
+                      {isKpisLoading ? "..." : kpis?.prazo_medio_12m ? `${kpis.prazo_medio_12m} d` : "—"}
+                    </span>
+                    <div className="login-kpi-icon">
+                      <Timer />
+                    </div>
+                  </div>
                   <div className="login-kpi-labels">
                     <span className="login-kpi-label">Prazo médio</span>
                     <span className="login-kpi-sub">
-                      {isKpisLoading ? "Carregando..." : kpis?.prazo_medio_mes_atual ? `Este mês: ${kpis.prazo_medio_mes_atual} dias` : "dias para conclusão"}
+                      {isKpisLoading ? "..." : kpis?.prazo_medio_mes_atual ? `Este mês: ${kpis.prazo_medio_mes_atual} dias` : "dias para conclusão"}
                     </span>
                   </div>
-                </div>
-                <div className="login-kpi-icon">
-                  <Timer />
                 </div>
                 <div className="login-kpi-accent" />
               </div>
               
-              {/* KPI 4: Locais Ativos - Emerald */}
+              {/* KPI 4: Recorde - Emerald */}
               <div className="login-kpi login-kpi--emerald">
                 <div className="login-kpi-content">
-                  <span className="login-kpi-value">
-                    {isKpisLoading ? "..." : kpis?.total_loc_12m ?? 0}
-                  </span>
+                  <div className="login-kpi-top">
+                    <span className="login-kpi-value">
+                      {isKpisLoading ? "..." : kpis?.recorde_qtd ?? 0}
+                    </span>
+                    <div className="login-kpi-icon">
+                      <Trophy />
+                    </div>
+                  </div>
                   <div className="login-kpi-labels">
-                    <span className="login-kpi-label">Locais inspecionados</span>
+                    <span className="login-kpi-label">Recorde mensal</span>
                     <span className="login-kpi-sub">
-                      {isKpisLoading ? "Carregando..." : `${kpis?.loc_mes_atual ?? 0} este mês`}
+                      {isKpisLoading ? "..." : kpis?.mes_recorde ?? "—"}
                     </span>
                   </div>
-                </div>
-                <div className="login-kpi-icon">
-                  <MapPin />
                 </div>
                 <div className="login-kpi-accent" />
               </div>
@@ -490,13 +494,18 @@ export default function Login() {
             )}
             
             <div className="login-footer">
-              <p className="login-mfa-notice">
-                Acesso protegido com MFA
-              </p>
               <p className="login-status">
                 Status do ambiente:{" "}
                 <span className="login-status-online">Online</span>
               </p>
+              <a 
+                href="https://www.mvrx.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="login-link"
+              >
+                www.mvrx.com.br
+              </a>
               <p className="login-created-by">
                 Created by Rocha, M.V.
               </p>
